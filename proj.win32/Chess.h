@@ -1,7 +1,7 @@
 /********************************************
- * 功能：棋子模型
+ * 功能：棋子模型头文件
  * 作者：郑伟丞
- * 最新修改日期：12.08
+ * 最新修改日期：12.09
  ********************************************/
 #pragma once
 
@@ -10,18 +10,46 @@
 #include <string>
 #include <vector>
 
+#include "cocos2d.h"
 #include "Csv.h"
 #include "ConfigController.h"
-#include"Equipment.h"
-#include"Condition.h"
+#include "Equipment.h"
+#include "Condition.h"
+
+#define promoteScale 1.2
+#define maxX 7
+#define maxY 4
+
+// 暂时用粗糙的方式存储英雄基本属性
+#define DAJI 0
+#define DIAOCHAN 1
+#define HOUYI 2
+#define DIRENJIE 3
+#define XIANGYU 4
+#define ZHANGFEI 5
+
+// 生命值
+int const hpData[6] = {3229,3019,3182,3242,3500,3450};
+// 法力值
+int const mpData[6] = { 490,490,440,440,400,400 };
+// 攻击值
+int const attackData[6] = { 170,168,180,169,157,153 };
+// 防御值
+int const defenceData[6] = { 86,89,86,95,103,125 };
+// 攻击距离，指与对手在棋盘上的曼哈顿距离
+int const attackDistanceData[6] = { 3,3,2,2,1,1 };
+// 蓝耗
+int const mpCostData[6] = { 50,50,40,40,40,40 };
 
 using std::string;
 using std::vector;
 
+USING_NS_CC;
 
  // 棋子属性数据类
 class ChessInfo 
 {
+public:
 	double HP; // 实时生命
 	double maxHP;//最大生命值
 
@@ -37,18 +65,12 @@ class ChessInfo
 	double basicAttackDistance; // 基础攻击距离
 	double improvedAttackDistance; // 加成后的攻击距离
 
-	double basicCriticalChance; // 基础暴击几率
-	double improvedCriticalChance; // 加成后的暴击几率
-
-	double basicCriticalDamage; // 暴击伤害
-	double improvedCriticalDamage; // 加成后的暴击几率
-
 	Condition myCondition;//当前状态
 };
 
 
 // 坐标类型  屏幕上的坐标(可视化用)和棋盘上的坐标(游戏逻辑用)
-enum class CoordinateType { coordinatesInScreen, coordinatesInChessBoard }; 
+enum class CoordinateType { screenCoordinates, chessBoardCoordinates};
 
 
 // 棋子坐标
@@ -62,10 +84,10 @@ public:
 	int GetY() const;
 
 	// 设置棋子横坐标
-	void SetX(const int x);
+	void SetX(const int X) noexcept;
 
 	// 设置棋子纵坐标
-	void SetY(const int y);
+	void SetY(const int Y);
 
 private:
 	// 横坐标
@@ -73,29 +95,28 @@ private:
 	// 纵坐标
 	int y; 
 
-	CoordinateType type; // 坐标类型
+	//CoordinateType type; // 坐标类型
 };
 
-
-// 棋子的三种星级
-enum class Level { level1, level2, level3 };
 
 
 // 棋子类
 class Chess : public Ref
 {
 protected:
-	string chessName; // 名称
+	int chessName; // 名称
+
+	string career; // 英雄职业
 
 	string chessImagePath; // 模型图片相对路径
 
 	string chessInfoPath; // 基础属性在数据表中的路径
 
-	Level chessLevel; // 星级
+	int chessLevel; // 星级
 
 	int chessPrice; // 棋子的花费
 
-	ChessInfo chessNowCondition; // 当前棋子各项属性
+	ChessInfo chessCondition; // 当前棋子各项属性
 
 	//ChessInfo buff; // 当前装备效果加成(大概不需要)
 
@@ -103,34 +124,44 @@ protected:
 
 	ChessCoordinate screenCoordinate; // 棋子在屏幕中的位置
 
-	Sprite* chessImage;//指向可视化
+	Sprite* chessImage;//指向棋子可视化
+	Sprite* attackImage;//指向普通攻击可视化
+	Sprite* skillImage;//指向技能可视化
+
 
 public:
 
-	// 初始化棋子状态
-	virtual bool init(int id);
-	virtual bool init();
 
 	// 初始化棋子状态
-	void initPieceIfo(int id);
+	void initCondition();
+	//void initPieceIfo();
+
+	// 获取英雄职业
+	string GetCareer();
 
 	// 更新棋子状态
-	bool updatePieceInfo(const double damage, ChessCoordinate* newScreenCoordinate);
+	//bool updatePieceInfo(const double damage, ChessCoordinate* newScreenCoordinate);
+
+	// 获取棋子贴图
+	const string getChessImagePath();
 
 	// 获取棋子名称
-	const string getChessName();
+	const int getChessName();
 
 	// 获取当前棋子数值
 	const ChessInfo* getChessCondition();
 
 	// 获取当前棋子星级
-	const Level getChessLevel();
+	const int getChessLevel();
 
-	// 获取当前棋子位置
+	// 根据需要类型获取当前棋子屏幕位置或棋盘
 	ChessCoordinate* getChessCoordinateByType(CoordinateType type);
 
+	//根据需要类型设定棋子的屏幕坐标或棋盘坐标
+	void setChessCoordinateByType(Vec2 position,CoordinateType type);
+
 	// 设置当前棋子星级
-	void setChessLevel(const Level newLevel);
+	void setChessLevel(const int newLevel);
 
 	//获取棋子类型
 	virtual string getTag() = 0;
@@ -138,7 +169,7 @@ public:
 	//CREATE_FUNC(ChessPiece);   这里ChessPiece是抽象类不能create
 
 	//技能函数，继承
-	virtual void skill() = 0;
+	virtual void skill(Chess& OPP) = 0;
 
 	//羁绊效果, 继承
 	virtual void careerBuff() = 0;
@@ -147,8 +178,8 @@ public:
 	void promoteRank();
 
 	//佩戴装备
-	virtual void wearEquip(int equipNum, int equipType);
-
+	void wearEquip(int equipNum, int equipType);
+	
 
 	//计算buff并修改自身属性
 	//virtual void readCondition();
@@ -161,7 +192,7 @@ public:
 	void beenAttack(int oppAttack);
 
 	//将上面的攻击函数和被攻击函数进行封装，实现一次攻击动作.参数是被攻击的对象
-	void attackOne(Chess& A);
+	void attackOne(Chess& OPP);
 
 	//判断棋子是否死亡
 	bool isDead();
@@ -170,13 +201,18 @@ public:
 	int storageNum = 0;//上方棋子为负数，下方棋子为正数
 
 	//棋子的可视化
-	Sprite* createChess(string chessName, string chessPicPath, Vec2 chessPosition);
+	Sprite* createChess(Vec2 chessPosition);
+	Sprite* getChessSprite();
 
-	//返回一个精灵指针，当精灵已经被当作战斗棋子可视化（即放上棋盘以后），这个精灵指针有一个指向对象，可以通过对指针操作完成动画效果
-	Sprite* getChess();
+	// 普通攻击的可视化
+	virtual Sprite* createAttack()=0;
+	Sprite* getAttackSprite();
 
-	//设定棋子的坐标,指屏幕上的位置
-	void setVec2(Vec2 position);
+	// 技能攻击的可视化
+	virtual Sprite* createSkill() = 0;
+	Sprite* getSkillSprite();
+
+	
 };
 
 
@@ -188,22 +224,25 @@ public:
 class mage : public Chess
 {
 private:
-
 	string career = "mage";
+
 public:
 
-	mage();
-
-	~mage();
-
-	//获得英雄职业类别
-	string getCareer();
+	// 初始化棋子属性
+	mage(int name);
 	
 	//技能函数
-	virtual void skill() override;
+	virtual void skill(Chess& OPP) override;
 
 	// 羁绊效果增益
 	virtual void careerBuff() override;
+
+	// 普通攻击可视化指针
+	virtual Sprite* createAttack() override;
+
+	// 技能攻击可视化指针
+	virtual Sprite* createSkill() override;
+
 };
 
 // 射手职业类
@@ -214,18 +253,23 @@ private:
 
 public:
 
-	shooter();
+	// 初始化棋子属性
+	shooter(int name);
 
+	// 销毁棋子
 	~shooter();
 
-	//获得英雄职业类别
-	string getCareer();
-
 	//技能函数
-	virtual void skill() override;
+	virtual void skill(Chess& OPP) override;
 
 	// 羁绊效果增益
 	virtual void careerBuff() override;
+
+	// 普通攻击可视化指针
+	virtual Sprite* createAttack() override;
+
+	// 技能攻击可视化指针
+	virtual Sprite* createSkill() override;
 };
 
 // 坦克职业类
@@ -235,18 +279,22 @@ private:
 	string career = "tank";
 
 public:
+	// 初始化棋子属性
+	tank(int name);
 
-	tank();
-
+	// 销毁棋子
 	~tank();
 
-	//获得英雄职业类别
-	string getCareer();
-
 	//技能函数
-	virtual void skill() override;
+	virtual void skill(Chess& OPP) override;
 
 	// 羁绊效果增益
 	virtual void careerBuff() override;
+
+	// 普通攻击可视化指针
+	virtual Sprite* createAttack() override;
+
+	// 技能攻击可视化指针
+	virtual Sprite* createSkill() override;
 };
 #endif
