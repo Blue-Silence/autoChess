@@ -29,17 +29,14 @@
 #define ZHANGFEI 5
 
 // 生命值
-int const hpData[6] = {3229,3019,3182,3242,3500,3450};
-// 法力值
-int const mpData[6] = { 490,490,440,440,400,400 };
+int const hpData[6] = { 3229,3019,3182,3242,3500,3450 };
 // 攻击值
 int const attackData[6] = { 170,168,180,169,157,153 };
 // 防御值
 int const defenceData[6] = { 86,89,86,95,103,125 };
 // 攻击距离，指与对手在棋盘上的曼哈顿距离
 int const attackDistanceData[6] = { 3,3,2,2,1,1 };
-// 蓝耗
-int const mpCostData[6] = { 50,50,40,40,40,40 };
+
 
 using std::string;
 using std::vector;
@@ -52,9 +49,6 @@ class ChessInfo
 public:
 	double HP; // 实时生命
 	double maxHP;//最大生命值
-
-	double MP; // 实时法力
-	double maxMP; // 最大法力
 
 	double basicAttack; // 基础攻击力
 	double improvedAttack;//加成后的攻击
@@ -78,16 +72,16 @@ class ChessCoordinate
 {
 public:
 	// 获取棋子横坐标
-	int GetX() const;
+	int getX() const;
 
 	// 获取棋子纵坐标
-	int GetY() const;
+	int getY() const;
 
 	// 设置棋子横坐标
-	void SetX(const int X) noexcept;
+	void setX(const int X);
 
 	// 设置棋子纵坐标
-	void SetY(const int Y);
+	void setY(const int Y);
 
 private:
 	// 横坐标
@@ -104,29 +98,41 @@ private:
 class Chess : public Ref
 {
 protected:
+	// 棋子名称
 	int chessName; // 名称
 
-	string career; // 英雄职业
+	// 英雄职业
+	string career; 
 
-	string chessImagePath; // 模型图片相对路径
+	// 模型图片相对路径
+	string chessImagePath; 
 
-	string chessInfoPath; // 基础属性在数据表中的路径
+	// 星级，最高为三
+	int chessLevel; 
 
-	int chessLevel; // 星级
+	// 棋子的花费
+	int chessPrice; 
 
-	int chessPrice; // 棋子的花费
+	// 棋子的各项属性
+	ChessInfo chessCondition; 
 
-	ChessInfo chessCondition; // 当前棋子各项属性
+	// 技能伤害效果
+	float skillScale=2;
 
-	//ChessInfo buff; // 当前装备效果加成(大概不需要)
+	// 棋子在棋盘中的位置
+	ChessCoordinate chessBoardCoordinate; 
 
-	ChessCoordinate chessBoardCoordinate; // 棋子在棋盘中的位置
+	// 棋子在屏幕中的位置，可视化用
+	ChessCoordinate screenCoordinate; 
 
-	ChessCoordinate screenCoordinate; // 棋子在屏幕中的位置
+	//棋子可视化指针
+	Sprite* chessImage;
 
-	Sprite* chessImage;//指向棋子可视化
-	Sprite* attackImage;//指向普通攻击可视化
-	Sprite* skillImage;//指向技能可视化
+	//普通攻击可视化
+	Sprite* attackImage;
+
+	// 技能攻击可视化指针
+	Sprite* skillImage;
 
 
 public:

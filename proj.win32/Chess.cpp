@@ -6,30 +6,28 @@
 
 #include "Chess.h"
 
-
 // ChessCoordinate类实现
-
-int ChessCoordinate::GetX() const
+int ChessCoordinate::getX() const
 {
 	return x;
 }
 
-int ChessCoordinate::GetY() const
+int ChessCoordinate::getY() const
 {
 	return y;
 }
 
-void ChessCoordinate::SetX(const int X) 
+void ChessCoordinate::setX(const int X) 
 {
-	if (X >= 0 && X <= maxX)
-		x = X;
+	
+	x = X;
 	return;
 }
 
-void ChessCoordinate::SetY(const int Y)
+void ChessCoordinate::setY(const int Y)
 {
-	if (Y >= 0 && Y <= maxY)
-		y = Y;
+	
+	y = Y;
 	return;
 }
 
@@ -39,7 +37,6 @@ void ChessCoordinate::SetY(const int Y)
 void Chess::initCondition()
 {
 	chessCondition.maxHP = chessCondition.HP = hpData[chessName];
-	chessCondition.maxMP = chessCondition.MP = mpData[chessName];
 	chessCondition.basicAttack = chessCondition.improvedAttack = attackData[chessName];
 	chessCondition.basicDefence = chessCondition.imporovedDefence = defenceData[chessName];
 	chessCondition.basicAttackDistance = chessCondition.improvedAttackDistance = attackDistanceData[chessName];
@@ -105,7 +102,6 @@ void Chess::promoteRank()
 
 		// 每升一级，各项属性跟着提升
 		chessCondition.maxHP *= promoteScale;
-		chessCondition.maxMP *= promoteScale;
 		chessCondition.basicAttack *= promoteScale;
 		chessCondition.basicDefence *= promoteScale;
 		chessCondition.basicAttackDistance *= promoteScale;
@@ -114,12 +110,7 @@ void Chess::promoteRank()
 	return;
 }
 
-// 待补充，根据武器属性给棋子进行属性提升
-void Chess::wearEquip(int equipNum, int equipType)
-{
 
-
-}
 
 //攻击函数，返回攻击值,作为攻击目标的被攻击函数的输入
 int Chess::myAttack()
@@ -178,10 +169,9 @@ Sprite* Chess::createChess(Vec2 chessPosition)
 
 
 	// 怎么缩放后面在调整
-	// 缩放大小建议写死就好了
-	// 不清楚condition是干嘛的
-	//float chessScale = 4 * config->getPx()->x / originSize1.x;
-	float chessScale = 4;
+	// 缩放大小由config一起控制
+	float chessScale = 4 * config->getPx()->x / originSize1.x;
+	//float chessScale = 4;
 	//float hpBarScale = 2;
 	//float mpBarScale = 2;
 	
@@ -229,13 +219,13 @@ void Chess::setChessCoordinateByType(Vec2 position, CoordinateType type)
 {
 	if (type == CoordinateType::chessBoardCoordinates)
 	{
-		chessBoardCoordinate.SetX(position.x);
-		chessBoardCoordinate.SetY(position.y);
+		chessBoardCoordinate.setX(position.x);
+		chessBoardCoordinate.setY(position.y);
 	}
 	else
 	{
-		screenCoordinate.SetX(position.x);
-		screenCoordinate.SetY(position.y);
+		screenCoordinate.setX(position.x);
+		screenCoordinate.setY(position.y);
 	}
 }
 
@@ -257,15 +247,14 @@ void mage::skill(Chess& OPP)
 	// 
 	// 技能可视化
 
-	OPP.beenAttack(2 * myAttack());
+	OPP.beenAttack(skillScale * myAttack());
 }
 
 // 羁绊效果增益
 void mage::careerBuff()
 {
-	// 法力上限提高并恢复
-	chessCondition.maxMP *= 1.2;
-	chessCondition.MP = chessCondition.maxMP;
+	// 技能伤害效果提升
+	skillScale = 3;
 }
 
 Sprite* mage::createAttack()
@@ -328,7 +317,7 @@ void shooter::skill(Chess& OPP)
 	// 
 	// 技能可视化
 
-	OPP.beenAttack(2 * myAttack());
+	OPP.beenAttack(skillScale * myAttack());
 }
 
 // 羁绊效果增益
@@ -396,7 +385,7 @@ void tank::skill(Chess& OPP)
 	// 
 	// 技能可视化
 
-	OPP.beenAttack(2 * myAttack());
+	OPP.beenAttack(skillScale * myAttack());
 }
 
 // 羁绊效果增益

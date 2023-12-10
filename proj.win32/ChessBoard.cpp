@@ -30,8 +30,8 @@ bool ChessBoard::init()
 //          第四个参数sprite是棋盘左下角第一个祺格的   //
 //          指针                                       //
 //函数功能：用于棋盘坐标和屏幕坐标的互转               //
-//函数返回值：目标类型坐标                             //
-// 注意事项：仅适用于棋盘区域                          //
+//函数返回值：目标类型坐标(x,y),到棋盘中相当于第x列，第y行//
+//注意事项：仅适用于棋盘区域                           //
 //-----------------------------------------------------//
 ChessCoordinate* ChessBoard::coordinateConvert(CoordinateType targetType, ChessCoordinate* oldPos, ChessCoordinate* newPos, Sprite* sprite)
 {
@@ -61,14 +61,13 @@ ChessCoordinate* ChessBoard::coordinateConvert(CoordinateType targetType, ChessC
 }
 
 // 在玩家A对战区放置棋子,输入坐标为棋盘坐标
-void ChessBoard::putChessInPlayerAWarZone(Vec2 posi,Chess* chess)
+void ChessBoard::putChessInPlayerAWarZone(int row,int col,Chess* chess)
 {
-	int x = static_cast<int>(posi.x);
-	int y = static_cast<int>(posi.y);
+	
 
-	if (isAvailable(posi))
+	if (isAvailable(row,col))
 	{
-		board[x][y] = 1;
+		board[row][col] = 1;
 		playerAWarZoneChesses.push_back(chess);
 	}
 }
@@ -105,14 +104,11 @@ void ChessBoard::removeChessFromPlayerAPreZone(Chess* chess)
 }
 
 // 在玩家B对战区放置棋子,输入坐标为棋盘坐标
-void ChessBoard::putChessInPlayerBWarZone(Vec2 posi, Chess* chess)
+void ChessBoard::putChessInPlayerBWarZone(int row,int col, Chess* chess)
 {
-	int x = static_cast<int>(posi.x);
-	int y = static_cast<int>(posi.y);
-
-	if (isAvailable(posi))
+	if (isAvailable(row,col))
 	{
-		board[x][y] = 1;
+		board[row][col] = 1;
 		playerBWarZoneChesses.push_back(chess);
 	}
 }

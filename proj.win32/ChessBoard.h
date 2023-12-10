@@ -50,7 +50,7 @@ public:
 	ChessCoordinate* coordinateConvert(CoordinateType type, ChessCoordinate* oldPos, ChessCoordinate* newPos, Sprite* sprite);
 
 	// 在玩家A对战区放置棋子,输入坐标为棋盘坐标
-	void putChessInPlayerAWarZone(Vec2 posi,Chess* chess);
+	void putChessInPlayerAWarZone(int row,int col,Chess* chess);
 
 	// 获取玩家A对战区棋子集合
 	vector<Chess*>* getPlayerAWarZoneChesses();
@@ -65,7 +65,7 @@ public:
 	void removeChessFromPlayerAPreZone(Chess* chess);
 
 	// 在玩家B对战区放置棋子,输入坐标为棋盘坐标
-	void putChessInPlayerBWarZone(Vec2 posi, Chess* chess);
+	void putChessInPlayerBWarZone(int row,int col, Chess* chess);
 
 	// 获取玩家B对战区棋子集合
 	vector<Chess*>* getPlayerBWarZoneChesses();
@@ -79,15 +79,24 @@ public:
 	// 从玩家B备战区移去棋子
 	void removeChessFromPlayerBPreZone(Chess* chess);
 
-	//检测是否在棋盘范围内
+	//检测鼠标是否在棋盘范围内
 	static bool isInBoard(Vec2 posi);
 
 	// 判断该位置是否可以放置棋子,输入参数请先转化为棋盘坐标
 	inline bool isAvailable(int row,int col);
 
 	// TODO
+	// 坐标的问题，棋盘大小应该没改吧，直接按他们原来的来
+	// 屏幕坐标x,y,(0,0)应该是左下角吧
+	// 
+	// 有些位置，蓝条和红条，技能贴图和普通攻击贴图，对，普通攻击怎么贴图
+	// 
+	// 在战斗中，移动各自贴图还没写吧
+	// 
+	// 坐标坐标和棋盘坐标的转化，返回值要注意！有时候需要反过来，x相当于列，y相当于行
 	// 寻路
-	//确定攻击目标之类的
+	// 
+	// 确定攻击目标之类的
 
 };
 
