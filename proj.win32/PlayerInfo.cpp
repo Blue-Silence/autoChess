@@ -86,10 +86,10 @@ int PlayerInfo::GetLifeValue() const
 //-----------------------------------------------------//
 //函数参数：空                                         //
 //函数功能：返回保存战斗棋子的数组的地址               //
-//函数返回值：ChessPiece**                             //
+//函数返回值：Chesse**                             //
 //函数注意事项(选)：无                                 //
 //-----------------------------------------------------//
-ChessPiece** PlayerInfo::GetBattleChessNum() const
+Chess** PlayerInfo::GetBattleChessNum() const
 {
 	return BattleChessNum;
 }

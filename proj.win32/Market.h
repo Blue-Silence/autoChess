@@ -19,7 +19,7 @@ class Market :public Ref
 {
 private:
 	// 棋子库里的棋子
-	vector<ChessPiece*>chessList;
+	vector<Chess*>chessList;
 
 	// 装备库里的装备
 	int equippment;

@@ -6,7 +6,7 @@
 
 #ifndef _PLAYERINFO_H
 #define _PLAYERINFO_H_
-#include "ChessPiece.h"
+#include "Chess.h"
 #include "Market.h"
 
 USING_NS_CC;
@@ -62,13 +62,13 @@ public:
 	int GetLifeValue() const;
 	
 	// 返回指针数组的指针
-	ChessPiece** GetBattleChessNum()const;
+	Chess** GetBattleChessNum()const;
 
 	// 玩家所拥有的棋子（初值4个棋子，上限8个棋子）
-	ChessPiece* OwnChessNum[OWNMAX]{};
+	Chess* OwnChessNum[OWNMAX]{};
 
 	// 玩家当前上场战斗的棋子（初值最大为3个棋子，上限7个棋子）
-	ChessPiece* BattleChessNum[BATTLEMAX]{};
+	Chess* BattleChessNum[BATTLEMAX]{};
 
 };
 #endif

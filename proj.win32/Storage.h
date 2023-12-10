@@ -6,9 +6,8 @@
 
 #ifndef _STORAGE_H_
 #define _STORAGE_H_
-
 #include <vector>
-#include "ChessPiece.h"
+#include "Chess.h"
 
 using std::vector;
 
