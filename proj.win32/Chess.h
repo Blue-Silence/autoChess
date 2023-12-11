@@ -12,7 +12,7 @@
 
 #include "cocos2d.h"
 #include "ConfigController.h"
-
+#include "Condition.h"
 
 #define promoteScale 1.2
 #define maxX 7
@@ -57,7 +57,7 @@ public:
 	double basicAttackDistance; // 基础攻击距离
 	double improvedAttackDistance; // 加成后的攻击距离
 
-	//Condition myCondition;//当前状态
+	Condition myCondition;//当前状态
 };
 
 
