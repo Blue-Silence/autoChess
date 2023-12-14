@@ -34,7 +34,12 @@ int const attackData[6] = { 170,168,180,169,157,153 };
 int const defenceData[6] = { 86,89,86,95,103,125 };
 // 攻击距离，指与对手在棋盘上的曼哈顿距离
 int const attackDistanceData[6] = { 3,3,2,2,1,1 };
-
+// 触发技能的攻击次数
+int const skillCooldowns[6] = { 3 ,3,3,3,4,4 };
+// 英雄贴图地址  待添加
+string const chessImagePaths[6] = { };
+// 英雄技能贴图地址
+//.....
 
 using std::string;
 using std::vector;
@@ -57,7 +62,12 @@ public:
 	double basicAttackDistance; // 基础攻击距离
 	double improvedAttackDistance; // 加成后的攻击距离
 
-	Condition myCondition;//当前状态
+	// 技能冷却时间
+	int skillCooldown;
+
+
+
+	//Condition myCondition;//当前状态
 };
 
 
@@ -131,6 +141,13 @@ protected:
 
 	// 技能攻击可视化指针
 	Sprite* skillImage;
+
+	// 生命条
+	ProgressTimer* hpBarProgress;
+
+	// 技能条
+	ProgressTimer* mpBarProgress;
+
 
 
 public:
@@ -212,6 +229,12 @@ public:
 	// 技能攻击的可视化
 	virtual Sprite* createSkill() = 0;
 	Sprite* getSkillSprite();
+
+	// 更新生命值
+	void updateHpBar();
+
+	// 更新技能值
+	void updateMpBar(int attackNum);
 
 	
 };
