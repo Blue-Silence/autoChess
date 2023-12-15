@@ -14,9 +14,12 @@ bool PlayerInfo::InitPlayerInfo()
 {
 	coinNum = 3;
 	lifeValue = 50;
-	level = LEVELINIT;
-	maxOwnChessNum = OWNINIT;
+	level = PLAYERLEVELINIT;
 	maxBattleChessNum = BATTLEINIT;
+	mageNumInBattleArea = shooterNumInBattleArea = tankNumInBattleArea = 0;
+	//mageNumTotal = shooterNumTotal = tankNumTotal = 0;
+	heroOneStarNumArr[HERONUM] = { 0 };
+	heroTwoStarNumArr[HERONUM] = { 0 };
 
 	return true;
 }
@@ -29,7 +32,7 @@ bool PlayerInfo::InitPlayerInfo()
 //-----------------------------------------------------//
 bool PlayerInfo::RaiseLevel(int coinNum, int level)
 {
-	if (coinNum < 4 || level == LEVELMAX)
+	if (coinNum < 4 || level == PLAYERLEVELMAX)
 	{
 		return false;
 	}
@@ -56,7 +59,6 @@ void PlayerInfo::ChangeLevel()
 	// 棋子数修改：3、5、7、9级更改
 	if (level == 3 || level == 5 || level == 7 || level == 9)
 	{
-		++maxOwnChessNum;
 		++maxBattleChessNum;
 	}
 }
@@ -83,6 +85,7 @@ int PlayerInfo::GetLifeValue() const
 	return lifeValue;
 }
 
+<<<<<<< Updated upstream
 //-----------------------------------------------------//
 //函数参数：空                                         //
 //函数功能：返回保存战斗棋子的数组的地址               //
@@ -90,6 +93,253 @@ int PlayerInfo::GetLifeValue() const
 //函数注意事项(选)：无                                 //
 //-----------------------------------------------------//
 Chess** PlayerInfo::GetBattleChessNum() const
+=======
+int PlayerInfo::getMaxBattleChessNum() const 
+>>>>>>> Stashed changes
 {
-	return BattleChessNum;
+	return maxBattleChessNum;
 }
+
+
+// 在玩家对战区放置棋子
+void PlayerInfo::putChessInBattleArea(Chess* chess)
+{
+	chessInBattleArea.push_back(chess);
+}
+
+// 获取玩家对战区棋子集合
+vector<Chess*>* PlayerInfo::getBattleAreaChesses()
+{
+	return &chessInBattleArea;
+}
+
+// 在玩家备战区放置棋子
+void PlayerInfo::putChessInPreArea(Chess* chess)
+{
+	chessInPreArea.push_back(chess);
+}
+
+// 获取玩家备战区的棋子集合
+vector<Chess*>* PlayerInfo::getPreAreaChesses()
+{
+	return &chessInPreArea;
+}
+
+// 从玩家A备战区移去棋子
+void PlayerInfo::removeChessFromPreArea(Chess* chess)
+{
+	// 移去第一个匹配的棋子即可
+	for (auto it = chessInPreArea.begin(); it != chessInPreArea.end(); ++it) 
+	{
+		if (*it == chess)
+		{
+			chessInPreArea.erase(it);
+			break;
+		}
+	}
+}
+
+// 以下是有关羁绊判断和升级星级的判断
+//-------------------//
+// 作者：胡峻玮      //
+// 修改日期：12.15   //
+// ------------------//
+
+
+// 羁绊判断函数
+void PlayerInfo::buffJudgment()
+{
+	for (int i = 0; i < chessInBattleArea.size(); ++i)
+	{
+		switch (chessInBattleArea[i]->getChessName())
+		{
+			case 0:
+			case 1:
+				mageNumInBattleArea++;
+				break;
+			case 2:
+			case 3:
+				shooterNumInBattleArea++;
+				break;
+			case 4:
+			case 5:
+				tankNumInBattleArea++;
+				break;
+		}
+	}
+	if (mageNumInBattleArea >= 2)
+	{
+		for (int i = 0; i < chessInBattleArea.size(); ++i)
+		{
+			if (chessInBattleArea[i]->GetCareer() == "mage")
+			{
+				chessInBattleArea[i]->careerBuff();
+			}
+		}
+	}
+	if (shooterNumInBattleArea >= 2)
+	{
+		for (int i = 0; i < chessInBattleArea.size(); ++i)
+		{
+			if (chessInBattleArea[i]->GetCareer() == "shooter")
+			{
+				chessInBattleArea[i]->careerBuff();
+			}
+		}
+	}
+	if (tankNumInBattleArea >= 2)
+	{
+		for (int i = 0; i < chessInBattleArea.size(); ++i)
+		{
+			if (chessInBattleArea[i]->GetCareer() == "tank")
+			{
+				chessInBattleArea[i]->careerBuff();
+			}
+		}
+	}
+	if (mageNumInBattleArea >= 1 && shooterNumInBattleArea >= 1 && tankNumInBattleArea >= 1)
+	{
+		for (int i = 0; i < chessInBattleArea.size(); ++i)
+		{
+			chessInBattleArea[i]->careerBuff();
+		}
+	}
+}
+
+
+
+void PlayerInfo::arrZero(int arrName[])
+{
+	for (int i = 0; i < HERONUM; ++i)
+	{
+		arrName[i] = 0;
+	}
+}
+
+// 注意：每次购买完一个英雄后都要调用下面的遍历升星函数(把这个函数放到购买函数里)
+// 遍历升星判断函数
+void PlayerInfo::raiseLevel()
+{
+	arrZero(heroOneStarNumArr);
+	arrZero(heroTwoStarNumArr);
+	for (int i = 0; i < chessInBattleArea.size(); ++i)
+	{
+		switch (chessInBattleArea[i]->getChessLevel())
+		{
+			case 1:
+				heroOneStarNumArr[chessInBattleArea[i]->getChessName()]++;
+				break;
+			case 2:
+				heroTwoStarNumArr[chessInBattleArea[i]->getChessName()]++;
+				break;
+		}
+	}
+	for (int i = 0; i < chessInPreArea.size(); ++i)
+	{
+		if (chessInPreArea[i] != nullptr)
+		{
+			switch (chessInPreArea[i]->getChessLevel())
+			{
+				case 1:
+					heroOneStarNumArr[chessInPreArea[i]->getChessName()]++;
+					break;
+				case 2:
+					heroTwoStarNumArr[chessInPreArea[i]->getChessName()]++;
+					break;
+			}
+		}
+	}
+
+	for (int i = 0; i < HERONUM; ++i)
+	{
+		if (heroOneStarNumArr[i] >= 3)
+		{
+			heroOneStarNumArr[i] -= 3;
+			heroTwoStarNumArr[i]++;
+			deleteLowLevelChess(i, 1);
+			createHighLevelChess(i, 2);
+		}
+		if (heroTwoStarNumArr[i] >= 3)
+		{
+			heroTwoStarNumArr[i] -= 3;
+			deleteLowLevelChess(i, 2);
+			createHighLevelChess(i, 3);
+			
+		}
+	}
+}
+
+// 升星后低星英雄删除函数
+void PlayerInfo::deleteLowLevelChess(int heroFlag,int level)
+{
+	int count = 0;
+	// 优先从备战区删除
+	for (int i = 0; i < chessInPreArea.size(); ++i)
+	{
+		if (chessInPreArea[i] != nullptr && chessInPreArea[i]->getChessName() == heroFlag && chessInPreArea[i]->getChessLevel() == level)
+		{
+			chessInPreArea[i] = nullptr;
+			count++;
+			if (count == 3)
+			{
+				return; // 如果已删除3个则停止
+			}
+		}
+	}
+
+	// 然后从战斗区删除
+	for (int i = 0; i < chessInBattleArea.size(); ++i)
+	{
+		if (chessInBattleArea[i]->getChessName() == heroFlag && chessInBattleArea[i]->getChessLevel() == level)
+		{
+			chessInBattleArea[i] = nullptr;
+			count++;
+			if (count == 3)
+			{
+				return; // 如果已删除3个则停止
+			}
+		}
+	}
+}
+
+// 此处new的对象在最后整个战斗结束后要进行释放
+// 升星后高星英雄出现在战斗区函数
+void PlayerInfo::createHighLevelChess(int heroflag, int level)
+{
+	switch (heroflag)
+	{
+		case 0:
+		case 1:
+			chessInBattleArea.push_back(new mage(heroflag));
+			break;
+		case 2:
+		case 3:
+			chessInBattleArea.push_back(new shooter(heroflag));
+			break;
+		case 4:
+		case 5:
+			chessInBattleArea.push_back(new tank(heroflag));
+			break;
+		default:
+			break;
+	}
+	for (int i = 1; i <= level; ++i)
+	{
+		(chessInBattleArea.back())->promoteRank();
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

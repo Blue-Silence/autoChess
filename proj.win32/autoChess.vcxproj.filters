@@ -15,10 +15,43 @@
     <ClCompile Include="main.cpp">
       <Filter>win32</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\AppDelegate.cpp">
+    <ClCompile Include="..\Classes\HelloWorldScene.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\HelloWorldScene.cpp">
+    <ClCompile Include="Market.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="PlayerInfo.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="Storage.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="AfterBattle.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="Battle.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="Chess.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="ChessBoard.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="Clock.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="ConfigController.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="PlayScene.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="StartAndLoginScene.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="AppDelegate.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
@@ -29,7 +62,40 @@
     <ClInclude Include="..\Classes\AppDelegate.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\HelloWorldScene.h">
+    <ClInclude Include="Market.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerInfo.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="Storage.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="AfterBattle.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="Battle.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="Chess.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="ChessBoard.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="Clock.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="ConfigController.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayScene.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="StartAndLoginScene.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="HelloWorldScene.h">
       <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>
@@ -37,5 +103,10 @@
     <ResourceCompile Include="game.rc">
       <Filter>resource</Filter>
     </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="build-cfg.json">
+      <Filter>src</Filter>
+    </None>
   </ItemGroup>
 </Project>
