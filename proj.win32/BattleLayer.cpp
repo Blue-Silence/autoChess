@@ -1,11 +1,24 @@
 #include "BattleLayer.h"
 
 
+
 bool BattleLayer::init()
 {
+	for (Chess* chess : *playerME.getchessInBattleArea())
+	{
+
+		chess->initCondition();
+	}
+	for (Chess* chess : *playerOPP.getchessInBattleArea())
+	{
+		chess->initCondition();
+	}
+	
+
 	return true;
 }
 
+// 
 void BattleLayer::update(float delta) 
 {
 	// 更新游戏状态
@@ -45,7 +58,7 @@ Chess* BattleLayer::findEnemy(Chess* damageMaker, PlayerInfo enemy)
 
 	for (int i = 0; i < 7; i++) 
 	{
-		if (enemy.BattleChessNum[i] == nullptr) 
+		if (enemy.chessInBattleArea[i] == nullptr) 
 		{//没棋子了
 			break;
 		}
@@ -53,11 +66,11 @@ Chess* BattleLayer::findEnemy(Chess* damageMaker, PlayerInfo enemy)
 		{
 			double temp = 0;
 			temp = BattleLayer::getDistance(damageMaker->getChessCoordinateByType(CoordinateType::chessBoardCoordinates), 
-				enemy.BattleChessNum[i]->getChessCoordinateByType(CoordinateType::chessBoardCoordinates));
+				enemy.chessInBattleArea[i]->getChessCoordinateByType(CoordinateType::chessBoardCoordinates));
 			
 			if (temp < distance) 
 			{
-				targetEnemyChess = enemy.BattleChessNum[i];
+				targetEnemyChess = enemy.chessInBattleArea[i];
 			}
 		}
 	}

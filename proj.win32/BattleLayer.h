@@ -35,6 +35,9 @@ public:
 	bool detect(PlayerInfo A);//检查玩家的战斗棋子是否还有剩余，如有，则进行攻击或移动
 
 private:
-	PlayerInfo player1;
-	PlayerInfo player2;
+
+	PlayerInfo playerME;
+	PlayerInfo playerOPP;
+
+
 };

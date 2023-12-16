@@ -57,7 +57,7 @@ public:
 	double improvedAttack;//加成后的攻击
 
 	double basicDefence; // 实时防御力
-	double imporovedDefence;//加成后的防御力
+	double improvedDefence;//加成后的防御力
 
 	double basicAttackDistance; // 基础攻击距离
 	double improvedAttackDistance; // 加成后的攻击距离
@@ -236,7 +236,8 @@ public:
 	// 更新技能值
 	void updateMpBar(int attackNum);
 
-	
+	Chess& operator=(const Chess& other);
+
 };
 
 

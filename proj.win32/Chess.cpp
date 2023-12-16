@@ -38,7 +38,7 @@ void Chess::initCondition()
 {
 	chessCondition.maxHP = chessCondition.HP = hpData[chessName];
 	chessCondition.basicAttack = chessCondition.improvedAttack = attackData[chessName];
-	chessCondition.basicDefence = chessCondition.imporovedDefence = defenceData[chessName];
+	chessCondition.basicDefence = chessCondition.improvedDefence = defenceData[chessName];
 	chessCondition.basicAttackDistance = chessCondition.improvedAttackDistance = attackDistanceData[chessName];
 	chessCondition.skillCooldown = skillCooldowns[chessName];
 }
@@ -264,7 +264,50 @@ void Chess::updateMpBar(int attackNum)
 }
 
 
+Chess& Chess::operator=(const Chess& other) 
+{
+	if (this == &other) 
+	{
+		return *this; // 检查自赋值
+	}
 
+	// 复制基本数据
+	chessName = other.chessName;
+	career = other.career;
+	chessImagePath = other.chessImagePath;
+	chessLevel = other.chessLevel;
+	chessPrice = other.chessPrice;
+
+	chessCondition.HP = other.chessCondition.HP; 
+	chessCondition.maxHP = other.chessCondition.maxHP;
+	chessCondition.basicAttack = other.chessCondition.basicAttack;
+	chessCondition.improvedAttack = other.chessCondition.improvedAttack;
+	chessCondition.basicDefence = other.chessCondition.basicDefence;
+	chessCondition.improvedDefence = other.chessCondition.improvedDefence;
+	chessCondition.basicAttackDistance = other.chessCondition.basicAttackDistance;
+	chessCondition.improvedAttackDistance = other.chessCondition.improvedAttackDistance;
+	chessCondition.skillCooldown = other.chessCondition.skillCooldown; 
+
+
+	skillScale = other.skillScale;
+
+	chessBoardCoordinate.setX(other.chessBoardCoordinate.getX());
+	chessBoardCoordinate.setY(other.chessBoardCoordinate.getY());
+
+	screenCoordinate.setX(other.screenCoordinate.getX());
+	screenCoordinate.setY(other.screenCoordinate.getY());
+
+
+
+	// 复制指针，实现共享 Sprite
+	chessImage = other.chessImage;
+	attackImage = other.attackImage;
+	skillImage = other.skillImage;
+	hpBarProgress = other.hpBarProgress;
+	mpBarProgress = other.mpBarProgress;
+
+	return *this;
+}
 
 
 // 以下是具体到职业的棋子子类
@@ -432,7 +475,7 @@ void tank::skill(Chess& OPP)
 void tank::careerBuff()
 {
 	// 现有防御值上升
-	chessCondition.imporovedDefence *= 1.2;
+	chessCondition.improvedDefence *= 1.2;
 }
 
 
