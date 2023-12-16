@@ -38,8 +38,9 @@ void Chess::initCondition()
 {
 	chessCondition.maxHP = chessCondition.HP = hpData[chessName];
 	chessCondition.basicAttack = chessCondition.improvedAttack = attackData[chessName];
-	chessCondition.basicDefence = chessCondition.imporovedDefence = defenceData[chessName];
+	chessCondition.basicDefence = chessCondition.improvedDefence = defenceData[chessName];
 	chessCondition.basicAttackDistance = chessCondition.improvedAttackDistance = attackDistanceData[chessName];
+	chessCondition.skillCooldown = skillCooldowns[chessName];
 }
 
 string Chess::GetCareer()
@@ -130,7 +131,7 @@ void Chess::beenAttack(int oppAttack)
 }
 
 
-// 执行一次攻击
+// 执行一次攻击，包含动画
 void Chess::attackOne(Chess& OPP)
 {
 	OPP.beenAttack(myAttack());
@@ -158,39 +159,60 @@ Sprite* Chess::createChess(Vec2 chessPosition)
 
 	// 创建三个精灵对象
 	chessImage = Sprite::createWithTexture(texture->getTextureForKey(chessImagePath));
-	auto hpBar = Sprite::createWithTexture(texture->getTextureForKey("/res/UI/HpBar.png"));//生命条
-	auto mpBar = Sprite::createWithTexture(texture->getTextureForKey("/res/UI/MpBar.png"));//蓝条
+	// 创建生命条
+	auto hpBar = Sprite::createWithTexture(texture->getTextureForKey("/res/UI/HpBar.png"));
+	hpBarProgress = ProgressTimer::create(hpBar);
+	hpBarProgress->setType(ProgressTimer::Type::BAR);
+
+	// 设置进度条的方向，从左到右
+	hpBarProgress->setMidpoint(Vec2(0.0f, 0.5f));
+	hpBarProgress->setBarChangeRate(Vec2(1.0f, 0.0f));
+	// 设置进度条的初始百分比
+	hpBarProgress->setPercentage(100); // 100% 表示完全填充
+
+
+	// 创建技能条
+	auto mpBar = Sprite::createWithTexture(texture->getTextureForKey("/res/UI/MpBar.png"));
+
+	mpBarProgress = ProgressTimer::create(mpBar);
+	mpBarProgress->setType(ProgressTimer::Type::BAR);
+
+	// 设置进度条的方向，从左到右
+	mpBarProgress->setMidpoint(Vec2(0.0f, 0.5f));
+	mpBarProgress->setBarChangeRate(Vec2(1.0f, 0.0f));
+	// 设置进度条的初始百分比
+	mpBarProgress->setPercentage(0); // 初始技能条进度为0
 
 
 	// 获取三个对象的原始大小
 	Vec2 chessOriginSize = chessImage->getContentSize();
-	Vec2 hpBarOriginSize = hpBar->getContentSize();
-	Vec2 mpBarOriginSize = mpBar->getContentSize();
+	Vec2 hpBarOriginSize = hpBarProgress->getContentSize();
+	Vec2 mpBarOriginSize = mpBarProgress->getContentSize();
 
 
 	// 怎么缩放后面在调整
 	// 缩放大小由config一起控制
 	float chessScale = 4 * config->getPx()->x / chessOriginSize.x;
 	//float chessScale = 4;
-	//float hpBarScale = 2;
-	//float mpBarScale = 2;
+	float hpBarScale = 2;
+	float mpBarScale = 2;
 	
 	// 设置三个精灵大小
 	chessImage->setScale(chessScale);
 	// 设置缩放，旋转的锚点
-	hpBar->setAnchorPoint(Vec2::ANCHOR_MIDDLE_BOTTOM);
-	mpBar->setAnchorPoint(Vec2::ANCHOR_MIDDLE_BOTTOM);
+	hpBarProgress->setAnchorPoint(Vec2::ANCHOR_MIDDLE_BOTTOM);
+	mpBarProgress->setAnchorPoint(Vec2::ANCHOR_MIDDLE_BOTTOM);
 
-	hpBar->setScale(0.7, 2);
-	mpBar->setScale(0.7, 3);
+	hpBarProgress->setScale(0.7, 2);
+	mpBarProgress->setScale(0.7, 3);
 
 
 	chessImage->setPosition(chessPosition);
-	hpBar->setPosition(chessPosition.x + 300, chessPosition.y + 1700);
-	mpBar->setPosition(chessPosition.x + 300, chessPosition.y + 2000);
+	hpBarProgress->setPosition(chessPosition.x + 300, chessPosition.y + 1700);
+	mpBarProgress->setPosition(chessPosition.x + 300, chessPosition.y + 2000);
 
-	chessImage->addChild(hpBar);
-	chessImage->addChild(mpBar);
+	chessImage->addChild(hpBarProgress);
+	chessImage->addChild(mpBarProgress);
 
 	
 
@@ -229,6 +251,64 @@ void Chess::setChessCoordinateByType(Vec2 position, CoordinateType type)
 	}
 }
 
+// 更新生命条进度
+void Chess::updateHpBar()
+{
+	hpBarProgress->setPercentage(chessCondition.HP / chessCondition.maxHP * 100);
+}
+
+// 更新技能条进度
+void Chess::updateMpBar(int attackNum)
+{
+	mpBarProgress->setPercentage(attackNum / getChessCondition()->skillCooldown * 100);
+}
+
+
+Chess& Chess::operator=(const Chess& other) 
+{
+	if (this == &other) 
+	{
+		return *this; // 检查自赋值
+	}
+
+	// 复制基本数据
+	chessName = other.chessName;
+	career = other.career;
+	chessImagePath = other.chessImagePath;
+	chessLevel = other.chessLevel;
+	chessPrice = other.chessPrice;
+
+	chessCondition.HP = other.chessCondition.HP; 
+	chessCondition.maxHP = other.chessCondition.maxHP;
+	chessCondition.basicAttack = other.chessCondition.basicAttack;
+	chessCondition.improvedAttack = other.chessCondition.improvedAttack;
+	chessCondition.basicDefence = other.chessCondition.basicDefence;
+	chessCondition.improvedDefence = other.chessCondition.improvedDefence;
+	chessCondition.basicAttackDistance = other.chessCondition.basicAttackDistance;
+	chessCondition.improvedAttackDistance = other.chessCondition.improvedAttackDistance;
+	chessCondition.skillCooldown = other.chessCondition.skillCooldown; 
+
+
+	skillScale = other.skillScale;
+
+	chessBoardCoordinate.setX(other.chessBoardCoordinate.getX());
+	chessBoardCoordinate.setY(other.chessBoardCoordinate.getY());
+
+	screenCoordinate.setX(other.screenCoordinate.getX());
+	screenCoordinate.setY(other.screenCoordinate.getY());
+
+
+
+	// 复制指针，实现共享 Sprite
+	chessImage = other.chessImage;
+	attackImage = other.attackImage;
+	skillImage = other.skillImage;
+	hpBarProgress = other.hpBarProgress;
+	mpBarProgress = other.mpBarProgress;
+
+	return *this;
+}
+
 
 // 以下是具体到职业的棋子子类
 
@@ -237,6 +317,7 @@ void Chess::setChessCoordinateByType(Vec2 position, CoordinateType type)
 mage::mage(int name)
 {
 	chessName = name;
+	chessImagePath = chessImagePaths[name];
 	initCondition();
 }
 
@@ -308,6 +389,7 @@ Sprite* mage::createSkill()
 shooter::shooter(int name)
 {
 	chessName = name;
+	chessImagePath = chessImagePaths[name];
 	initCondition();
 }
 // 对目标使用技能
@@ -376,6 +458,7 @@ Sprite* shooter::createSkill()
 tank::tank(int name)
 {
 	chessName = name;
+	chessImagePath = chessImagePaths[name];
 	initCondition();
 }
 // 对目标使用技能
@@ -392,7 +475,7 @@ void tank::skill(Chess& OPP)
 void tank::careerBuff()
 {
 	// 现有防御值上升
-	chessCondition.imporovedDefence *= 1.2;
+	chessCondition.improvedDefence *= 1.2;
 }
 
 
