@@ -10,7 +10,7 @@
 //函数返回值：bool型                                   //
 //函数注意事项(选)：无                                 //
 //-----------------------------------------------------//
-bool PlayerInfo::InitPlayerInfo()
+bool PlayerInfo::init()
 {
 	coinNum = 3;
 	lifeValue = 50;
@@ -85,17 +85,8 @@ int PlayerInfo::GetLifeValue() const
 	return lifeValue;
 }
 
-<<<<<<< Updated upstream
-//-----------------------------------------------------//
-//函数参数：空                                         //
-//函数功能：返回保存战斗棋子的数组的地址               //
-//函数返回值：Chesse**                             //
-//函数注意事项(选)：无                                 //
-//-----------------------------------------------------//
-Chess** PlayerInfo::GetBattleChessNum() const
-=======
+
 int PlayerInfo::getMaxBattleChessNum() const 
->>>>>>> Stashed changes
 {
 	return maxBattleChessNum;
 }

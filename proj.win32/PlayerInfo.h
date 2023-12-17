@@ -18,7 +18,7 @@ const int BATTLEMAX = 7;
 const int BATTLEINIT = 3;
 const int PLAYERLEVELMAX = 10;
 const int PLAYERLEVELINIT = 1;
-
+const int HERONUM = 6;
 class PlayerInfo :public Ref
 {
 private:
@@ -63,7 +63,7 @@ private:
 
 public:
 	// 玩家信息初始化函数
-	virtual bool InitPlayerInfo();
+	virtual bool init();
 
 	// 创建对象
 	CREATE_FUNC(PlayerInfo);
@@ -83,12 +83,6 @@ public:
 
 	// 获取当前血量接口函数
 	int GetLifeValue() const;
-<<<<<<< Updated upstream
-	
-	// 返回指针数组的指针
-	Chess** GetBattleChessNum()const;
-=======
->>>>>>> Stashed changes
 
 	// 获取当前能上场英雄最大值
 	int getMaxBattleChessNum() const;
