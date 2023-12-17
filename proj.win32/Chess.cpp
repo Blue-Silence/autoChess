@@ -58,7 +58,7 @@ const int Chess::getChessName()
 	return chessName;
 }
 
-const ChessInfo* Chess::getChessCondition()
+ChessInfo* Chess::getChessCondition()
 {
 	return &chessCondition;
 }
@@ -95,17 +95,18 @@ void Chess::setChessLevel(const int newLevel)
 }
 
 // 提升棋子星级，最多提升到三级，升级的同时棋子的属性会跟着提升
-void Chess::promoteRank()
+void Chess::promoteRank(int dstRank)
 {
-	if (chessLevel<3)
+	if (dstRank<=3)
 	{
-		chessLevel++;
+		chessLevel = dstRank;
 
 		// 每升一级，各项属性跟着提升
-		chessCondition.maxHP *= promoteScale;
-		chessCondition.basicAttack *= promoteScale;
-		chessCondition.basicDefence *= promoteScale;
-		chessCondition.basicAttackDistance *= promoteScale;
+		chessCondition.HP = chessCondition.maxHP = hpData[chessName]*pow(promoteScale, dstRank);
+		chessCondition.improvedAttack = chessCondition.basicAttack = attackData[chessName] * pow(promoteScale, dstRank);
+		chessCondition.improvedDefence = chessCondition.basicDefence = defenceData[chessName] * pow(promoteScale, dstRank);
+		chessCondition.improvedAttackDistance = chessCondition.basicAttackDistance = attackDistanceData[chessName] * pow(promoteScale, dstRank);
+		
 
 	}
 	return;
@@ -338,6 +339,11 @@ void mage::careerBuff()
 	skillScale = 3;
 }
 
+void mage::removeCareerBuff()
+{
+	skillScale = 2;
+}
+
 Sprite* mage::createAttack()
 {
 	auto texture = Director::getInstance()->getTextureCache();
@@ -409,6 +415,11 @@ void shooter::careerBuff()
 	chessCondition.improvedAttack *= 1.2;
 }
 
+void shooter::removeCareerBuff()
+{
+	chessCondition.improvedAttack /= 1.2;
+}
+
 Sprite* shooter::createAttack()
 {
 	auto texture = Director::getInstance()->getTextureCache();
@@ -476,6 +487,11 @@ void tank::careerBuff()
 {
 	// 现有防御值上升
 	chessCondition.improvedDefence *= 1.2;
+}
+
+void tank::removeCareerBuff()
+{
+	chessCondition.improvedDefence /= 1.2;
 }
 
 

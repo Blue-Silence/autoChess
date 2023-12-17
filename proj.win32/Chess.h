@@ -188,7 +188,7 @@ public:
 	const int getChessName();
 
 	// 获取当前棋子数值
-	const ChessInfo* getChessCondition();
+	ChessInfo* getChessCondition();
 
 	// 获取当前棋子星级
 	const int getChessLevel();
@@ -210,11 +210,13 @@ public:
 	//羁绊效果, 继承
 	virtual void careerBuff() = 0;
 
-	//提升棋子星级
-	void promoteRank();
+	// remove 羁绊效果
+	virtual void removeCareerBuff() = 0;
 
-	//佩戴装备
-	void wearEquip(int equipNum, int equipType);
+	//提升棋子星级
+	void promoteRank(int dstRank);
+
+	
 	
 
 	//计算buff并修改自身属性
@@ -233,8 +235,6 @@ public:
 	//判断棋子是否死亡
 	bool isDead();
 
-	// 这是啥
-	int storageNum = 0;//上方棋子为负数，下方棋子为正数
 
 	//棋子的可视化
 	Sprite* createChess(Vec2 chessPosition);
@@ -280,6 +280,9 @@ public:
 	// 羁绊效果增益
 	virtual void careerBuff() override;
 
+	// 去除羁绊效果
+	virtual void removeCareerBuff() override;
+
 	// 普通攻击可视化指针
 	virtual Sprite* createAttack() override;
 
@@ -308,6 +311,9 @@ public:
 	// 羁绊效果增益
 	virtual void careerBuff() override;
 
+	// 去除羁绊效果
+	virtual void removeCareerBuff() override;
+
 	// 普通攻击可视化指针
 	virtual Sprite* createAttack() override;
 
@@ -333,6 +339,9 @@ public:
 
 	// 羁绊效果增益
 	virtual void careerBuff() override;
+
+	// 去除羁绊效果
+	virtual void removeCareerBuff() override;
 
 	// 普通攻击可视化指针
 	virtual Sprite* createAttack() override;

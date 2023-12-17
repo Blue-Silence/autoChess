@@ -6,12 +6,14 @@ bool BattleLayer::init()
 {
 	for (Chess* chess : *playerME->getBattleAreaChesses())
 	{
-
-		chess->initCondition();
+		chess->getChessCondition()->HP = chess->getChessCondition()->maxHP;
+		chess->attackNum = 0;
+		
 	}
 	for (Chess* chess : *playerOPP->getBattleAreaChesses())
 	{
-		chess->initCondition();
+		chess->getChessCondition()->HP = chess->getChessCondition()->maxHP;
+		chess->attackNum = 0;
 	}
 	
 
