@@ -4,12 +4,12 @@
 
 bool BattleLayer::init()
 {
-	for (Chess* chess : *playerME.getchessInBattleArea())
+	for (Chess* chess : *playerME.getBattleAreaChesses())
 	{
 
 		chess->initCondition();
 	}
-	for (Chess* chess : *playerOPP.getchessInBattleArea())
+	for (Chess* chess : *playerOPP.getBattleAreaChesses())
 	{
 		chess->initCondition();
 	}
@@ -58,7 +58,7 @@ Chess* BattleLayer::findEnemy(Chess* damageMaker, PlayerInfo enemy)
 
 	for (int i = 0; i < 7; i++) 
 	{
-		if (enemy.chessInBattleArea[i] == nullptr) 
+		if ((*enemy.getBattleAreaChesses())[i] == nullptr)
 		{//没棋子了
 			break;
 		}
@@ -66,11 +66,11 @@ Chess* BattleLayer::findEnemy(Chess* damageMaker, PlayerInfo enemy)
 		{
 			double temp = 0;
 			temp = BattleLayer::getDistance(damageMaker->getChessCoordinateByType(CoordinateType::chessBoardCoordinates), 
-				enemy.chessInBattleArea[i]->getChessCoordinateByType(CoordinateType::chessBoardCoordinates));
+				(*enemy.getBattleAreaChesses())[i]->getChessCoordinateByType(CoordinateType::chessBoardCoordinates));
 			
 			if (temp < distance) 
 			{
-				targetEnemyChess = enemy.chessInBattleArea[i];
+				targetEnemyChess = (*enemy.getBattleAreaChesses())[i];
 			}
 		}
 	}
@@ -126,7 +126,7 @@ void BattleLayer::findPathToEnemy(Chess* damageMaker, Chess* targetChess,ChessBo
 		dx = -1;
 	}
 
-	coordinateConvert(CoordinateType::screenCoordinates, { xOfdamageMaker+dx,yOfdamageMaker+dy }, newPos);
+	CoordinateConvert(CoordinateType::screenCoordinates, { xOfdamageMaker+dx,yOfdamageMaker+dy }, newPos);
 	moveChess(damageMakerImage, Vec2{ newPos->getX(),newPos->getY() });
 }
 
@@ -269,11 +269,11 @@ bool BattleLayer::detect(PlayerInfo A)
 {
 	bool over = -1;
 	for (int i = 0; i < 7; i++) {
-		if (A.BattleChessNum[i] == nullptr) {//没棋子了
+		if ((*A.getBattleAreaChesses())[i] == nullptr) {//没棋子了
 			break;
 		}
 		else {
-			if (A.BattleChessNum[i]->isDead()) {//棋子死了
+			if ((*A.getBattleAreaChesses())[i]->isDead()) {//棋子死了
 				if (over == -1) {
 					over = 1;
 				}
