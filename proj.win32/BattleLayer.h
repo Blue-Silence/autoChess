@@ -21,23 +21,24 @@ public:
 
 	//void pieceBattle(Chess &damageMaker, Chess &victim);
 
-	Chess* findEnemy(Chess* damageMaker, PlayerInfo enemy);
+	Chess* findEnemy(Chess* damageMaker, PlayerInfo* enemy);
 
 	//这是一个普通的寻路函数,每次只走一步
 	void findPathToEnemy(Chess* damageMaker, Chess* targetEnemy,ChessBoard* chessboard);
 
 	// 移动棋子
-	void moveChess(Sprite* movingChess, Vec2 targetPoistion);
+	void moveChess(Chess* movingChess, Vec2 targetPoistion);
 
 	// 攻击——动画+数据
 	void doAttack(Chess* damageMaker, Chess* targetEnemy);
 
-	bool detect(PlayerInfo A);//检查玩家的战斗棋子是否还有剩余，如有，则进行攻击或移动
+	bool isEnd();//检查玩家的战斗棋子是否还有剩余，如有，则进行攻击或移动
 
 private:
 
-	PlayerInfo playerME;
-	PlayerInfo playerOPP;
+	ChessBoard* chessBoard;
+	PlayerInfo* playerME;
+	PlayerInfo* playerOPP;
 
 
 };

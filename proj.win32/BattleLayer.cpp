@@ -4,12 +4,12 @@
 
 bool BattleLayer::init()
 {
-	for (Chess* chess : *playerME.getBattleAreaChesses())
+	for (Chess* chess : *playerME->getBattleAreaChesses())
 	{
 
 		chess->initCondition();
 	}
-	for (Chess* chess : *playerOPP.getBattleAreaChesses())
+	for (Chess* chess : *playerOPP->getBattleAreaChesses())
 	{
 		chess->initCondition();
 	}
@@ -25,8 +25,45 @@ void BattleLayer::update(float delta)
 	// 例如：角色移动，寻找攻击目标，执行攻击等
 	// ...
 
-	// 调用其他您定义的方法
-	// 比如：findAttackTargets(), moveCharacters(), performAttacks() 等
+	for (auto chess : *playerME->getBattleAreaChesses())
+	{
+		Chess* targetChess;
+		// 先确定攻击目标，确定目标一帧的时间应该是够的，findEnemy()函数执行后，将棋子的状态设为Moving
+		if(chess->state == Chess::State::Idle)
+			targetChess = findEnemy(chess, playerOPP);
+		// 棋子处于移动状态但没有在移动时需要调用
+		else if (chess->state == Chess::State::Moving && !chess->isMoving)
+		{
+			// 进入攻击范围了，不需要再移动了，设置棋子状态为攻击
+			if (getDistance(chess->getChessCoordinateByType(CoordinateType::chessBoardCoordinates),
+				targetChess->getChessCoordinateByType(CoordinateType::chessBoardCoordinates)) 
+				< (chess->getChessCondition()->improvedAttackDistance + 1))
+			{
+				chess->state = Chess::State::Attacking;
+				chess->isMoving = false;
+				// 注意，虽然进入攻击状态，但还没有开始攻击
+				chess->isAttacking = false;
+				continue;
+			}
+			// 设置为开始移动，必须等findPathToEnemy()执行完毕后在函数结尾将isMoving重新置为false才能进入本分支再次调用
+			chess->isMoving = true;
+			findPathToEnemy(chess, targetChess, chessBoard);
+		}
+		// 棋子处于攻击状态时但没有在攻击时需要调用
+		else if (chess->state == Chess::State::Attacking && !chess->isAttacking)
+		{
+
+			// 设置开始攻击了，必须等doAttack()执行完毕后在函数结尾将isAttacking重新置为false才能进入本分支再次调用
+			chess->isAttacking = true;
+			doAttack(chess, targetChess);
+
+		}
+
+		// 
+
+	}
+
+	
 }
 
 // 获取两个棋子之间在祺盘上的曼哈顿距离
@@ -51,42 +88,56 @@ double BattleLayer::getDistance(ChessCoordinate* start, ChessCoordinate* end)
 //}
 
 // 寻找攻击目标，选择距离最近的敌方英雄
-Chess* BattleLayer::findEnemy(Chess* damageMaker, PlayerInfo enemy)
+Chess* BattleLayer::findEnemy(Chess* damageMaker, PlayerInfo* enemy)
 {
 	double distance = 999;
-	Chess* targetEnemyChess;
+	Chess* targetChess;
 
-	for (int i = 0; i < 7; i++) 
+	for (auto chess : *enemy->getBattleAreaChesses())
 	{
-		if ((*enemy.getBattleAreaChesses())[i] == nullptr)
-		{//没棋子了
-			break;
-		}
-		else
+		if (chess->isDead())
+			continue;
+		int tmp = getDistance(damageMaker->getChessCoordinateByType(CoordinateType::chessBoardCoordinates),
+			(chess->getChessCoordinateByType(CoordinateType::chessBoardCoordinates)));
+		if (tmp < distance)
 		{
-			double temp = 0;
-			temp = BattleLayer::getDistance(damageMaker->getChessCoordinateByType(CoordinateType::chessBoardCoordinates), 
-				(*enemy.getBattleAreaChesses())[i]->getChessCoordinateByType(CoordinateType::chessBoardCoordinates));
-			
-			if (temp < distance) 
-			{
-				targetEnemyChess = (*enemy.getBattleAreaChesses())[i];
-			}
+			targetChess = chess;
 		}
 	}
-	return targetEnemyChess;
+
+	
+	// 将棋子的状态转入移动状态
+	damageMaker->state = Chess::State::Moving;
+	// 注意只是进入移动状态，但还没开始移动
+	damageMaker->isMoving = false;
+
+	return targetChess;
 }
 
 // 将精灵移动到指定位置，坐标需为屏幕坐标
-void BattleLayer::moveChess(Sprite* movingChess,Vec2 targetPosition)
+void BattleLayer::moveChess(Chess* movingChess,Vec2 targetPosition)
 {
-	float duration = 0.5f; // 移动所需时间，以秒为单位
+	Sprite* movingChessImage = movingChess->getChessSprite();
+	float duration = 0.2f; // 移动所需时间，以秒为单位
 	auto moveTo = MoveTo::create(duration, targetPosition);
-	movingChess->runAction(moveTo);
-	
+	auto callback = CallFunc::create([this, movingChess,targetPosition]() 
+		{
+			
+		// 移动完成后的处理
+		// 例如：更新棋子状态
+			movingChess->setChessCoordinateByType(targetPosition, CoordinateType::screenCoordinates);
+			ChessCoordinate* newPos;
+			CoordinateConvert(CoordinateType::chessBoardCoordinates, targetPosition, newPos);
+			movingChess->setChessCoordinateByType(Vec2(newPos->getY(), newPos->getX()), CoordinateType::chessBoardCoordinates);
+			// 移动一步完毕后，设置isMoving为false
+			movingChess->isMoving = false;
+		});
+
+	auto sequence = Sequence::create(moveTo, callback, nullptr);
+	movingChessImage->runAction(sequence);
 }
 
-// 寻路函数 循环调用，只需要知道下一步怎么走即可
+// 寻路函数 每次只走一步
 void BattleLayer::findPathToEnemy(Chess* damageMaker, Chess* targetChess,ChessBoard* chessboard)
 {
 	ChessCoordinate src, dst;
@@ -127,62 +178,70 @@ void BattleLayer::findPathToEnemy(Chess* damageMaker, Chess* targetChess,ChessBo
 	}
 
 	CoordinateConvert(CoordinateType::screenCoordinates, { xOfdamageMaker+dx,yOfdamageMaker+dy }, newPos);
-	moveChess(damageMakerImage, Vec2{ newPos->getX(),newPos->getY() });
+	damageMaker->targetPos = Vec2(newPos->getX(),newPos->getY());
+	moveChess(damageMaker, damageMaker->targetPos);
+	
 }
 
 
 // 待添加音效
+
+
 void BattleLayer::doAttack(Chess* damageMaker, Chess* targetEnemy)
 {
 	Sprite* damageMakerImage = damageMaker->getChessSprite();
 	string damageMakerCareer = damageMaker->GetCareer();
 	Sprite* targetChessImage = targetEnemy->getChessSprite();
 
-	// 普攻计数器
-	int attackNum = 0;
-
-	while (true)
+	// 使用技能
+	if (damageMaker->attackNum == damageMaker->getChessCondition()->skillCooldown)
 	{
-		// 使用技能
-		if (attackNum == damageMaker->getChessCondition()->skillCooldown)
-		{
 
-			// 技能可视化逻辑
-			damageMaker->createSkill();
-			Sprite* damageMakerSkillImage = damageMaker->getSkillSprite();
-			// 把技能的贴图添加到当前层或场景中
-			this->addChild(damageMakerSkillImage);
-			// 移动到目标所需的时间，以秒为单位
-			float moveDuration = 0.5f;
-			// 技能移动到目标位置
-			auto moveAction = MoveTo::create(moveDuration, targetChessImage->getPosition());
-			// 击中对方后消失
-			auto removeSprite = CallFunc::create([damageMakerSkillImage]()
-				{
-					damageMakerSkillImage->removeFromParent();
-				});
-			
+		// 技能可视化逻辑
+		damageMaker->createSkill();
+		Sprite* damageMakerSkillImage = damageMaker->getSkillSprite();
+		// 把技能的贴图添加到当前层或场景中
+		this->addChild(damageMakerSkillImage);
+		// 移动到目标所需的时间，以秒为单位
+		float moveDuration = 0.5f;
+		// 技能移动到目标位置
+		auto moveSkill = MoveTo::create(moveDuration, targetChessImage->getPosition());
+
+		// 技能移动到目标位置击中目标后的处理
+		auto callback = CallFunc::create([damageMaker,targetEnemy,damageMakerImage,damageMakerSkillImage]()
+		{
+			// 移除技能贴图
+			damageMakerSkillImage->removeFromParent();
 			// 数值逻辑
 			damageMaker->skill(*targetEnemy);
 			// 更新对手生命条进度
 			targetEnemy->updateHpBar();
 			// 更新自己的技能进度条
 			damageMaker->updateMpBar(0);
-			attackNum = 0;
+			// 重置普通攻击计数器
+			damageMaker->attackNum = 0;
+
 			// 判断自己是否死了
 			if (damageMaker->isDead())
 			{
 				damageMakerImage->removeFromParent();
-				break;
+
 			}
 			// 对方已死，停止攻击
 			if (targetEnemy->isDead())
 			{
-				break;
-			}
-		}
 
-		// 进行一次普攻 待添加音效
+			}
+
+		});
+		auto sequence = Sequence::create(moveSkill, callback, nullptr);
+		// 执行技能动画和逻辑计算
+		damageMakerSkillImage->runAction(sequence);
+	}
+	// 进行一次普通攻击，待添加音效
+	else
+	{
+		Sequence* normalAttack;
 		if (damageMakerCareer == "mage" || damageMakerCareer == "shooter")
 		{
 			// 普攻可视化逻辑
@@ -191,14 +250,48 @@ void BattleLayer::doAttack(Chess* damageMaker, Chess* targetEnemy)
 			// 把普通攻击的贴图添加到当前层或场景中
 			this->addChild(damageMakerAttackImage);
 			// 移动到目标所需的时间，以秒为单位
-			float moveDuration = 0.5f; 
+			float moveDuration = 0.5f;
 			// 远程攻击移动到目标位置
-			auto moveAction = MoveTo::create(moveDuration, targetChessImage->getPosition());
+			auto moveAttack = MoveTo::create(moveDuration, targetChessImage->getPosition());
 			// 击中对方后消失
-			auto removeSprite = CallFunc::create([damageMakerAttackImage]() 
+			auto removeSprite = CallFunc::create([damageMakerAttackImage]()
 				{
 					damageMakerAttackImage->removeFromParent();
 				});
+			// 组合动作
+			normalAttack = Sequence::create(moveAttack, removeSprite, nullptr);
+
+			// 技能移动到目标位置击中目标后的处理
+			auto callback = CallFunc::create([damageMaker, targetEnemy, damageMakerImage]()
+			{
+					// 数值逻辑
+					damageMaker->attackOne(*targetEnemy);
+
+					// 更新普通攻击计数器
+					damageMaker->attackNum++;
+
+					// 更新对手生命条进度
+					targetEnemy->updateHpBar();
+					// 更新自己的技能进度条
+					damageMaker->updateMpBar(damageMaker->attackNum);
+					// 判断自己是否死了
+					if (damageMaker->isDead())
+					{
+						damageMakerImage->removeFromParent();
+
+					}
+					// 对方已死，停止攻击
+					if (targetEnemy->isDead())
+					{
+
+					}
+					// 攻击完毕后设置棋子状态为不在攻击，以便下次update可以调用新一次的doAttack()
+					damageMaker->isAttacking = false;
+			});
+			auto sequence = Sequence::create(normalAttack, callback, nullptr);
+			// 执行技能动画和逻辑计算
+			damageMakerAttackImage->runAction(sequence);
+
 		}
 		else
 		{
@@ -207,28 +300,40 @@ void BattleLayer::doAttack(Chess* damageMaker, Chess* targetEnemy)
 			auto attackActionReverse = attackAction->reverse(); // 攻击后缩放回原始大小
 
 			// 组合动作
-			auto attackSequence = Sequence::create(attackAction, attackActionReverse, nullptr);
-			// 让攻击者执行这个动作序列
-			damageMakerImage->runAction(attackSequence);
-		}
-		
-		// 数值逻辑
-		damageMaker->attackOne(*targetEnemy);
-		++attackNum;
-		// 更新对手生命条进度
-		targetEnemy->updateHpBar();
-		// 更新自己的技能进度条
-		damageMaker->updateMpBar(attackNum);
-		// 判断自己是否死了
-		if (damageMaker->isDead())
-		{
-			damageMakerImage->removeFromParent();
-			break;
-		}
-		// 对方已死，停止攻击
-		if (targetEnemy->isDead())
-		{
-			break;
+			normalAttack = Sequence::create(attackAction, attackActionReverse, nullptr);
+
+			// 技能移动到目标位置击中目标后的处理
+			auto callback = CallFunc::create([damageMaker, targetEnemy, damageMakerImage]()
+			{
+					// 数值逻辑
+					damageMaker->attackOne(*targetEnemy);
+
+					// 更新普通攻击计数器
+					damageMaker->attackNum++;
+
+					// 更新对手生命条进度
+					targetEnemy->updateHpBar();
+					// 更新自己的技能进度条
+					damageMaker->updateMpBar(damageMaker->attackNum);
+					// 判断自己是否死了
+					if (damageMaker->isDead())
+					{
+						damageMakerImage->removeFromParent();
+
+					}
+					// 对方已死，停止攻击
+					if (targetEnemy->isDead())
+					{
+
+					}
+					// 攻击完毕后设置棋子状态为不在攻击，以便下次update可以调用新一次的doAttack()
+					damageMaker->isAttacking = false;
+
+
+			});
+			auto sequence = Sequence::create(normalAttack, callback, nullptr);
+			// 执行技能动画和逻辑计算
+			damageMakerImage->runAction(sequence);
 		}
 	}
 }
@@ -257,38 +362,9 @@ void BattleLayer::doAttack(Chess* damageMaker, Chess* targetEnemy)
 
 
 
-
-
-
-
-
-
-
-
-bool BattleLayer::detect(PlayerInfo A)
+bool BattleLayer::isEnd()
 {
-	bool over = -1;
-	for (int i = 0; i < 7; i++) {
-		if ((*A.getBattleAreaChesses())[i] == nullptr) {//没棋子了
-			break;
-		}
-		else {
-			if ((*A.getBattleAreaChesses())[i]->isDead()) {//棋子死了
-				if (over == -1) {
-					over = 1;
-				}
-			}
-			else {
-				over = 0;
-			}
-		}
-	}
-	if (over != 0) {//结束了
-		return true;
-	}
-	else {
-		return false;
-	}
+	
 }
 
 

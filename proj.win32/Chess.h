@@ -149,9 +149,27 @@ protected:
 	ProgressTimer* mpBarProgress;
 
 
-
 public:
 
+	// 棋子当前状态
+	enum class State
+	{
+		Idle,
+		Finding,
+		Moving,
+		Attacking
+	};
+	State state = State::Idle;
+	// 攻击目标的像素位置
+	Vec2 targetPos;
+
+	// 注意这里的状态和上面state的区分，state指一整个时间区间的状态，
+	// 比如在Moving状态中也分 正在走这一步（isMoving）和走完这一步该走下一步(!isMoving)的区别
+	bool isMoving=false;
+	bool isAttacking=false;
+
+	// 普攻计数器
+	int attackNum = 0;
 
 	// 初始化棋子状态
 	void initCondition();
