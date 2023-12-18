@@ -14,7 +14,9 @@ public:
 
 	void update(float delta);
 
-	//CREATE_FUNC(Battle);
+	CREATE_FUNC(BattleLayer);
+
+	void chessInitBeforeBattle(Chess* chess);
 
 	//计算两个棋子之间的曼哈顿距离，输入参数为两个棋子的棋格坐标
 	double getDistance(ChessCoordinate* start, ChessCoordinate* end);
@@ -32,13 +34,14 @@ public:
 	// 攻击——动画+数据
 	void doAttack(Chess* damageMaker, Chess* targetEnemy);
 
-	bool isEnd();//检查玩家的战斗棋子是否还有剩余，如有，则进行攻击或移动
+	// 战斗测试
+	void AItest();
 
 private:
-
+	bool gameOver = false;
 	ChessBoard* chessBoard;
 	PlayerInfo* playerME;
 	PlayerInfo* playerOPP;
 
-
+	
 };
