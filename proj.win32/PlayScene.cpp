@@ -19,17 +19,9 @@ bool PlayScene::init()
 	auto origin = Director::getInstance()->getVisibleOrigin();
 	auto buttonPositiony = visibleSize.height / 3;	//	The y position of two buttons
 
-	// 创建单点事件监听器
-	auto clickListener = EventListenerTouchOneByOne::create();
-	clickListener->setSwallowTouches(true);
-	clickListener->onTouchBegan = CC_CALLBACK_2(PlayScene::onTouchBegan, this);
-	clickListener->onTouchEnded = CC_CALLBACK_2(PlayScene::onTouchEnded, this);
-	_eventDispatcher->addEventListenerWithSceneGraphPriority(clickListener, this);
-
-	// 创建移动事件监听器
-	auto moveListener = EventListenerMouse::create();
-	moveListener->onMouseMove = CC_CALLBACK_1(PlayScene::onMouseMove, this);
-	_eventDispatcher->addEventListenerWithSceneGraphPriority(moveListener, this);
+	// 创建鼠标事件监听器
+	mouseListener = EventListenerMouse::create();
+	_eventDispatcher->addEventListenerWithSceneGraphPriority(mouseListener, this);
 
 	// 添加背景层
 	playLayer = Layer::create();
@@ -47,13 +39,13 @@ bool PlayScene::init()
 	// 创建棋盘
 	chessBoardModel = ChessBoard::create();
 	createBoard(Vec2(config->getPx()->x * 38, config->getPx()->y * 30));
-
+	CC_SAFE_RETAIN(chessBoardModel);
 	// 创建玩家
 	playerA = PlayerInfo::create();
 	CC_SAFE_RETAIN(playerA);
 
 	//初始化备战席
-	preArea = PreparationSeat::create();
+	preArea = PreparationSeat::create(playerA, chessBoardModel, mouseListener, playLayer);
 	playLayer->addChild(preArea->PreAreaLayer);
 	CC_SAFE_RETAIN(preArea);
 

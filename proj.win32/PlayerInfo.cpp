@@ -85,8 +85,17 @@ int PlayerInfo::GetLifeValue() const
 	return lifeValue;
 }
 
-
+//<<<<<<< Updated upstream
+//-----------------------------------------------------//
+//函数参数：空                                         //
+//函数功能：返回保存战斗棋子的数组的地址               //
+//函数返回值：Chesse**                             //
+//函数注意事项(选)：无                                 //
+//-----------------------------------------------------//
+//Chess** PlayerInfo::GetBattleChessNum() const
+//=======
 int PlayerInfo::getMaxBattleChessNum() const 
+//>>>>>>> Stashed changes
 {
 	return maxBattleChessNum;
 }
@@ -320,7 +329,18 @@ void PlayerInfo::createHighLevelChess(int heroflag, int level)
 	}
 }
 
-
+//mlx
+int PlayerInfo::GetMinIndex()
+{
+	for (int i = 0; i < 9; i++)
+	{
+		if (chessInPreArea[i] == nullptr)
+		{
+			return i;
+		}
+	}
+	return -1;
+}
 
 
 

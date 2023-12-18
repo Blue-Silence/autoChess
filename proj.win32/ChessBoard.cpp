@@ -39,30 +39,34 @@ void CoordinateConvert(CoordinateType targetType, Vec2 oldPos, ChessCoordinate* 
 
 	//获取起始块的逻辑尺寸
 	auto texture = Director::getInstance()->getTextureCache();
-	auto sprite = Sprite::createWithTexture(texture->getTextureForKey("/res/Background/bgwhite.png"));
+	auto sprite = Sprite::create("/res/Background/bgwhite.png");
+	Vec2 originSize = sprite->getContentSize();
+
+	float scale = 10 * config->getPx()->x / originSize.x;
+
 	Size oneP = sprite->getContentSize();
 
-	int halfBoardWidth = oneP.width / 2;
-	int halfBoardHeight = oneP.height / 2;
+	int halfBoardWidth = oneP.width * scale / 2;
+	int halfBoardHeight = oneP.height * scale / 2;
 
 	//获得小格左下角位置(默认修改小格锚点位于右下角)
 	//小格锚点改动，这里简单修改即可
 	Vec2 XY = Vec2(config->getPx()->x * 38, config->getPx()->y * 30);
-	XY.x = XY.x - 2 * halfBoardWidth;
 
 	if (targetType == CoordinateType::chessBoardCoordinates)
 	{
-		newPos->setX(static_cast<int>(oldPos.x - XY.x) % (halfBoardWidth * 2) + 1);
-		newPos->setY(static_cast<int>(oldPos.y - XY.y) % (halfBoardHeight * 2) + 1);
+		newPos->setX(static_cast<int>(oldPos.x - XY.x) / (halfBoardHeight * 2));
+		newPos->setY(static_cast<int>(oldPos.y - XY.y) / (halfBoardHeight * 2));
 
 	}
 	else
 	{
 		//给予的逻辑尺寸坐标是对应坐标位置小方块的中心
-		newPos->setX(oldPos.x * 2 * halfBoardWidth - halfBoardWidth);
-		newPos->setY(oldPos.y * 2 * halfBoardHeight - halfBoardHeight);
+		newPos->setX(XY.x + oldPos.x * 2 * halfBoardWidth + halfBoardWidth);
+		newPos->setY(XY.y + oldPos.y * 2 * halfBoardHeight + halfBoardHeight);
 	}
 }
+
 
 // 鼠标是否在棋盘区域,输入坐标为
 bool ChessBoard::isInBoard(Vec2 posi)
@@ -195,5 +199,5 @@ void ChessBoard::moveChessFromPreZoneToWarZone(Chess* selectedChess, int targetR
 	selectedChess->setChessCoordinateByType(Vec2(targetCol, targetRow), CoordinateType::chessBoardCoordinates);
 
 	// 更新棋盘状态，标记该位置已被占用
-	board[targetRow][targetCol] = true;
+	//board[targetRow][targetCol] = true;
 }

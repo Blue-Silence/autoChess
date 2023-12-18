@@ -40,6 +40,7 @@ public:
 	static Scene* createScene();
 	Market* shopModel;
 	virtual bool init();
+	EventListenerMouse* mouseListener;
 
 	// 创建可视化棋盘， position为(0, 0)位置欺骗图片左下角的锚点坐标
 	void createBoard(Vec2 position);

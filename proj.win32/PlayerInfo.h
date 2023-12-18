@@ -18,7 +18,10 @@ const int BATTLEMAX = 7;
 const int BATTLEINIT = 3;
 const int PLAYERLEVELMAX = 10;
 const int PLAYERLEVELINIT = 1;
-const int HERONUM = 6;
+//mlx:此处为不报错，注意更改
+const int HERONUM = 9;
+//
+
 class PlayerInfo :public Ref
 {
 private:
@@ -54,8 +57,7 @@ private:
 	// 存储当前我方战斗区棋子
 	vector<Chess*> chessInBattleArea;
 
-	// 存储当前我方备战区棋子
-	vector<Chess*> chessInPreArea = vector<Chess*>(9, nullptr);
+
 
 	// 存储当前我方全部棋子
 	vector<Chess*> chessTotal;
@@ -68,6 +70,11 @@ public:
 	// 创建对象
 	CREATE_FUNC(PlayerInfo);
 
+	// 存储当前我方备战区棋子
+	vector<Chess*> chessInPreArea = vector<Chess*>(9, nullptr);
+
+	//mlx:得到下标最小的空位
+	int GetMinIndex();
 
 	// 创建自己的商店对象
 	Market market;
@@ -83,6 +90,12 @@ public:
 
 	// 获取当前血量接口函数
 	int GetLifeValue() const;
+//<<<<<<< Updated upstream
+	
+	// 返回指针数组的指针
+	Chess** GetBattleChessNum()const;
+//=======
+//>>>>>>> Stashed changes
 
 	// 获取当前能上场英雄最大值
 	int getMaxBattleChessNum() const;
@@ -129,6 +142,7 @@ public:
 	// 升星后高星英雄出现在战斗区函数
 	void createHighLevelChess(int heroflag, int level);
 
-
+	//友元声明
+	friend class PreparationSeat;
 };
 #endif

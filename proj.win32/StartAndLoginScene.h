@@ -22,7 +22,7 @@ using namespace CocosDenshion;
 #include "ui/CocosGUI.h"
 using namespace ui;
 
-//#include "PlayScene.h"
+#include "PlayScene.h"
 
 class StartAndLoginScene :public Scene
 {
@@ -33,6 +33,9 @@ public:
 
 	CREATE_FUNC(StartAndLoginScene);
 
+	//创建按钮函数
+	static MenuItemSprite* createGameButton(std::string normalPicPath, std::string pressedPicPath, const ccMenuCallback& callback);
+
 private:
 	//预加载资源相关
 	const int totalFileNums = 46;
@@ -42,9 +45,10 @@ private:
 	Vec2 pageCoord;
 	//加载进度显示
 	Label* loadLabel;
-	//开始和退出按键
-	MenuItemImage* start;
-	MenuItemImage* exit;
+	//开始和结束按键
+	MenuItemSprite* start;
+	MenuItemSprite* exit;
+
 
 	//加载资源
 	void LoadResource();
