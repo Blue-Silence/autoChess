@@ -157,11 +157,13 @@ Sprite* Chess::createChess(Vec2 chessPosition)
 	//CsvParser csv;
 	//csv.parseWithFile("Data/PiecesData.csv");
 
-
 	// 创建三个精灵对象
-	chessImage = Sprite::createWithTexture(texture->getTextureForKey(chessImagePath));
+	std::string imageHeroPath = getChessImagePath();
+	int pos = imageHeroPath.find(".png");
+	imageHeroPath.replace(pos, 11, "Hero.png");
+	chessImage = Sprite::create(imageHeroPath);
 	// 创建生命条
-	auto hpBar = Sprite::createWithTexture(texture->getTextureForKey("/res/UI/HpBar.png"));
+	auto hpBar = Sprite::create("/res/UI/HpBar.png");
 	hpBarProgress = ProgressTimer::create(hpBar);
 	hpBarProgress->setType(ProgressTimer::Type::BAR);
 
@@ -171,10 +173,8 @@ Sprite* Chess::createChess(Vec2 chessPosition)
 	// 设置进度条的初始百分比
 	hpBarProgress->setPercentage(100); // 100% 表示完全填充
 
-
 	// 创建技能条
-	auto mpBar = Sprite::createWithTexture(texture->getTextureForKey("/res/UI/MpBar.png"));
-
+	auto mpBar = Sprite::create("/res/UI/MpBar.png");
 	mpBarProgress = ProgressTimer::create(mpBar);
 	mpBarProgress->setType(ProgressTimer::Type::BAR);
 

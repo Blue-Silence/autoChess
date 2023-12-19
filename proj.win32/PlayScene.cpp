@@ -46,7 +46,6 @@ bool PlayScene::init()
 
 	//初始化备战席
 	preArea = PreparationSeat::create(playerA, chessBoardModel, mouseListener, playLayer);
-	playLayer->addChild(preArea->PreAreaLayer);
 	CC_SAFE_RETAIN(preArea);
 
 	// 创建商店
@@ -302,9 +301,6 @@ void PlayScene::BuyChess(Ref* sender, int index)
 		Chess* purchasedChess = shopModel->chessList[index];
 		playerA->chessInPreArea[location] = (purchasedChess);
 		preArea->CreatePreAreaButton(purchasedChess, location);
-		//更新备战席层
-		preArea->PreAreaLayer->removeFromParent();
-		playLayer->addChild(preArea->PreAreaLayer, 8);
 	}
 }
 void PlayScene::menuBuyExpCallBack(Ref* sender)
