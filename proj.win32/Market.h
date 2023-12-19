@@ -25,7 +25,7 @@ private:
 
 public:
 	// 棋子库里的棋子
-	vector<Chess*>chessList;
+	vector<shared_ptr<Chess>>chessList;
 
 	CREATE_FUNC(Market);
 

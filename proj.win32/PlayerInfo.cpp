@@ -85,42 +85,41 @@ int PlayerInfo::GetLifeValue() const
 	return lifeValue;
 }
 
-
-int PlayerInfo::getMaxBattleChessNum() const 
+int PlayerInfo::getMaxBattleChessNum() const
 {
 	return maxBattleChessNum;
 }
 
 
 // 在玩家对战区放置棋子
-void PlayerInfo::putChessInBattleArea(Chess* chess)
+void PlayerInfo::putChessInBattleArea(shared_ptr<Chess> chess)
 {
 	chessInBattleArea.push_back(chess);
 }
 
 // 获取玩家对战区棋子集合
-vector<Chess*>* PlayerInfo::getBattleAreaChesses()
+vector<shared_ptr<Chess>>* PlayerInfo::getBattleAreaChesses()
 {
 	return &chessInBattleArea;
 }
 
 // 在玩家备战区放置棋子
-void PlayerInfo::putChessInPreArea(Chess* chess)
+void PlayerInfo::putChessInPreArea(shared_ptr<Chess> chess)
 {
 	chessInPreArea.push_back(chess);
 }
 
 // 获取玩家备战区的棋子集合
-vector<Chess*>* PlayerInfo::getPreAreaChesses()
+vector<shared_ptr<Chess>>* PlayerInfo::getPreAreaChesses()
 {
 	return &chessInPreArea;
 }
 
 // 从玩家A备战区移去棋子
-void PlayerInfo::removeChessFromPreArea(Chess* chess)
+void PlayerInfo::removeChessFromPreArea(shared_ptr<Chess> chess)
 {
 	// 移去第一个匹配的棋子即可
-	for (auto it = chessInPreArea.begin(); it != chessInPreArea.end(); ++it) 
+	for (auto it = chessInPreArea.begin(); it != chessInPreArea.end(); ++it)
 	{
 		if (*it == chess)
 		{
@@ -255,13 +254,13 @@ void PlayerInfo::raiseLevel()
 			heroTwoStarNumArr[i] -= 3;
 			deleteLowLevelChess(i, 2);
 			createHighLevelChess(i, 3);
-			
+
 		}
 	}
 }
 
 // 升星后低星英雄删除函数
-void PlayerInfo::deleteLowLevelChess(int heroFlag,int level)
+void PlayerInfo::deleteLowLevelChess(int heroFlag, int level)
 {
 	int count = 0;
 	// 优先从备战区删除
@@ -297,27 +296,26 @@ void PlayerInfo::deleteLowLevelChess(int heroFlag,int level)
 // 升星后高星英雄出现在战斗区函数
 void PlayerInfo::createHighLevelChess(int heroflag, int level)
 {
+	shared_ptr<Chess> chess;
 	switch (heroflag)
 	{
 		case 0:
 		case 1:
-			chessInBattleArea.push_back(new mage(heroflag));
+			chess = make_shared<mage>(heroflag);
 			break;
 		case 2:
 		case 3:
-			chessInBattleArea.push_back(new shooter(heroflag));
+			chess = make_shared<shooter>(heroflag);
 			break;
 		case 4:
 		case 5:
-			chessInBattleArea.push_back(new tank(heroflag));
+			chess = make_shared<tank>(heroflag);
 			break;
 		default:
-			break;
+			return;
 	}
-	for (int i = 1; i <= level; ++i)
-	{
-		//(chessInBattleArea.back())->promoteRank();
-	}
+	chessInBattleArea.push_back(chess);
+	chess->promoteRank(level);
 }
 
 //mlx
@@ -332,16 +330,3 @@ int PlayerInfo::GetMinIndex()
 	}
 	return -1;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

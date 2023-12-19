@@ -19,7 +19,8 @@ const int BATTLEINIT = 3;
 const int PLAYERLEVELMAX = 10;
 const int PLAYERLEVELINIT = 1;
 //mlx:此处为不报错，注意更改
-const int HERONUM = 9;
+//hjw:已修改
+const int HERONUM = 6;
 //
 
 class PlayerInfo :public Ref
@@ -53,14 +54,11 @@ private:
 	int heroOneStarNumArr[HERONUM];
 	int heroTwoStarNumArr[HERONUM];
 
-
 	// 存储当前我方战斗区棋子
-	vector<Chess*> chessInBattleArea;
-
-
+	vector<shared_ptr<Chess>> chessInBattleArea;
 
 	// 存储当前我方全部棋子
-	vector<Chess*> chessTotal;
+	vector<shared_ptr<Chess>> chessTotal;
 
 
 public:
@@ -71,7 +69,7 @@ public:
 	CREATE_FUNC(PlayerInfo);
 
 	// 存储当前我方备战区棋子
-	vector<Chess*> chessInPreArea = vector<Chess*>(9, nullptr);
+	vector<shared_ptr<Chess>> chessInPreArea = vector<shared_ptr<Chess>>(9, nullptr);
 
 	//mlx:得到下标最小的空位
 	int GetMinIndex();
@@ -90,12 +88,6 @@ public:
 
 	// 获取当前血量接口函数
 	int GetLifeValue() const;
-//<<<<<<< Updated upstream
-	
-	// 返回指针数组的指针
-	Chess** GetBattleChessNum()const;
-//=======
-//>>>>>>> Stashed changes
 
 	// 获取当前能上场英雄最大值
 	int getMaxBattleChessNum() const;
@@ -106,19 +98,19 @@ public:
 	// ------------------//
 
 	// 在玩家对战区放置棋子,输入坐标为棋盘坐标
-	void putChessInBattleArea(Chess* chess);
+	void putChessInBattleArea(shared_ptr<Chess> chess);
 
 	// 获取玩家对战区棋子集合
-	vector<Chess*>* getBattleAreaChesses();
+	vector<shared_ptr<Chess>>* getBattleAreaChesses();
 
 	// 在玩家备战区放置棋子
-	void putChessInPreArea(Chess* chess);
+	void putChessInPreArea(shared_ptr<Chess> chess);
 
 	// 获取玩家备战区棋子集合
-	vector<Chess*>* getPreAreaChesses();
+	vector<shared_ptr<Chess>>* getPreAreaChesses();
 
 	// 从玩家备战区移去棋子
-	void removeChessFromPreArea(Chess* chess);
+	void removeChessFromPreArea(shared_ptr<Chess> chess);
 
 	// 以下是有关羁绊判断和升级星级的判断
 	//-------------------//
