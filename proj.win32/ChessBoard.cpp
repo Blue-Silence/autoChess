@@ -67,11 +67,10 @@ void CoordinateConvert(CoordinateType targetType, Vec2 oldPos, ChessCoordinate* 
 	}
 }
 
-
 // 鼠标是否在棋盘区域,输入坐标为
 bool ChessBoard::isInBoard(Vec2 posi)
 {
-	if (posi.x > 500 && posi.y > 500)
+	if (posi.x >= 242 && posi.y > 260)
 	{
 		return true;
 	}
@@ -89,6 +88,12 @@ inline bool ChessBoard::isAvailable(int row, int col)
 	if (row < 0 || row >= BOARDMAXR || col < 0 || col >= BOARDMAXC)
 		return false;
 	return board[row][col] == 0;
+}
+
+//mlx:棋子上场
+void ChessBoard::OnBoard(int row, int col)
+{
+	board[row][col] = true;
 }
 
 //-------------------------------------------分界线-------------------------------------------//
