@@ -298,7 +298,7 @@ void PlayScene::BuyChess(Ref* sender, int index)
 		MenuItemImage* myButton = static_cast<MenuItemImage*>(sender);
 		myButton->removeFromParent();
 		//备战席加入新棋子
-		Chess* purchasedChess = shopModel->chessList[index];
+		shared_ptr<Chess> purchasedChess = shopModel->chessList[index];
 		playerA->chessInPreArea[location] = (purchasedChess);
 		preArea->CreatePreAreaButton(purchasedChess, location);
 	}

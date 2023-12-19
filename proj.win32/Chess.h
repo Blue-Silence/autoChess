@@ -79,6 +79,9 @@ enum class CoordinateType { screenCoordinates, chessBoardCoordinates};
 class ChessCoordinate 
 {
 public:
+
+	ChessCoordinate() :x(0), y(0) {}
+
 	// 获取棋子横坐标
 	int getX() const;
 
@@ -90,6 +93,7 @@ public:
 
 	// 设置棋子纵坐标
 	void setY(const int Y);
+
 
 private:
 	// 横坐标

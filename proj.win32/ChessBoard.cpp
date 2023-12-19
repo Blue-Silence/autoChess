@@ -83,10 +83,11 @@ bool ChessBoard::isInBoard(Vec2 posi)
 int turn = 1;//第几局
 
 // 判断该位置是否可以放置棋子,输入参数请先转化为棋盘坐标
-inline bool ChessBoard::isAvailable(int row, int col)
+bool ChessBoard::isAvailable(int row, int col)
 {
 	if (row < 0 || row >= BOARDMAXR || col < 0 || col >= BOARDMAXC)
 		return false;
+
 	return board[row][col] == 0;
 }
 
@@ -104,43 +105,43 @@ void ChessBoard::OnBoard(int row, int col)
 // ------------------//
 
 
-void ChessBoard::onMouseDown(Event* event)
-{
-	EventMouse* mouseEvent = dynamic_cast<EventMouse*>(event);
-	if (!mouseEvent)
-		return;
+//void ChessBoard::onMouseDown(Event* event)
+//{
+//	EventMouse* mouseEvent = dynamic_cast<EventMouse*>(event);
+//	if (!mouseEvent)
+//		return;
+//
+//	Vec2 clickedPosition = mouseEvent->getLocation();
+//
+//	// 检查点击位置是否在备战区内
+//	if (isInPreparationZone(clickedPosition)) 
+//	{
+//		// 选中备战区的棋子
+//		selectedChess = getChessAtPreparationZone(clickedPosition);
+//	}
+//	else if (selectedChess && isInBoard(clickedPosition)) 
+//	{
+//		// 此处正常应该有提示，到时候补充
+//		if ((*player.getBattleAreaChesses()).size() > player.getMaxBattleChessNum())
+//			return;
+//		// 将选中的棋子放置到战斗区
+//		ChessCoordinate boardPosition;
+//		CoordinateConvert(CoordinateType::chessBoardCoordinates, clickedPosition, &boardPosition);
+//		moveChessFromPreZoneToWarZone(selectedChess,boardPosition.getY(), boardPosition.getX());
+//		selectedChess = nullptr;  // 清除选中的棋子
+//	}
+//}
 
-	Vec2 clickedPosition = mouseEvent->getLocation();
-
-	// 检查点击位置是否在备战区内
-	if (isInPreparationZone(clickedPosition)) 
-	{
-		// 选中备战区的棋子
-		selectedChess = getChessAtPreparationZone(clickedPosition);
-	}
-	else if (selectedChess && isInBoard(clickedPosition)) 
-	{
-		// 此处正常应该有提示，到时候补充
-		if ((*player.getBattleAreaChesses()).size() > player.getMaxBattleChessNum())
-			return;
-		// 将选中的棋子放置到战斗区
-		ChessCoordinate boardPosition;
-		CoordinateConvert(CoordinateType::chessBoardCoordinates, clickedPosition, &boardPosition);
-		moveChessFromPreZoneToWarZone(selectedChess,boardPosition.getY(), boardPosition.getX());
-		selectedChess = nullptr;  // 清除选中的棋子
-	}
-}
-
-bool ChessBoard::createMouseListener(Node* targetNode)
-{
-	selectedChess = nullptr;  // 初始时没有选中的棋子
-
-	auto mouseListener = EventListenerMouse::create();
-	mouseListener->onMouseDown = CC_CALLBACK_1(ChessBoard::onMouseDown, this);
-	targetNode->getEventDispatcher()->addEventListenerWithSceneGraphPriority(mouseListener, targetNode);
-
-	return true;
-}
+//bool ChessBoard::createMouseListener(Node* targetNode)
+//{
+//	selectedChess = nullptr;  // 初始时没有选中的棋子
+//
+//	auto mouseListener = EventListenerMouse::create();
+//	mouseListener->onMouseDown = CC_CALLBACK_1(ChessBoard::onMouseDown, this);
+//	targetNode->getEventDispatcher()->addEventListenerWithSceneGraphPriority(mouseListener, targetNode);
+//
+//	return true;
+//}
 
 
 bool ChessBoard::isInPreparationZone(const Vec2& position) 
@@ -155,7 +156,7 @@ bool ChessBoard::isInPreparationZone(const Vec2& position)
 	return position.x >= X_min && position.x <= X_max && position.y >= Y_min && position.y <= Y_max;
 }
 
-Chess* ChessBoard::getChessAtPreparationZone(const Vec2& position)
+shared_ptr<Chess> ChessBoard::getChessAtPreparationZone(const Vec2& position)
 {
 	// 假设每个棋子在备战区都有一个固定的屏幕坐标范围
 	// 根据备战区的实际布局来调整这个逻辑
@@ -179,30 +180,30 @@ Chess* ChessBoard::getChessAtPreparationZone(const Vec2& position)
 	return nullptr; // 没有找到任何棋子
 }
 
-void ChessBoard::moveChessFromPreZoneToWarZone(Chess* selectedChess, int targetRow, int targetCol)
-{
-	// 首先检查是否选中了备战区中的棋子
-	auto it = find((*player.getPreAreaChesses()).begin(), (*player.getPreAreaChesses()).end(), selectedChess);
-	if (it == (*player.getPreAreaChesses()).end())
-	{
-		// 如果棋子不在备战区，则不进行任何操作
-		return;
-	}
-
-	// 检查目标位置是否可用
-	if (!isAvailable(targetRow, targetCol))
-	{
-		// 如果目标位置已经被占用，则不进行任何操作
-		return;
-	}
-
-	// 从备战区移除棋子
-	(*player.getPreAreaChesses()).erase(it);
-
-	// 将棋子放置到战斗区的指定位置
-	player.putChessInBattleArea(selectedChess);
-	selectedChess->setChessCoordinateByType(Vec2(targetCol, targetRow), CoordinateType::chessBoardCoordinates);
-
-	// 更新棋盘状态，标记该位置已被占用
-	//board[targetRow][targetCol] = true;
-}
+//void ChessBoard::moveChessFromPreZoneToWarZone(Chess* selectedChess, int targetRow, int targetCol)
+//{
+//	// 首先检查是否选中了备战区中的棋子
+//	auto it = find((*player.getPreAreaChesses()).begin(), (*player.getPreAreaChesses()).end(), selectedChess);
+//	if (it == (*player.getPreAreaChesses()).end())
+//	{
+//		// 如果棋子不在备战区，则不进行任何操作
+//		return;
+//	}
+//
+//	// 检查目标位置是否可用
+//	if (!isAvailable(targetRow, targetCol))
+//	{
+//		// 如果目标位置已经被占用，则不进行任何操作
+//		return;
+//	}
+//
+//	// 从备战区移除棋子
+//	(*player.getPreAreaChesses()).erase(it);
+//
+//	// 将棋子放置到战斗区的指定位置
+//	player.putChessInBattleArea(selectedChess);
+//	selectedChess->setChessCoordinateByType(Vec2(targetCol, targetRow), CoordinateType::chessBoardCoordinates);
+//
+//	// 更新棋盘状态，标记该位置已被占用
+//	//board[targetRow][targetCol] = true;
+//}

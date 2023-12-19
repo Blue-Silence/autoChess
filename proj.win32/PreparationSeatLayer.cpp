@@ -65,7 +65,7 @@ void  PreparationSeat::CallBack(Ref* sender, int index)
 						myButton->setVisible(false);
 						//上场
 						this->cBoard->OnBoard(onBoardCoord.x, onBoardCoord.y);
-						Chess* curHero = player->chessInPreArea[index];
+						shared_ptr<Chess> curHero = player->chessInPreArea[index];
 						player->chessInPreArea[index] = nullptr;
 						CoordinateConvert(CoordinateType::screenCoordinates, onBoardCoord, sceenCoord);
 						Vec2 onScreenCoord;
@@ -82,7 +82,7 @@ void  PreparationSeat::CallBack(Ref* sender, int index)
 		};
 }
 
-void  PreparationSeat::CreatePreAreaButton(Chess* curHero, int index)
+void  PreparationSeat::CreatePreAreaButton(shared_ptr<Chess> curHero, int index)
 {
 	CC_SAFE_RETAIN(PreAreaLayer);
 	//得到图片

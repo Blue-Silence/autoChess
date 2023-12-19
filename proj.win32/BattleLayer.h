@@ -10,35 +10,41 @@
 class BattleLayer :public Layer
 {
 public:
+
 	bool init();
 
 	void update(float delta);
 
 	CREATE_FUNC(BattleLayer);
 
-	void chessInitBeforeBattle(Chess* chess);
+	void chessInitBeforeBattle(shared_ptr<Chess> chess);
 
 	//计算两个棋子之间的曼哈顿距离，输入参数为两个棋子的棋格坐标
 	double getDistance(ChessCoordinate* start, ChessCoordinate* end);
 
 	//void pieceBattle(Chess &damageMaker, Chess &victim);
 
-	Chess* findEnemy(Chess* damageMaker, PlayerInfo* enemy);
+	shared_ptr<Chess> findEnemy(shared_ptr<Chess> damageMaker, PlayerInfo* enemy);
 
 	//这是一个普通的寻路函数,每次只走一步
-	void findPathToEnemy(Chess* damageMaker, Chess* targetEnemy,ChessBoard* chessboard);
+	void findPathToEnemy(shared_ptr<Chess> damageMaker, shared_ptr<Chess> targetEnemy);
 
 	// 移动棋子
-	void moveChess(Chess* movingChess, Vec2 targetPoistion);
+	void moveChess(shared_ptr<Chess> movingChess, Vec2 targetPoistion);
 
 	// 攻击——动画+数据
-	void doAttack(Chess* damageMaker, Chess* targetEnemy);
+	void doAttack(shared_ptr<Chess> damageMaker, shared_ptr<Chess> targetEnemy);
+
+	inline bool isAvailable(int row, int col);
 
 	// 战斗测试
 	void AItest();
 
 private:
 	bool gameOver = false;
+
+	int boardInGame[BOARDMAXR][BOARDMAXC] = { 0 };
+
 	ChessBoard* chessBoard;
 	PlayerInfo* playerME;
 	PlayerInfo* playerOPP;

@@ -44,7 +44,7 @@ public:
 	Layer* PreAreaLayer;
 
 	//生成备战席精灵
-	void CreatePreAreaButton(Chess* curHero, int index);
+	void CreatePreAreaButton(shared_ptr<Chess> curHero, int index);
 
 	//上场回调函数
 	void menuToBattleCallBackCallBack(Ref* sender, Chess* curHero);

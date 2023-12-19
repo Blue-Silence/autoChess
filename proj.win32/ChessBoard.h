@@ -56,7 +56,7 @@ public:
 	static bool isInBoard(Vec2 posi);
 
 	// 判断该位置是否可以放置棋子,输入参数请先转化为棋盘坐标
-	inline bool isAvailable(int row, int col);
+	bool isAvailable(int row, int col);
 
 	//mlx:放置棋子，更改棋盘
 	void OnBoard(int row, int col);
@@ -72,20 +72,20 @@ public:
 	// 当前选中的棋子
 	Chess* selectedChess;
 
-	// 处理鼠标点击事件
-	void onMouseDown(Event* event);
+	//// 处理鼠标点击事件
+	//void onMouseDown(Event* event);
 
-	// 创建并设置鼠标事件监听器
-	bool createMouseListener(Node* targetNode);
+	//// 创建并设置鼠标事件监听器
+	//bool createMouseListener(Node* targetNode);
 
 	// 判断鼠标点击位置是否在备战区
 	bool isInPreparationZone(const Vec2& position);
 
 	// 获取备战区棋子的信息
-	Chess* getChessAtPreparationZone(const Vec2& position);
+	shared_ptr<Chess> getChessAtPreparationZone(const Vec2& position);
 
-	// 将备战区的棋子移动至战斗区
-	void moveChessFromPreZoneToWarZone(Chess* selectedChess, int targetRow, int targetCol);
+	//// 将备战区的棋子移动至战斗区
+	//void moveChessFromPreZoneToWarZone(Chess* selectedChess, int targetRow, int targetCol);
 
 
 	// TODO

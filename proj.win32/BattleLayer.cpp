@@ -8,7 +8,7 @@ void BattleLayer::AItest()
 }
 
 // 战斗前初始化棋子的战斗数据
-void BattleLayer::chessInitBeforeBattle(Chess* chess)
+void BattleLayer::chessInitBeforeBattle(shared_ptr<Chess> chess)
 {
 	chess->state = Chess::State::Idle;
 	chess->isAttacking = false;
@@ -19,16 +19,28 @@ void BattleLayer::chessInitBeforeBattle(Chess* chess)
 	chess->inGameChessBoardCoordinate.setY(chess->getChessCoordinateByType(CoordinateType::chessBoardCoordinates)->getY());
 	chess->inGameScreenCoordinate.setX(chess->getChessCoordinateByType(CoordinateType::screenCoordinates)->getX());
 	chess->inGameScreenCoordinate.setY(chess->getChessCoordinateByType(CoordinateType::screenCoordinates)->getY());
+	boardInGame[chess->inGameChessBoardCoordinate.getY()][chess->inGameChessBoardCoordinate.getX()] = 1;
+}
+
+inline bool BattleLayer::isAvailable(int row, int col)
+{
+	if (row < 0 || row >= BOARDMAXR || col < 0 || col >= BOARDMAXC)
+		return false;
+
+	return boardInGame[row][col] == 0;
 }
 
 bool BattleLayer::init()
 {
 	gameOver = false;
-	for (Chess* chess : *playerME->getBattleAreaChesses())
+	memset(boardInGame, 0, sizeof boardInGame);
+
+	for (shared_ptr<Chess> chess : *playerME->getBattleAreaChesses())
 	{
 		chessInitBeforeBattle(chess);
 	}
-	for (Chess* chess : *playerOPP->getBattleAreaChesses())
+
+	for (shared_ptr<Chess> chess : *playerOPP->getBattleAreaChesses())
 	{
 		chessInitBeforeBattle(chess);
 	}
@@ -42,11 +54,11 @@ bool BattleLayer::init()
 void BattleLayer::update(float delta) 
 {
 	// 我方
-	for (auto chess : *playerME->getBattleAreaChesses())
+	for (shared_ptr<Chess> chess : *playerME->getBattleAreaChesses())
 	{
 		if (chess->isDead())
 			continue;
-		Chess* targetChess;
+		shared_ptr<Chess> targetChess;
 		// 先确定攻击目标，确定目标一帧的时间应该是够的，findEnemy()函数执行后，将棋子的状态设为Moving
 		if(chess->state == Chess::State::Idle)
 		{
@@ -62,8 +74,8 @@ void BattleLayer::update(float delta)
 		else if (chess->state == Chess::State::Moving && !chess->isMoving)
 		{
 			// 进入攻击范围了，不需要再移动了，设置棋子状态为攻击
-			if (getDistance(chess->getChessCoordinateByType(CoordinateType::chessBoardCoordinates),
-				targetChess->getChessCoordinateByType(CoordinateType::chessBoardCoordinates)) 
+			if (getDistance(&chess->inGameChessBoardCoordinate,
+				&targetChess->inGameChessBoardCoordinate)
 				< (chess->getChessCondition()->improvedAttackDistance + 1))
 			{
 				chess->state = Chess::State::Attacking;
@@ -74,7 +86,7 @@ void BattleLayer::update(float delta)
 			}
 			// 设置为开始移动，必须等findPathToEnemy()执行完毕后在函数结尾将isMoving重新置为false才能进入本分支再次调用
 			chess->isMoving = true;
-			findPathToEnemy(chess, targetChess, chessBoard);
+			findPathToEnemy(chess, targetChess);
 		}
 		// 棋子处于攻击状态时但没有在攻击时需要调用
 		else if (chess->state == Chess::State::Attacking && !chess->isAttacking)
@@ -90,7 +102,7 @@ void BattleLayer::update(float delta)
 	{
 		if (chess->isDead())
 			continue;
-		Chess* targetChess;
+		shared_ptr<Chess> targetChess;
 		// 先确定攻击目标，确定目标一帧的时间应该是够的，findEnemy()函数执行后，将棋子的状态设为Moving
 		if (chess->state == Chess::State::Idle)
 		{
@@ -118,7 +130,7 @@ void BattleLayer::update(float delta)
 			}
 			// 设置为开始移动，必须等findPathToEnemy()执行完毕后在函数结尾将isMoving重新置为false才能进入本分支再次调用
 			chess->isMoving = true;
-			findPathToEnemy(chess, targetChess, chessBoard);
+			findPathToEnemy(chess, targetChess);
 		}
 		// 棋子处于攻击状态时但没有在攻击时需要调用
 		else if (chess->state == Chess::State::Attacking && !chess->isAttacking)
@@ -161,17 +173,19 @@ double BattleLayer::getDistance(ChessCoordinate* start,ChessCoordinate* end)
 //}
 
 // 寻找攻击目标，选择距离最近的敌方英雄
-Chess* BattleLayer::findEnemy(Chess* damageMaker, PlayerInfo* enemy)
+shared_ptr<Chess> BattleLayer::findEnemy(shared_ptr<Chess> damageMaker, PlayerInfo* enemy)
 {
 	double distance = 999;
-	Chess* targetChess = nullptr;
+
+	shared_ptr<Chess> targetChess = nullptr;
 
 	for (auto chess : *enemy->getBattleAreaChesses())
 	{
 		if (chess->isDead())
 			continue;
-		int tmp = getDistance(damageMaker->getChessCoordinateByType(CoordinateType::chessBoardCoordinates),
-			(chess->getChessCoordinateByType(CoordinateType::chessBoardCoordinates)));
+		int tmp = getDistance(&damageMaker->inGameChessBoardCoordinate,
+			(&chess->inGameChessBoardCoordinate));
+
 		if (tmp < distance)
 		{
 			targetChess = chess;
@@ -194,7 +208,7 @@ Chess* BattleLayer::findEnemy(Chess* damageMaker, PlayerInfo* enemy)
 }
 
 // 将精灵移动到指定位置，坐标需为屏幕坐标
-void BattleLayer::moveChess(Chess* movingChess,Vec2 targetPosition)
+void BattleLayer::moveChess(shared_ptr<Chess> movingChess,Vec2 targetPosition)
 {
 	Sprite* movingChessImage = movingChess->getChessSprite();
 	float duration = 0.2f; // 移动所需时间，以秒为单位
@@ -203,11 +217,22 @@ void BattleLayer::moveChess(Chess* movingChess,Vec2 targetPosition)
 		{
 			
 		// 移动完成后的处理
-		// 例如：更新棋子状态和位置
-			movingChess->setChessCoordinateByType(targetPosition, CoordinateType::screenCoordinates);
-			ChessCoordinate* newPos;
+
+			// 更新棋子在游戏中的屏幕坐标
+			movingChess->inGameScreenCoordinate.setX(int(targetPosition.x));
+			movingChess->inGameScreenCoordinate.setY(int(targetPosition.y));
+			
+			ChessCoordinate* newPos = new ChessCoordinate;
 			CoordinateConvert(CoordinateType::chessBoardCoordinates, targetPosition, newPos);
-			movingChess->setChessCoordinateByType(Vec2(newPos->getY(), newPos->getX()), CoordinateType::chessBoardCoordinates);
+
+			// 更新棋子在游戏中的棋盘坐标
+			int oldRow = movingChess->inGameChessBoardCoordinate.getY();
+			int oldCol = movingChess->inGameChessBoardCoordinate.getX();
+			boardInGame[oldRow][oldCol] = 0;
+			movingChess->inGameChessBoardCoordinate.setX(newPos->getX()); 
+			movingChess->inGameChessBoardCoordinate.setY(newPos->getY());
+			boardInGame[newPos->getY()][newPos->getX()] = 1;
+			delete newPos;
 			// 移动一步完毕后，设置isMoving为false
 			movingChess->isMoving = false;
 		});
@@ -217,7 +242,7 @@ void BattleLayer::moveChess(Chess* movingChess,Vec2 targetPosition)
 }
 
 // 寻路函数 每次只走一步
-void BattleLayer::findPathToEnemy(Chess* damageMaker, Chess* targetChess,ChessBoard* chessboard)
+void BattleLayer::findPathToEnemy(shared_ptr<Chess> damageMaker, shared_ptr<Chess> targetChess)
 {
 	ChessCoordinate src, dst;
 
@@ -232,39 +257,42 @@ void BattleLayer::findPathToEnemy(Chess* damageMaker, Chess* targetChess,ChessBo
 	Sprite* damageMakerImage = damageMaker->getChessSprite();
 	Sprite* targetChessImage = targetChess->getChessSprite();
 
-	ChessCoordinate* newPos;
+	
+	ChessCoordinate* newPos = new ChessCoordinate;
+	
 	int dx = 0;
 	int dy = 0;
 	
 	
 	// 先走y方向
-	if (yOfdamageMaker < yOftargetChess && chessboard->isAvailable(yOfdamageMaker + 1, xOfdamageMaker))
+	if (yOfdamageMaker < yOftargetChess && isAvailable(yOfdamageMaker + 1, xOfdamageMaker))
 	{
 		dy = 1;
 	}
-	else if (yOfdamageMaker > yOftargetChess && chessboard->isAvailable(yOfdamageMaker - 1, xOfdamageMaker))
+	else if (yOfdamageMaker > yOftargetChess && isAvailable(yOfdamageMaker - 1, xOfdamageMaker))
 	{
 		dy = -1;
 	}
 	// 再走x方向
-	else if (xOfdamageMaker < xOftargetChess && chessboard->isAvailable(yOfdamageMaker, xOfdamageMaker + 1))
+	else if (xOfdamageMaker < xOftargetChess && isAvailable(yOfdamageMaker, xOfdamageMaker + 1))
 	{
 		dx = 1;
 	}
-	else if (xOfdamageMaker > xOftargetChess && chessboard->isAvailable(yOfdamageMaker, xOfdamageMaker - 1))
+	else if (xOfdamageMaker > xOftargetChess && isAvailable(yOfdamageMaker, xOfdamageMaker - 1))
 	{
 		dx = -1;
 	}
 
-	CoordinateConvert(CoordinateType::screenCoordinates, { xOfdamageMaker+dx,yOfdamageMaker+dy }, newPos);
+	CoordinateConvert(CoordinateType::screenCoordinates, Vec2(int(xOfdamageMaker + dx),int(yOfdamageMaker + dy)), newPos);
 	damageMaker->targetPos = Vec2(newPos->getX(),newPos->getY());
+	delete newPos;
 	moveChess(damageMaker, damageMaker->targetPos);
 	
 }
 
 
 // 待添加音效
-void BattleLayer::doAttack(Chess* damageMaker, Chess* targetEnemy)
+void BattleLayer::doAttack(shared_ptr<Chess> damageMaker, shared_ptr<Chess> targetEnemy)
 {
 	Sprite* damageMakerImage = damageMaker->getChessSprite();
 	string damageMakerCareer = damageMaker->GetCareer();
