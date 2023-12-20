@@ -126,13 +126,13 @@ public:
 	void arrZero(int arrName[]);
 
 	// 升星判断函数
-	void raiseLevel();
+	void starRaiseLevel(int location, int &delLoc_1, int &delLoc_2);
 
 	// 升星后低星英雄删除函数
-	void deleteLowLevelChess(int heroFlag, int level);
+	void deleteLowLevelChess(int heroFlag, int level, int location, int& delLoc_1, int& delLoc_2);
 
 	// 升星后高星英雄出现在战斗区函数
-	void createHighLevelChess(int heroflag, int level);
+	void createHighLevelChess(int heroflag, int level, int location);
 
 	//友元声明
 	friend class PreparationSeat;

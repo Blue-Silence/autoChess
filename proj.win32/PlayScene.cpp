@@ -294,13 +294,20 @@ void PlayScene::menuFreshShopCallBack(Ref* sender)
 void PlayScene::BuyChess(Ref* sender, int index)
 {
 	int location = playerA->GetMinIndex();
+	int delLoc_1 = -1;
+	int delLoc_2 = -1;
+	int& ref_delLoc_1 = delLoc_1;
+	int& ref_delLoc_2 = delLoc_2;
 	if (sender && location != -1) {
 		MenuItemImage* myButton = static_cast<MenuItemImage*>(sender);
 		myButton->removeFromParent();
 		//备战席加入新棋子
 		shared_ptr<Chess> purchasedChess = shopModel->chessList[index];
 		playerA->chessInPreArea[location] = (purchasedChess);
+		playerA->starRaiseLevel(location, ref_delLoc_1, ref_delLoc_2);
+		purchasedChess = playerA->chessInPreArea[location];
 		preArea->CreatePreAreaButton(purchasedChess, location);
+
 	}
 }
 void PlayScene::menuBuyExpCallBack(Ref* sender)
