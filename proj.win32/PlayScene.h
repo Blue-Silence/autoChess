@@ -77,6 +77,8 @@ private:
 	// 玩家
 	PlayerInfo* playerA;
 
+
+
 	//备战席层
 	PreparationSeat* preArea;
 

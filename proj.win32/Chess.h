@@ -119,7 +119,7 @@ protected:
 	string chessImagePath; 
 
 	// 星级，最高为三
-	int chessLevel; 
+	int chessLevel=1; 
 
 	// 棋子的花费
 	int chessPrice; 
@@ -137,7 +137,7 @@ protected:
 	ChessCoordinate screenCoordinate; 
 
 	//棋子可视化指针
-	Sprite* chessImage;
+	
 
 	//普通攻击可视化
 	Sprite* attackImage;
@@ -153,6 +153,7 @@ protected:
 
 
 public:
+	Sprite* chessImage;
 
 	// 游戏中棋子的棋盘位置，会变化
 	ChessCoordinate inGameChessBoardCoordinate;

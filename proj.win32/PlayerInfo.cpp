@@ -208,7 +208,7 @@ void PlayerInfo::arrZero(int arrName[])
 
 // 注意：每次购买完一个英雄后都要调用下面的遍历升星函数(把这个函数放到购买函数里)
 // 遍历升星判断函数
-void PlayerInfo::raiseLevel()
+void PlayerInfo::starRaiseLevel(int location,  int &delLoc_1, int &delLoc_2)
 {
 	arrZero(heroOneStarNumArr);
 	arrZero(heroTwoStarNumArr);
@@ -246,21 +246,21 @@ void PlayerInfo::raiseLevel()
 		{
 			heroOneStarNumArr[i] -= 3;
 			heroTwoStarNumArr[i]++;
-			deleteLowLevelChess(i, 1);
-			createHighLevelChess(i, 2);
+			deleteLowLevelChess(i, 1, location, delLoc_1, delLoc_2);
+			createHighLevelChess(i, 2, location);
 		}
 		if (heroTwoStarNumArr[i] >= 3)
 		{
 			heroTwoStarNumArr[i] -= 3;
-			deleteLowLevelChess(i, 2);
-			createHighLevelChess(i, 3);
+			deleteLowLevelChess(i, 2, location, delLoc_1, delLoc_2);
+			createHighLevelChess(i, 3, location);
 
 		}
 	}
 }
 
 // 升星后低星英雄删除函数
-void PlayerInfo::deleteLowLevelChess(int heroFlag, int level)
+void PlayerInfo::deleteLowLevelChess(int heroFlag, int level, int location, int& delLoc_1, int& delLoc_2)
 {
 	int count = 0;
 	// 优先从备战区删除
@@ -268,6 +268,15 @@ void PlayerInfo::deleteLowLevelChess(int heroFlag, int level)
 	{
 		if (chessInPreArea[i] != nullptr && chessInPreArea[i]->getChessName() == heroFlag && chessInPreArea[i]->getChessLevel() == level)
 		{
+			if (delLoc_1 == -1)
+			{
+				delLoc_1 = i;
+			}
+			if (delLoc_1 != -1 && delLoc_2 == -1)
+			{
+				delLoc_2 = i;
+			}
+			
 			chessInPreArea[i] = nullptr;
 			count++;
 			if (count == 3)
@@ -282,6 +291,14 @@ void PlayerInfo::deleteLowLevelChess(int heroFlag, int level)
 	{
 		if (chessInBattleArea[i]->getChessName() == heroFlag && chessInBattleArea[i]->getChessLevel() == level)
 		{
+			if (delLoc_1 == -1)
+			{
+				delLoc_1 = i;
+			}
+			if (delLoc_1 != -1 && delLoc_2 == -1)
+			{
+				delLoc_2 = i;
+			}
 			chessInBattleArea[i] = nullptr;
 			count++;
 			if (count == 3)
@@ -294,7 +311,7 @@ void PlayerInfo::deleteLowLevelChess(int heroFlag, int level)
 
 // 此处new的对象在最后整个战斗结束后要进行释放
 // 升星后高星英雄出现在战斗区函数
-void PlayerInfo::createHighLevelChess(int heroflag, int level)
+void PlayerInfo::createHighLevelChess(int heroflag, int level, int location)
 {
 	shared_ptr<Chess> chess;
 	switch (heroflag)
@@ -314,7 +331,7 @@ void PlayerInfo::createHighLevelChess(int heroflag, int level)
 		default:
 			return;
 	}
-	chessInBattleArea.push_back(chess);
+	chessInPreArea[location] = chess;
 	chess->promoteRank(level);
 }
 
