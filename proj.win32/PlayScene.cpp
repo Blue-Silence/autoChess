@@ -5,6 +5,7 @@ Scene* PlayScene::createScene()
 	return PlayScene::create();
 }
 
+
 bool PlayScene::init()
 {
 	if (!Scene::init()) // 对父类init方法的判断
@@ -52,8 +53,13 @@ bool PlayScene::init()
 	
 	createShop(Vec2(-45 * config->getPx()->x, -45 * config->getPx()->y));	
 
+
+	
+
+
+
 	// 添加退出按钮
-	auto exitButton = StartAndLoginScene::createGameButton("/res/UI/ExitNormal.png", "/res/UI/ExitSelected.png", CC_CALLBACK_1(PlayScene::menuExitCallBack, this));
+	auto exitButton = StartAndLoginScene::createGameButton("/res/UI/ExitNormal.png", "/res/UI/ExitSelected.png", CC_CALLBACK_1(PlayScene::onBattleButtonClicked, this));
 
 	exitButton->setAnchorPoint(Vec2::ANCHOR_MIDDLE);
 	originSize = exitButton->getContentSize();
@@ -66,6 +72,12 @@ bool PlayScene::init()
 
 	
 	return true;
+}
+
+void PlayScene::onBattleButtonClicked(Ref* sender) 
+{
+	auto battleLayer = BattleLayer::create(); // 创建 BattleLayer
+	this->addChild(battleLayer, 6); // 将 BattleLayer 添加到当前场景
 }
 
 void PlayScene::createBoard(Vec2 position)

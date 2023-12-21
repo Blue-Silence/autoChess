@@ -27,19 +27,18 @@
 #define ZHANGFEI 5
 
 // 生命值
-int const hpData[6] = { 3229,3019,3182,3242,3500,3450 };
+double const hpData[6] = { 3229,3019,3182,3242,3500,3450 };
 // 攻击值
-int const attackData[6] = { 170,168,180,169,157,153 };
+double const attackData[6] = { 170,168,180,169,157,153 };
 // 防御值
-int const defenceData[6] = { 86,89,86,95,103,125 };
+double const defenceData[6] = { 86,89,86,95,103,125 };
 // 攻击距离，指与对手在棋盘上的曼哈顿距离
-int const attackDistanceData[6] = { 3,3,2,2,1,1 };
+double const attackDistanceData[6] = { 3,3,2,2,1,1 };
 // 触发技能的攻击次数
-int const skillCooldowns[6] = { 3 ,3,3,3,4,4 };
+const int skillCooldowns[6] = {3,3,3,3,4,4 };
 // 英雄贴图地址  待添加
 string const chessImagePaths[6] = { "/res/DaJi.png","/res/DiaoChan.png","/res/HouYi.png","/res/DiRenJie.png","/res/XiangYu.png","/res/ZhangFei.png" };
-// 英雄技能贴图地址
-//.....
+
 
 using std::string;
 using std::vector;
@@ -83,7 +82,7 @@ public:
 	ChessCoordinate() :x(0), y(0) {}
 
 	// 获取棋子横坐标
-	int getX() const;
+	int getX() const ;
 
 	// 获取棋子纵坐标
 	int getY() const;
@@ -114,7 +113,7 @@ protected:
 	int chessName; // 名称
 
 	// 英雄职业
-	string career; 
+	string career;
 
 	// 模型图片相对路径
 	string chessImagePath; 
@@ -172,6 +171,8 @@ public:
 	};
 	State state = State::Idle;
 
+	shared_ptr<Chess> targetChess;
+
 	// 攻击目标的像素位置
 	Vec2 targetPos;
 
@@ -179,10 +180,10 @@ public:
 	// 比如在Moving状态中也分 正在走这一步（isMoving）和走完这一步该走下一步(!isMoving)的区别
 	bool isMoving=false;
 
-	bool isAttacking=false;
+	bool isAttacking=true;
 
 	// 普攻计数器
-	int attackNum = 0;
+	double attackNum = 0;
 
 	// 初始化棋子状态
 	void initCondition();
@@ -265,7 +266,7 @@ public:
 	void updateHpBar();
 
 	// 更新技能值
-	void updateMpBar(int attackNum);
+	void updateMpBar();
 
 	Chess& operator=(const Chess& other);
 
@@ -280,7 +281,7 @@ public:
 class mage : public Chess
 {
 private:
-	string career = "mage";
+	
 
 public:
 
@@ -308,7 +309,7 @@ public:
 class shooter : public Chess
 {
 private:
-	string career = "shooter";
+	
 
 public:
 
@@ -338,8 +339,7 @@ public:
 class tank : public Chess
 {
 private:
-	string career = "tank";
-
+	
 public:
 	// 初始化棋子属性
 	tank(int name);

@@ -151,7 +151,7 @@ Sprite* Chess::createChess(Vec2 chessPosition)
 	// 设置棋子的位置
 	setChessCoordinateByType(chessPosition, CoordinateType::screenCoordinates);
 
-	auto texture = Director::getInstance()->getTextureCache();
+	
 	auto config = ConfigController::getInstance();
 
 	//CsvParser csv;
@@ -162,6 +162,7 @@ Sprite* Chess::createChess(Vec2 chessPosition)
 	int pos = imageHeroPath.find(".png");
 	imageHeroPath.replace(pos, 11, "Hero.png");
 	chessImage = Sprite::create(imageHeroPath);
+
 	// 创建生命条
 	auto hpBar = Sprite::create("/res/UI/HpBar.png");
 	hpBarProgress = ProgressTimer::create(hpBar);
@@ -181,6 +182,7 @@ Sprite* Chess::createChess(Vec2 chessPosition)
 	// 设置进度条的方向，从左到右
 	mpBarProgress->setMidpoint(Vec2(0.0f, 0.5f));
 	mpBarProgress->setBarChangeRate(Vec2(1.0f, 0.0f));
+
 	// 设置进度条的初始百分比
 	mpBarProgress->setPercentage(0); // 初始技能条进度为0
 
@@ -191,26 +193,35 @@ Sprite* Chess::createChess(Vec2 chessPosition)
 	Vec2 mpBarOriginSize = mpBarProgress->getContentSize();
 
 
-	// 怎么缩放后面在调整
+	
 	// 缩放大小由config一起控制
-	float chessScale = 4 * config->getPx()->x / chessOriginSize.x;
-	//float chessScale = 4;
-	float hpBarScale = 2;
-	float mpBarScale = 2;
+	float chessScaleX = 6 * config->getPx()->x / chessOriginSize.x;
+	float chessScaleY = 7.5 * config->getPx()->y / chessOriginSize.y;
+
+	
+	
+	float hpBarScaleX = 10 * config->getPx()->x / hpBarOriginSize.x;
+	float hpBarScaleY = 1 * config->getPx()->y / hpBarOriginSize.y;
+	float mpBarScaleX = 10 * config->getPx()->x / mpBarOriginSize.x;
+	float mpBarScaleY = 1 * config->getPx()->y / mpBarOriginSize.y;
 	
 	// 设置三个精灵大小
-	chessImage->setScale(chessScale);
+	chessImage->setScale(chessScaleX,chessScaleY);
+
 	// 设置缩放，旋转的锚点
-	hpBarProgress->setAnchorPoint(Vec2::ANCHOR_MIDDLE_BOTTOM);
-	mpBarProgress->setAnchorPoint(Vec2::ANCHOR_MIDDLE_BOTTOM);
+	chessImage->setAnchorPoint(Vec2::ANCHOR_MIDDLE);
+	hpBarProgress->setAnchorPoint(Vec2::ANCHOR_MIDDLE);
+	mpBarProgress->setAnchorPoint(Vec2::ANCHOR_MIDDLE);
+	hpBarProgress->setScale(hpBarScaleX /chessScaleX , hpBarScaleY /chessScaleX);
+	mpBarProgress->setScale(mpBarScaleX / chessScaleX, mpBarScaleY / chessScaleX);
 
-	hpBarProgress->setScale(0.7, 2);
-	mpBarProgress->setScale(0.7, 3);
-
+	double nowWidth = chessImage->getContentSize().width;
+	double nowHeight = chessImage->getContentSize().height;
+	
 
 	chessImage->setPosition(chessPosition);
-	hpBarProgress->setPosition(chessPosition.x + 300, chessPosition.y + 1700);
-	mpBarProgress->setPosition(chessPosition.x + 300, chessPosition.y + 2000);
+	hpBarProgress->setPosition(chessPosition.x - 0.5 * nowWidth, chessPosition.y + 0.60 * nowHeight);
+	mpBarProgress->setPosition(chessPosition.x - 0.5 * nowWidth, chessPosition.y + 0.70 * nowHeight);
 
 	chessImage->addChild(hpBarProgress);
 	chessImage->addChild(mpBarProgress);
@@ -259,9 +270,9 @@ void Chess::updateHpBar()
 }
 
 // 更新技能条进度
-void Chess::updateMpBar(int attackNum)
+void Chess::updateMpBar()
 {
-	mpBarProgress->setPercentage(attackNum / getChessCondition()->skillCooldown * 100);
+	mpBarProgress->setPercentage(attackNum / chessCondition.skillCooldown * 100);
 }
 
 
@@ -318,7 +329,10 @@ Chess& Chess::operator=(const Chess& other)
 mage::mage(int name)
 {
 	chessName = name;
+	career = "mage";
 	chessImagePath = chessImagePaths[name];
+
+
 	initCondition();
 }
 
@@ -350,18 +364,18 @@ Sprite* mage::createAttack()
 
 	// 取路径中的图片代表普通攻击，这里也写死了
 	if(chessName==DAJI)
-		attackImage = Sprite::createWithTexture(texture->getTextureForKey("/res/Attack/mage/normal/DAJI"));
+		attackImage = Sprite::create("/res/Effect/DAJI1.png");
 	else
-		attackImage = Sprite::createWithTexture(texture->getTextureForKey("/res/Attack/mage/normal/DIAOCHAN"));
+		attackImage = Sprite::create("/res/Effect/DIAOCHAN1.png");
 
 	// 后续再调整
 	// 可以根据需要设置攻击精灵的位置和缩放
 	// 这里假设我们将攻击放置在棋子的旁边
-	Vec2 attackPosition = chessImage->getPosition() + Vec2(100, 0); // 举例，右侧100像素
+	Vec2 attackPosition = chessImage->getPosition() ; // 举例，右侧100像素
 	attackImage->setPosition(attackPosition);
 
 	// 可以设置其他属性，比如缩放、旋转等
-	attackImage->setScale(1.0); // 示例缩放
+	attackImage->setScale(0.1); // 示例缩放
 	return attackImage;
 }
 
@@ -371,18 +385,19 @@ Sprite* mage::createSkill()
 
 	// 取路径中的图片代表普通攻击，这里也写死了
 	if (chessName == DAJI)
-		skillImage = Sprite::createWithTexture(texture->getTextureForKey("/res/Attack/mage/skill/DAJI"));
+		skillImage = Sprite::create("/res/Effect/DAJI.png");
 	else
-		skillImage = Sprite::createWithTexture(texture->getTextureForKey("/res/Attack/mage/skill/DIAOCHAN"));
+		skillImage = Sprite::create("/res/Effect/DIAOCHAN.png");
 
 	// 后续再调整
 	// 可以根据需要设置攻击精灵的位置和缩放
 	// 这里假设我们将攻击放置在棋子的旁边
-	Vec2 attackPosition = chessImage->getPosition() + Vec2(100, 0); // 举例，右侧100像素
+	Vec2 attackPosition = chessImage->getPosition(); // 举例，右侧100像素
+
 	skillImage->setPosition(attackPosition);
 
 	// 可以设置其他属性，比如缩放、旋转等
-	skillImage->setScale(1.0); // 示例缩放
+	skillImage->setScale(0.1); // 示例缩放
 	return skillImage;
 }
 
@@ -395,6 +410,7 @@ Sprite* mage::createSkill()
 shooter::shooter(int name)
 {
 	chessName = name;
+	career = "shooter";
 	chessImagePath = chessImagePaths[name];
 	initCondition();
 }
@@ -426,18 +442,18 @@ Sprite* shooter::createAttack()
 
 	// 取路径中的图片代表普通攻击，这里也写死了
 	if (chessName == HOUYI)
-		attackImage = Sprite::createWithTexture(texture->getTextureForKey("/res/Attack/shooter/normal/HOUYI"));
+		attackImage = Sprite::create("/res/Effect/HOUYI1.png");
 	else
-		attackImage = Sprite::createWithTexture(texture->getTextureForKey("/res/Attack/shooter/normal/DIRENJIE"));
+		attackImage = Sprite::create("/res/Effect/DIRENJIE1.png");
 
 	// 后续再调整
 	// 可以根据需要设置攻击精灵的位置和缩放
 	// 这里假设我们将攻击放置在棋子的旁边
-	Vec2 attackPosition = chessImage->getPosition() + Vec2(100, 0); // 举例，右侧100像素
+	Vec2 attackPosition = chessImage->getPosition(); // 举例，右侧100像素
 	attackImage->setPosition(attackPosition);
 
 	// 可以设置其他属性，比如缩放、旋转等
-	attackImage->setScale(1.0); // 示例缩放
+	attackImage->setScale(0.05); // 示例缩放
 	return attackImage;
 }
 
@@ -447,18 +463,18 @@ Sprite* shooter::createSkill()
 
 	// 取路径中的图片代表普通攻击，这里也写死了
 	if (chessName == HOUYI)
-		skillImage = Sprite::createWithTexture(texture->getTextureForKey("/res/Attack/shooter/skill/HOUYI"));
+		skillImage = Sprite::create("/res/Effect/HOUYI.png");
 	else
-		skillImage = Sprite::createWithTexture(texture->getTextureForKey("/res/Attack/shooter/skill/DIRENJIE"));
+		skillImage = Sprite::create("/res/Effect/DIRENJIE.png");
 
 	// 后续再调整
 	// 可以根据需要设置攻击精灵的位置和缩放
 	// 这里假设我们将攻击放置在棋子的旁边
-	Vec2 attackPosition = chessImage->getPosition() + Vec2(100, 0); // 举例，右侧100像素
+	Vec2 attackPosition = chessImage->getPosition() ; // 举例，右侧100像素
 	skillImage->setPosition(attackPosition);
 
 	// 可以设置其他属性，比如缩放、旋转等
-	skillImage->setScale(1.0); // 示例缩放
+	skillImage->setScale(0.1); // 示例缩放
 	return skillImage;
 }
 
@@ -469,6 +485,7 @@ Sprite* shooter::createSkill()
 tank::tank(int name)
 {
 	chessName = name;
+	career = "tank";
 	chessImagePath = chessImagePaths[name];
 	initCondition();
 }
@@ -522,9 +539,9 @@ Sprite* tank::createSkill()
 
 	// 取路径中的图片代表普通攻击，这里也写死了
 	if (chessName == XIANGYU)
-		skillImage = Sprite::createWithTexture(texture->getTextureForKey("/res/Attack/tank/skill/XIANGYU"));
+		skillImage = Sprite::create("/res/Effect/XIANGYU.png");
 	else
-		skillImage = Sprite::createWithTexture(texture->getTextureForKey("/res/Attack/tank/skill/ZHANGFEI"));
+		skillImage = Sprite::create("/res/Effect/ZHANGFEI.png");
 
 	// 后续再调整
 	// 可以根据需要设置攻击精灵的位置和缩放

@@ -26,6 +26,7 @@ using std::vector;
 #include "Market.h"
 #include "PlayerInfo.h"
 #include "PreparationSeatLayer.h"
+#include "BattleLayer.h"
 
 #define ROW_BOARD			5
 #define COL_BOARD			8
@@ -50,6 +51,8 @@ public:
 
 	// 创建可视化棋子卡片
 	MenuItemSprite* createPieceCard(string pieceName, string piecePicPath, Vec2 position, const ccMenuCallback& callback);
+
+	void PlayScene::onBattleButtonClicked(Ref* sender);
 
 	// 坐标转换函数
 	static ChessCoordinate* coordingrevert(Vec2 realPosition);
