@@ -58,6 +58,8 @@ static void problemLoading(const char* filename)
 // on "init" you need to initialize your instance
 bool ConfigScene::init()
 {
+
+
     //////////////////////////////
     // 1. super init first
     if ( !Scene::init() )
@@ -67,6 +69,8 @@ bool ConfigScene::init()
 
     auto visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
+
+    float unitH = visibleSize.height / 1000;
 
     /////////////////////////////
     // 2. add a menu item with "X" image, which is clicked to quit the program
@@ -102,7 +106,7 @@ bool ConfigScene::init()
     // add a label shows "Hello World"
     // create and initialize a label
 
-    auto label = Label::createWithTTF("Config", "fonts/Marker Felt.ttf", 24);
+    auto label = Label::createWithTTF("Config", "fonts/Marker Felt.ttf", 80*unitH);
     if (label == nullptr)
     {
         problemLoading("'fonts/Marker Felt.ttf'");
@@ -116,25 +120,12 @@ bool ConfigScene::init()
         // add the label as a child to this layer
         this->addChild(label, 1);
     }
-/*
-    // add "HelloWorld" splash screen"
-    auto sprite = Sprite::create("HelloWorld.png");
-    if (sprite == nullptr)
-    {
-        problemLoading("'HelloWorld.png'");
-    }
-    else
-    {
-        // position the sprite on the center of the screen
-        sprite->setPosition(Vec2(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y));
 
-        // add the sprite as a child to this layer
-        this->addChild(sprite, 0);
-    }
-*/
+
+
     {
 
-        auto label = Label::createWithTTF("Player Number", "fonts/Marker Felt.ttf", 16);
+        auto label = Label::createWithTTF("Player Number", "fonts/Marker Felt.ttf", 52*unitH);
         if (label == nullptr)
         {
             problemLoading("'fonts/Marker Felt.ttf'");
@@ -148,10 +139,8 @@ bool ConfigScene::init()
             // add the label as a child to this layer
             this->addChild(label, 1);
         }
-        label->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y + 100));
+        label->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y + 313*unitH));
     }
-
-
 
 
     {
@@ -179,16 +168,13 @@ bool ConfigScene::init()
 
         if (slider == nullptr)
             throw "";
-        slider->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y + 80));
+        slider->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y + 247*unitH));
 
         this->addChild(slider);
     }
 
-
-
     {
-
-        auto label = Label::createWithTTF("Music volume", "fonts/Marker Felt.ttf", 16);
+        auto label = Label::createWithTTF("1                           2                           4", "fonts/Marker Felt.ttf", 40 * unitH);
         if (label == nullptr)
         {
             problemLoading("'fonts/Marker Felt.ttf'");
@@ -202,7 +188,29 @@ bool ConfigScene::init()
             // add the label as a child to this layer
             this->addChild(label, 1);
         }
-        label->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y + 60));
+        label->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y + 180 * unitH));
+    }
+
+
+
+
+    {
+
+        auto label = Label::createWithTTF("Music volume", "fonts/Marker Felt.ttf", 52*unitH);
+        if (label == nullptr)
+        {
+            problemLoading("'fonts/Marker Felt.ttf'");
+        }
+        else
+        {
+            // position the label on the center of the screen
+            label->setPosition(Vec2(origin.x + visibleSize.width / 2,
+                origin.y + visibleSize.height - label->getContentSize().height));
+
+            // add the label as a child to this layer
+            this->addChild(label, 1);
+        }
+        label->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y + 0*unitH));
     }
 
 
@@ -231,17 +239,10 @@ bool ConfigScene::init()
 
         if (slider == nullptr)
             throw "";
-        slider->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y + 40));
+        slider->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y + -77*unitH));
 
         this->addChild(slider);
     }
-
-
-
-
-
-
-
 
     return true;
 }
