@@ -17,7 +17,18 @@ public:
 
 	void update(float delta);
 
-	CREATE_FUNC(BattleLayer);
+	//CREATE_FUNC(BattleLayer);
+
+	// 自定义的静态创建函数
+	static BattleLayer* create(PlayerInfo* playerME, PlayerInfo* playerOPP) {
+		BattleLayer* layer = new (std::nothrow) BattleLayer(playerME, playerOPP);
+		if (layer && layer->init()) {
+			layer->autorelease();
+			return layer;
+		}
+		CC_SAFE_DELETE(layer);
+		return nullptr;
+	}
 
 	void chessInitBeforeBattle(shared_ptr<Chess> chess);
 
@@ -43,21 +54,27 @@ public:
 	// 封装英雄进行战斗的全流程——寻找、寻路、攻击
 	void playGame(shared_ptr<Chess> chess,PlayerInfo* opp);
 
+	// 判断谁赢谁负
+	void detectWinner();
+
 	// 战斗测试
 	void AItest();
 
 
 
 private:
+
+	// 私有构造函数
+	BattleLayer(PlayerInfo* playerOfMe, PlayerInfo* playerOfOpp)
+	 {playerME = playerOfMe; playerOPP = playerOfOpp; }
+
 	bool gameOver = false;
 
 	int boardInGame[BOARDMAXR][BOARDMAXC] = { 0 };
 
-	ChessBoard chessBoard;
+	PlayerInfo* playerME;
 
-	PlayerInfo playerME;
-
-	PlayerInfo playerOPP;
+	PlayerInfo* playerOPP;
 
 	
 };

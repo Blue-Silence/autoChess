@@ -221,7 +221,7 @@ Sprite* Chess::createChess(Vec2 chessPosition)
 
 	chessImage->setPosition(chessPosition);
 	hpBarProgress->setPosition(chessPosition.x - 0.5 * nowWidth, chessPosition.y + 0.60 * nowHeight);
-	mpBarProgress->setPosition(chessPosition.x - 0.5 * nowWidth, chessPosition.y + 0.70 * nowHeight);
+	mpBarProgress->setPosition(chessPosition.x - 0.5 * nowWidth, chessPosition.y + 0.80 * nowHeight);
 
 	chessImage->addChild(hpBarProgress);
 	chessImage->addChild(mpBarProgress);

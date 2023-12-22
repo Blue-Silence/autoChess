@@ -43,7 +43,9 @@ bool PlayScene::init()
 	CC_SAFE_RETAIN(chessBoardModel);
 	// 创建玩家
 	playerA = PlayerInfo::create();
+	playerOPP = PlayerInfo::create();
 	CC_SAFE_RETAIN(playerA);
+	CC_SAFE_RETAIN(playerOPP);
 
 	//初始化备战席
 	preArea = PreparationSeat::create(playerA, chessBoardModel, mouseListener, playLayer);
@@ -76,7 +78,7 @@ bool PlayScene::init()
 
 void PlayScene::onBattleButtonClicked(Ref* sender) 
 {
-	auto battleLayer = BattleLayer::create(); // 创建 BattleLayer
+	auto battleLayer = BattleLayer::create(playerA,playerOPP); // 创建 BattleLayer
 	this->addChild(battleLayer, 6); // 将 BattleLayer 添加到当前场景
 }
 

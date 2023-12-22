@@ -10,13 +10,13 @@ void BattleLayer::AItest()
 	
 	
 
-	playerOPP.putChessInBattleArea(make_shared<shooter>(HOUYI));
-	playerOPP.putChessInBattleArea(make_shared<shooter>(DIRENJIE));
+	playerOPP->putChessInBattleArea(make_shared<shooter>(HOUYI));
+	playerOPP->putChessInBattleArea(make_shared<shooter>(DIRENJIE));
 
 	ChessCoordinate* newPos = new ChessCoordinate;
 
-	shared_ptr<Chess> daji = (*playerOPP.getBattleAreaChesses())[0];
-	shared_ptr<Chess> diaochan = (*playerOPP.getBattleAreaChesses())[1];
+	shared_ptr<Chess> daji = (*playerOPP->getBattleAreaChesses())[0];
+	shared_ptr<Chess> diaochan = (*playerOPP->getBattleAreaChesses())[1];
 
 	daji->setChessCoordinateByType(Vec2(3, 4), CoordinateType::chessBoardCoordinates);
 	CoordinateConvert(CoordinateType::screenCoordinates, Vec2(3, 4), newPos);
@@ -33,7 +33,7 @@ void BattleLayer::AItest()
 
 
 
-	playerME.putChessInBattleArea(make_shared<mage>(DAJI));
+	/*playerME.putChessInBattleArea(make_shared<mage>(DAJI));
 	playerME.putChessInBattleArea(make_shared<mage>(DIAOCHAN));
 
 	newPos = new ChessCoordinate;
@@ -49,9 +49,9 @@ void BattleLayer::AItest()
 	diaochan1->setChessCoordinateByType(Vec2(3, 1), CoordinateType::chessBoardCoordinates);
 	CoordinateConvert(CoordinateType::screenCoordinates, Vec2(3, 1), newPos);
 	diaochan1->setChessCoordinateByType(Vec2(newPos->getX(), newPos->getY()), CoordinateType::screenCoordinates);
-	this->addChild(diaochan1->createChess(Vec2(newPos->getX(), newPos->getY())));
+	this->addChild(diaochan1->createChess(Vec2(newPos->getX(), newPos->getY())));*/
 
-	delete newPos;
+	//delete newPos;
 
 
 	
@@ -94,12 +94,12 @@ bool BattleLayer::init()
 	AItest();
 
 
-	for (shared_ptr<Chess> chess : *playerME.getBattleAreaChesses())
+	for (shared_ptr<Chess> chess : *playerME->getBattleAreaChesses())
 	{
 		chessInitBeforeBattle(chess);
 	}
 
-	for (shared_ptr<Chess> chess : *playerOPP.getBattleAreaChesses())
+	for (shared_ptr<Chess> chess : *playerOPP->getBattleAreaChesses())
 	{
 		chessInitBeforeBattle(chess);
 	}
@@ -115,28 +115,34 @@ bool BattleLayer::init()
 void BattleLayer::update(float delta) 
 {
 	// 我方
-	for (auto chess : *playerME.getBattleAreaChesses())
+	for (auto chess : *playerME->getBattleAreaChesses())
 	{
 		if (chess->isDead())
 			continue;
 		
-		playGame(chess,&playerOPP);
+		playGame(chess,playerOPP);
 	}
 	// 对方
-	for (auto chess : *playerOPP.getBattleAreaChesses())
+	for (auto chess : *playerOPP->getBattleAreaChesses())
 	{
 		if (chess->isDead())
 			continue;
-		playGame(chess, &playerME);
+		playGame(chess, playerME);
 	}
 
 	if(gameOver)
 	{
 		// 取消对update函数的调度
 		this->unscheduleUpdate();
+		
 	}
 }
 
+
+void BattleLayer::detectWinner()
+{
+	
+}
 
 // 封装英雄进行战斗的全流程——寻找、寻路、攻击
 void BattleLayer::playGame(shared_ptr<Chess> chess,PlayerInfo* opp)
@@ -201,11 +207,6 @@ double BattleLayer::getDistance(ChessCoordinate* start,ChessCoordinate* end)
 }
 
 
-//void Battle::pieceBattle(Chess &damageMaker, Chess &victim)
-//{
-	//进行了攻击
-	//damageMaker.attackOne(victim);
-//}
 
 // 寻找攻击目标，选择距离最近的敌方英雄
 shared_ptr<Chess> BattleLayer::findEnemy(shared_ptr<Chess> damageMaker, PlayerInfo* enemy)
@@ -232,7 +233,6 @@ shared_ptr<Chess> BattleLayer::findEnemy(shared_ptr<Chess> damageMaker, PlayerIn
 	// 说明对方已经没有存活的棋子了，游戏结束
 	if (targetChess == nullptr)
 	{
-
 		return nullptr;
 	}
 
@@ -247,30 +247,29 @@ shared_ptr<Chess> BattleLayer::findEnemy(shared_ptr<Chess> damageMaker, PlayerIn
 // 将精灵移动到指定位置，坐标需为屏幕坐标
 void BattleLayer::moveChess(shared_ptr<Chess> movingChess,Vec2 targetPosition)
 {
+	// 移动前先更新棋盘坐标，抢占位置，避免位置冲突
+	ChessCoordinate* newPos = new ChessCoordinate;
+	CoordinateConvert(CoordinateType::chessBoardCoordinates, targetPosition, newPos);
+	int oldRow = movingChess->inGameChessBoardCoordinate.getY();
+	int oldCol = movingChess->inGameChessBoardCoordinate.getX();
+	boardInGame[oldRow][oldCol] = 0;
+	movingChess->inGameChessBoardCoordinate.setX(newPos->getX());
+	movingChess->inGameChessBoardCoordinate.setY(newPos->getY());
+	boardInGame[newPos->getY()][newPos->getX()] = 1;
+	delete newPos;
+
+	// 开始移动
 	Sprite* movingChessImage = movingChess->getChessSprite();
 	float duration = 0.5f; // 移动所需时间，以秒为单位
 	auto moveTo = MoveTo::create(duration, targetPosition);
 	auto callback = CallFunc::create([this, movingChess,targetPosition]() 
 		{
 			
-		// 移动完成后的处理
-
-			// 更新棋子在游戏中的屏幕坐标
+			// 移动完成后的处理
+			// 移动完成才更新棋子在游戏中的屏幕坐标
 			movingChess->inGameScreenCoordinate.setX(int(targetPosition.x));
 			movingChess->inGameScreenCoordinate.setY(int(targetPosition.y));
 			
-			ChessCoordinate* newPos = new ChessCoordinate;
-			CoordinateConvert(CoordinateType::chessBoardCoordinates, targetPosition, newPos);
-
-			// 更新棋子在游戏中的棋盘坐标
-			int oldRow = movingChess->inGameChessBoardCoordinate.getY();
-			int oldCol = movingChess->inGameChessBoardCoordinate.getX();
-			boardInGame[oldRow][oldCol] = 0;
-			movingChess->inGameChessBoardCoordinate.setX(newPos->getX()); 
-			movingChess->inGameChessBoardCoordinate.setY(newPos->getY());
-			boardInGame[newPos->getY()][newPos->getX()] = 1;
-
-			delete newPos;
 			// 移动一步完毕后，设置isMoving为false
 			movingChess->isMoving = false;
 		});
@@ -321,6 +320,7 @@ void BattleLayer::findPathToEnemy(shared_ptr<Chess> damageMaker, shared_ptr<Ches
 	{
 		dx = -1;
 	}
+	
 
 	CoordinateConvert(CoordinateType::screenCoordinates, Vec2(int(xOfdamageMaker + dx),int(yOfdamageMaker + dy)), newPos);
 	damageMaker->targetPos = Vec2(newPos->getX(),newPos->getY());
@@ -363,7 +363,7 @@ void BattleLayer::doAttack(shared_ptr<Chess> damageMaker, shared_ptr<Chess> targ
 		// 把技能的贴图添加到当前层或场景中
 		this->addChild(damageMakerSkillImage);
 		// 移动到目标所需的时间，以秒为单位
-		float moveDuration = 0.1f;
+		float moveDuration = 0.5f;
 		// 技能移动到目标位置
 		auto moveSkill = MoveTo::create(moveDuration, targetPosition);
 		// 技能击中对方后消失
@@ -437,7 +437,7 @@ void BattleLayer::doAttack(shared_ptr<Chess> damageMaker, shared_ptr<Chess> targ
 			// 把普通攻击的贴图添加到当前层或场景中
 			this->addChild(damageMakerAttackImage);
 			// 移动到目标所需的时间，以秒为单位
-			float moveDuration = 0.1f;
+			float moveDuration = 0.5f;
 			// 远程攻击移动到目标位置
 			auto moveAttack = MoveTo::create(moveDuration, targetPosition);
 			// 击中对方后消失

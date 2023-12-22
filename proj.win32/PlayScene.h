@@ -77,6 +77,8 @@ private:
 	// 玩家
 	PlayerInfo* playerA;
 
+	// 对手玩家
+	PlayerInfo* playerOPP;
 
 
 	//备战席层
