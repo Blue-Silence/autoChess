@@ -18,13 +18,13 @@ void BattleLayer::AItest()
 	shared_ptr<Chess> daji = (*playerOPP->getBattleAreaChesses())[0];
 	shared_ptr<Chess> diaochan = (*playerOPP->getBattleAreaChesses())[1];
 
-	daji->setChessCoordinateByType(Vec2(3, 4), CoordinateType::chessBoardCoordinates);
-	CoordinateConvert(CoordinateType::screenCoordinates, Vec2(3, 4), newPos);
+	daji->setChessCoordinateByType(Vec2(3, 0), CoordinateType::chessBoardCoordinates);
+	CoordinateConvert(CoordinateType::screenCoordinates, Vec2(3, 0), newPos);
 	daji->setChessCoordinateByType(Vec2(newPos->getX(),newPos->getY()), CoordinateType::screenCoordinates);
 	this->addChild(daji->createChess(Vec2 (newPos->getX(),newPos->getY())));
 
-	diaochan->setChessCoordinateByType(Vec2(2, 3), CoordinateType::chessBoardCoordinates);
-	CoordinateConvert(CoordinateType::screenCoordinates, Vec2(2, 3), newPos);
+	diaochan->setChessCoordinateByType(Vec2(0, 0), CoordinateType::chessBoardCoordinates);
+	CoordinateConvert(CoordinateType::screenCoordinates, Vec2(0, 0), newPos);
 	diaochan->setChessCoordinateByType(Vec2(newPos->getX(), newPos->getY()), CoordinateType::screenCoordinates);
 	this->addChild(diaochan->createChess(Vec2(newPos->getX(), newPos->getY())));
 
@@ -75,9 +75,18 @@ void BattleLayer::chessInitBeforeBattle(shared_ptr<Chess> chess)
 	chess->inGameChessBoardCoordinate.setY(chess->getChessCoordinateByType(CoordinateType::chessBoardCoordinates)->getY());
 	chess->inGameScreenCoordinate.setX(chess->getChessCoordinateByType(CoordinateType::screenCoordinates)->getX());
 	chess->inGameScreenCoordinate.setY(chess->getChessCoordinateByType(CoordinateType::screenCoordinates)->getY());
+	
+	
+	chess->createChess(Vec2(chess->inGameScreenCoordinate.getX(), chess->inGameScreenCoordinate.getY()));
+	addChild(chess->getChessSprite());
+	
+
 	chess->getChessSprite()->setVisible(true);
-	chess->getChessSprite()->setPosition(Vec2(chess->inGameScreenCoordinate.getX(), chess->inGameScreenCoordinate.getY()));
+
 	boardInGame[chess->inGameChessBoardCoordinate.getY()][chess->inGameChessBoardCoordinate.getX()] = 1;
+	// 更新红蓝条
+	chess->updateHpBar();
+	chess->updateMpBar();
 }
 
 inline bool BattleLayer::isAvailable(int row, int col)
@@ -94,7 +103,7 @@ bool BattleLayer::init()
 
 	memset(boardInGame, 0, sizeof boardInGame);
 
-	AItest();
+	//AItest();
 
 
 	for (shared_ptr<Chess> chess : *playerME->getBattleAreaChesses())
@@ -138,10 +147,28 @@ void BattleLayer::update(float delta)
 	{
 		// 取消对update函数的调度
 		this->unscheduleUpdate();
-		// 战后清算
-		detectWinner();
 
-		
+
+		// 战后清算
+		//detectWinner();
+
+		// 创建一个辅助节点
+		auto delayNode = Node::create();
+		this->addChild(delayNode); // 添加到当前层
+
+		// 创建延时动作
+		auto delayAction = DelayTime::create(1.0f); // 2秒延时
+
+		auto callbackAction = CallFunc::create([this, delayNode]() {
+			detectWinner();
+			});
+
+		// 创建动作序列
+		auto sequence = Sequence::create(delayAction,callbackAction, nullptr);
+
+		// 运行动作
+		delayNode->runAction(sequence);
+
 	}
 }
 
@@ -155,8 +182,9 @@ void BattleLayer::detectWinner()
 
 	for (auto chess : *playerME->getBattleAreaChesses())
 	{
-		auto chessImage = chess->getChessSprite();
-		chessImage->setVisible(false);
+		chess->getChessSprite()->removeFromParent();
+		//auto chessImage = chess->getChessSprite();
+		//chessImage->setVisible(false);
 		if (chess->isDead())
 			continue;
 		surviveNumMe++;	
@@ -164,8 +192,8 @@ void BattleLayer::detectWinner()
 
 	for (auto chess : *playerOPP->getBattleAreaChesses())
 	{
-		auto chessImage = chess->getChessSprite();
-		chessImage->setVisible(false);
+		chess->getChessSprite()->removeFromParent();
+		//chessImage->setVisible(false);
 		if (chess->isDead())
 			continue;
 		surviveNumOPP++;
@@ -177,7 +205,7 @@ void BattleLayer::detectWinner()
 
 	if (surviveNumMe > 0)
 	{
-		playerOPP->DecreaseLifeValue(playerME->GetLevel() + surviveNumMe);
+		playerOPP->DecreaseLifeValue(playerME->getLevel() + surviveNumMe);
 		auto victoryImage = Sprite::create("/res/Victory.png");
 		// 设置在正中间
 		victoryImage->setPosition(Vec2(origin.x + visibleSize.width / 2,
@@ -197,9 +225,10 @@ void BattleLayer::detectWinner()
 		auto endAction = ScaleBy::create(0.5f, 1.5f); // 缩放到原来的1.5倍
 		auto endActionReverse = endAction->reverse(); // 缩放回原始大小
 
-		auto callback = CallFunc::create([victoryImage]()
+		auto callback = CallFunc::create([victoryImage,this]()
 			{
 				victoryImage->removeFromParent();
+				*isInBattle = false;
 			});
 
 		// 组合动作
@@ -209,17 +238,29 @@ void BattleLayer::detectWinner()
 	}
 	else if (surviveNumOPP > 0)
 	{
-		playerME->DecreaseLifeValue(playerOPP->GetLevel() + surviveNumOPP);
+		playerME->DecreaseLifeValue(playerOPP->getLevel() + surviveNumOPP);
 		auto defeatImage = Sprite::create("/res/Defeat.png");
 		defeatImage->setPosition(Vec2(origin.x + visibleSize.width / 2,
 			origin.y + visibleSize.height / 2));
+
+		// 获取原始大小
+		Vec2 OriginSize = defeatImage->getContentSize();
+
+		// 缩放大小由config一起控制
+		float chessScaleX = 88.9 * config->getPx()->x / OriginSize.x;
+		float chessScaleY = 50 * config->getPx()->y / OriginSize.y;
+
+		// 设置大小
+		defeatImage->setScale(chessScaleX, chessScaleY);
+
 		// 将 Label 添加到当前场景
 		this->addChild(defeatImage);
 		auto endAction = ScaleBy::create(0.5f, 1.5f); // 缩放到原来的1.5倍
 		auto endActionReverse = endAction->reverse(); // 缩放回原始大小
-		auto callback = CallFunc::create([defeatImage]()
+		auto callback = CallFunc::create([defeatImage,this]()
 			{
 				defeatImage->removeFromParent();
+				*isInBattle = false;
 			});
 		// 组合动作
 		Sequence* sequence = Sequence::create(endAction, endActionReverse,callback, nullptr);
@@ -230,13 +271,24 @@ void BattleLayer::detectWinner()
 		auto drawImage = Sprite::create("/res/Draw.png");
 		drawImage->setPosition(Vec2(origin.x + visibleSize.width / 2,
 			origin.y + visibleSize.height / 2));
+
+		// 获取原始大小
+		Vec2 OriginSize = drawImage->getContentSize();
+
+		// 缩放大小由config一起控制
+		float chessScaleX = 88.9 * config->getPx()->x / OriginSize.x;
+		float chessScaleY = 50 * config->getPx()->y / OriginSize.y;
+
+		// 设置大小
+		drawImage->setScale(chessScaleX, chessScaleY);
 		// 将 Label 添加到当前场景
 		this->addChild(drawImage);
 		auto endAction = ScaleBy::create(0.5f, 1.5f); // 缩放到原来的1.5倍
 		auto endActionReverse = endAction->reverse(); // 缩放回原始大小
-		auto callback = CallFunc::create([drawImage]()
+		auto callback = CallFunc::create([drawImage,this]()
 			{
 				drawImage->removeFromParent();
+				*isInBattle = false;
 			});
 		// 组合动作
 		Sequence* sequence = Sequence::create(endAction, endActionReverse,callback, nullptr);

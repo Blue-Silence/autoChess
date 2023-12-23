@@ -19,6 +19,7 @@ using std::vector;
 #include "PlayerInfo.h"
 #include "PreparationSeatLayer.h"
 #include "BattleLayer.h"
+#include "AIMode.h"
 
 #define ROW_BOARD			5
 #define COL_BOARD			8
@@ -31,8 +32,13 @@ class PlayScene : public Scene
 {
 public:
 	static Scene* createScene();
+
 	Market* shopModel;
+
 	virtual bool init();
+
+	void update(float delta);
+
 	EventListenerMouse* mouseListener;
 
 	// 创建可视化棋盘， position为(0, 0)位置欺骗图片左下角的锚点坐标
@@ -52,6 +58,21 @@ public:
 	CREATE_FUNC(PlayScene);
 
 private:
+	// AI 选手池
+	AIMode* AI = nullptr;
+
+	// 游戏模式
+	string gameMode = "人机对战";
+
+	// AI玩家数量
+	int AINum = 4;
+
+	// 当前对战的AI
+	int TargetAI = 0;
+
+	// 游戏状态
+	bool isInBattle = false;
+
 	// 场景层
 	Layer* playLayer;
 
@@ -89,6 +110,8 @@ private:
 	void menuBuyExpCallBack(Ref* sender);
 	// 购买棋子的点击事件
 	void BuyChess(Ref* sender,int index);
+
+
 	
 };
 

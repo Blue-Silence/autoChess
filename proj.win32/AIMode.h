@@ -4,6 +4,8 @@
 
 #include "ChessBoard.h"
 #include <random>
+
+
 class AIMode :public Layer
 {
 private:
@@ -12,13 +14,19 @@ private:
 
     int chessBoard[BOARDMAXR][BOARDMAXC] = { 0 };
 
-    static int turn;
+    int totalAINum = 0;
+
+    int liveAINum=0;
+
+    int turn;
+
 public:
     //-------------------//
     //     接口函数      //
     //-------------------//
-    vector<PlayerInfo> getPlayersVectorInfo();
+    vector<PlayerInfo>* getPlayersVectorInfo();
 
+    
 
     //-------------------//
     //     功能函数      //
@@ -34,7 +42,16 @@ public:
     AIMode& operator=(const AIMode& other);
 
     // 重载后置递增运算符 主要功能便于回合数+1
-    AIMode operator++(int);
+   // AIMode operator++(int);
+
+    // AI玩家阵亡一个
+    void deleteOneAI() { liveAINum--; }
+
+    // 是否还有存活的AI玩家可以战斗
+    bool existLiveAI() { return liveAINum > 0; }
+
+    // 除了正在和玩家对战的AI，其余AI随机扣血
+    void randomBloodLose(int AIInBattle);
 
     // 随机数获取函数
     int getRandomNumber(int minNum, int upNum);    

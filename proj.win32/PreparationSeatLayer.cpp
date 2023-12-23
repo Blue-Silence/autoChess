@@ -68,6 +68,11 @@ void  PreparationSeat::CallBack(Ref* sender, int index)
 							//精灵上场、记录
 							onBoardSprite[static_cast<int>(onBoardCoord.x)][static_cast<int>(onBoardCoord.y)] = ChessToBoard(onBoardCoord, index);
 							auto chess = player->chessInPreArea[index];
+							/*chess->setChessCoordinateByType(Vec2(boardCoord->getX(), boardCoord->getY()), CoordinateType::chessBoardCoordinates);
+							ChessCoordinate* screenPos = new ChessCoordinate;
+							CoordinateConvert(CoordinateType::screenCoordinates, Vec2(boardCoord->getX(), boardCoord->getY()), screenPos);
+							chess->setChessCoordinateByType(Vec2(screenPos->getX(), screenPos->getY()), CoordinateType::screenCoordinates);
+							delete screenPos;*/
 							player->putChessInBattleArea(chess);
 							//棋子记录
 							onBoardChess[static_cast<int>(onBoardCoord.x)][static_cast<int>(onBoardCoord.y)] = chess;
@@ -84,6 +89,7 @@ void  PreparationSeat::CallBack(Ref* sender, int index)
 							//清除
 							myButton->setVisible(false);
 							onBoardSprite[static_cast<int>(onBoardCoord.x)][static_cast<int>(onBoardCoord.y)]->removeFromParent();
+
 							//交换记录
 							shared_ptr<Chess> chessToBoard = player->chessInPreArea[index];
 							shared_ptr<Chess> chessToPre = onBoardChess[static_cast<int>(onBoardCoord.x)][static_cast<int>(onBoardCoord.y)];
@@ -145,11 +151,10 @@ Sprite* PreparationSeat::ChessToBoard(const Vec2& onBoardCoord, int index)
 	ChessCoordinate* sceenCoord = new ChessCoordinate;
 	this->cBoard->OnBoard(onBoardCoord.x, onBoardCoord.y);
 	shared_ptr<Chess> curHero = player->chessInPreArea[index];
-
-	CoordinateConvert(CoordinateType::screenCoordinates, onBoardCoord, sceenCoord);
+	CoordinateConvert(CoordinateType::screenCoordinates, Vec2(onBoardCoord.y,onBoardCoord.x), sceenCoord);
 	Vec2 onScreenCoord;
-	onScreenCoord.x = sceenCoord->getY();
-	onScreenCoord.y = sceenCoord->getX();
+	onScreenCoord.x = sceenCoord->getX();
+	onScreenCoord.y = sceenCoord->getY();
 	Sprite* Hero = curHero->createChess(onScreenCoord);
 	curHero->setChessCoordinateByType(onScreenCoord, CoordinateType::screenCoordinates);
 	curHero->setChessCoordinateByType(Vec2(onBoardCoord.y, onBoardCoord.x), CoordinateType::chessBoardCoordinates);

@@ -53,7 +53,34 @@ bool PlayScene::init()
 
 	// 创建商店
 	
-	createShop(Vec2(-45 * config->getPx()->x, -45 * config->getPx()->y));	
+	createShop(Vec2(-45 * config->getPx()->x, -45 * config->getPx()->y));
+
+
+	///////测试用
+	playerA->putChessInBattleArea(make_shared<shooter>(HOUYI));
+	playerA->putChessInBattleArea(make_shared<shooter>(DIRENJIE));
+
+	ChessCoordinate* newPos = new ChessCoordinate;
+
+	shared_ptr<Chess> daji = (*playerA->getBattleAreaChesses())[0];
+	shared_ptr<Chess> diaochan = (*playerA->getBattleAreaChesses())[1];
+
+	daji->setChessCoordinateByType(Vec2(3, 0), CoordinateType::chessBoardCoordinates);
+	CoordinateConvert(CoordinateType::screenCoordinates, Vec2(3, 0), newPos);
+	daji->setChessCoordinateByType(Vec2(newPos->getX(), newPos->getY()), CoordinateType::screenCoordinates);
+	//this->addChild(daji->createChess(Vec2(newPos->getX(), newPos->getY())));
+
+	diaochan->setChessCoordinateByType(Vec2(2, 1), CoordinateType::chessBoardCoordinates);
+	CoordinateConvert(CoordinateType::screenCoordinates, Vec2(2, 1), newPos);
+	diaochan->setChessCoordinateByType(Vec2(newPos->getX(), newPos->getY()), CoordinateType::screenCoordinates);
+	//this->addChild(diaochan->createChess(Vec2(newPos->getX(), newPos->getY())));
+
+	delete newPos;
+	//////
+
+
+
+
 
 	// 添加退出按钮
 	auto exitButton = StartAndLoginScene::createGameButton("/res/UI/ExitNormal.png", "/res/UI/ExitSelected.png", CC_CALLBACK_1(PlayScene::onBattleButtonClicked, this));
@@ -68,29 +95,105 @@ bool PlayScene::init()
 	playLayer->addChild(menu, 5);
 
 
-	// 进行多次对战
-	while (true)
-	{
-		// AI类实例接收杨神的数字，生成相应数量的AI对象
-		// 
-		// 每次确定两个相互对战的对象
-		// 将两个对象传入BattleLayer::create(),每调用一次BattleLayer就进行一次两两对战
-		// 重复上述两个步骤，直到有角色死亡之类
+	//// 进行多次对战
+	//while (true)
+	//{
+	//	// AI类实例接收杨神的数字，生成相应数量的AI对象
+	//	// 
+	//	// 每次确定两个相互对战的对象
+	//	// 将两个对象传入BattleLayer::create(),每调用一次BattleLayer就进行一次两两对战
+	//	// 重复上述两个步骤，直到有角色死亡之类
 
-	}
+	//}
 
 
-
+	// 调度启动update()函数，开始战斗
+	this->scheduleUpdate();
 	
 
 	
 	return true;
 }
 
+void PlayScene::update(float delta)
+{
+	if (gameMode == "人机对战")
+	{
+		if (AI == nullptr && AINum != 0)
+			AI = new AIMode(AINum);
+
+		if (!isInBattle && AI != nullptr)
+		{
+			isInBattle = true;
+			if (!AI->existLiveAI())
+			{
+				// 战斗结束,玩家获胜
+			}
+			else if (!playerA->isAlive())
+			{
+				// AI获胜
+			}
+
+			//AI++;
+			TargetAI = (TargetAI) % (AINum)+1;
+			while (!(*AI->getPlayersVectorInfo())[TargetAI].isAlive())
+			{
+				TargetAI = (TargetAI) % (AINum)+1;
+			}
+			// 选定好本轮对战的AI选手
+			playerOPP = &(*AI->getPlayersVectorInfo())[TargetAI];
+			// 其余的AI随机扣血
+			AI->randomBloodLose(TargetAI);
+			
+
+			// 玩家和AI开始对战！
+			// 计时器
+			// 
+			// 
+			// 
+			// 检查并移除现有的 BattleLayer
+			auto existingLayer = this->getChildByTag(BATTLE_LAYER_TAG);
+			if (existingLayer) {
+				this->removeChild(existingLayer, true);
+			}
+
+			// 创建并添加新的 BattleLayer
+			auto battleLayer = BattleLayer::create(playerA, playerOPP, &isInBattle);
+			battleLayer->setTag(BATTLE_LAYER_TAG); // 设置标签以便识别
+			this->addChild(battleLayer, 6);
+
+
+
+
+		}
+	}
+	else if (gameMode == "联机对战")
+	{
+
+	}
+}
+
+
+
+
+
+
+
+
+
+
 void PlayScene::onBattleButtonClicked(Ref* sender) 
 {
-	auto battleLayer = BattleLayer::create(playerA,playerOPP,num); // 创建 BattleLayer
-	this->addChild(battleLayer, 6); // 将 BattleLayer 添加到当前场景
+	// 检查并移除现有的 BattleLayer
+	auto existingLayer = this->getChildByTag(BATTLE_LAYER_TAG);
+	if (existingLayer) {
+		this->removeChild(existingLayer, true);
+	}
+
+	// 创建并添加新的 BattleLayer
+	auto battleLayer = BattleLayer::create(playerA, playerOPP, &isInBattle);
+	battleLayer->setTag(BATTLE_LAYER_TAG); // 设置标签以便识别
+	this->addChild(battleLayer, 6);
 }
 
 void PlayScene::createBoard(Vec2 position)

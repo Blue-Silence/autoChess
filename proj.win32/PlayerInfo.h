@@ -18,6 +18,7 @@ const int BATTLEMAX = 7;
 const int BATTLEINIT = 3;
 const int PLAYERLEVELMAX = 10;
 const int PLAYERLEVELINIT = 1;
+const int BATTLE_LAYER_TAG = 100;
 //mlx:此处为不报错，注意更改
 //hjw:已修改
 const int HERONUM = 6;
@@ -91,6 +92,8 @@ public:
 
 	// 获取当前血量接口函数
 	int GetLifeValue() const;
+
+	bool isAlive() const { return lifeValue > 0; }
 
 	// AI模式专有:设置金币数量
 	void setCoinNum(int num);

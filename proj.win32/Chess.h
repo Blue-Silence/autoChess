@@ -138,7 +138,7 @@ protected:
 	ChessCoordinate screenCoordinate; 
 
 	//棋子可视化指针
-	
+	Sprite* chessImage=nullptr;
 
 	//普通攻击可视化
 	Sprite* attackImage;
@@ -154,7 +154,7 @@ protected:
 
 
 public:
-	Sprite* chessImage;
+	
 
 	// 游戏中棋子的棋盘位置，会变化
 	ChessCoordinate inGameChessBoardCoordinate;

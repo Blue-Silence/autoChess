@@ -11,8 +11,6 @@ class BattleLayer :public Layer
 {
 public:
 
-	
-
 	bool init();
 
 	void update(float delta);
@@ -20,9 +18,12 @@ public:
 	//CREATE_FUNC(BattleLayer);
 
 	// 自定义的静态创建函数
-	static BattleLayer* create(PlayerInfo* playerME, PlayerInfo* playerOPP) {
-		BattleLayer* layer = new (std::nothrow) BattleLayer(playerME, playerOPP);
-		if (layer && layer->init()) {
+	static BattleLayer* create(PlayerInfo* playerME, PlayerInfo* playerOPP,bool* isInBattle) 
+	{
+		;
+		BattleLayer* layer = new (std::nothrow) BattleLayer(playerME, playerOPP,isInBattle);
+		if (layer && layer->init()) 
+		{
 			layer->autorelease();
 			return layer;
 		}
@@ -65,8 +66,10 @@ public:
 private:
 
 	// 私有构造函数
-	BattleLayer(PlayerInfo* playerOfMe, PlayerInfo* playerOfOpp)
-	 {playerME = playerOfMe; playerOPP = playerOfOpp; }
+	BattleLayer(PlayerInfo* playerOfMe, PlayerInfo* playerOfOpp,bool* inBattle)
+	{
+		playerME = playerOfMe; playerOPP = playerOfOpp; isInBattle = inBattle;
+	}
 
 	bool gameOver = false;
 
@@ -75,6 +78,8 @@ private:
 	PlayerInfo* playerME;
 
 	PlayerInfo* playerOPP;
+
+	bool* isInBattle;
 
 	
 };
