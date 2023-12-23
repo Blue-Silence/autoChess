@@ -158,8 +158,9 @@ bool ConfigScene::init()
                 break;
             case ui::Widget::TouchEventType::ENDED:
                 slider->setPercent(50 * opt);
-                if (this->playerNum != nullptr)
-                    *this->playerNum = opt+1;
+                //if (this->playerNum != nullptr)
+                //    *this->playerNum = opt+1;
+                this->playerNumTMP = opt+1;
                 break;
             default:
                 break;
@@ -229,8 +230,9 @@ bool ConfigScene::init()
             case ui::Widget::TouchEventType::BEGAN:
                 break;
             case ui::Widget::TouchEventType::ENDED:
-                if (this->musicPercent != nullptr)
-                    *this->musicPercent = slider->getPercent();
+                //if (this->musicPercent != nullptr)
+                //    *this->musicPercent = slider->getPercent();
+                this->musicPercentTMP = slider->getPercent();
                 break;
             default:
                 break;
@@ -252,5 +254,10 @@ void ConfigScene::menuCloseCallback(Ref* pSender)
 {
     //Close the cocos2d-x game scene and quit the application
     Director::getInstance()->popScene();
+    if(this->musicPercent!=nullptr)
+          *this->musicPercent = this->musicPercentTMP;
+    if(this->payerNum!=nullptr)
+          *this->payerNum = this->payerNumTMP;
+ 
 }
 
