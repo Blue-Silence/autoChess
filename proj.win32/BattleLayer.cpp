@@ -65,6 +65,7 @@ void BattleLayer::AItest()
 // 战斗前初始化棋子的战斗数据
 void BattleLayer::chessInitBeforeBattle(shared_ptr<Chess> chess)
 {
+	
 	chess->state = Chess::State::Idle;
 	chess->isAttacking = false;
 	chess->isMoving = false;
@@ -74,6 +75,8 @@ void BattleLayer::chessInitBeforeBattle(shared_ptr<Chess> chess)
 	chess->inGameChessBoardCoordinate.setY(chess->getChessCoordinateByType(CoordinateType::chessBoardCoordinates)->getY());
 	chess->inGameScreenCoordinate.setX(chess->getChessCoordinateByType(CoordinateType::screenCoordinates)->getX());
 	chess->inGameScreenCoordinate.setY(chess->getChessCoordinateByType(CoordinateType::screenCoordinates)->getY());
+	chess->getChessSprite()->setVisible(true);
+	chess->getChessSprite()->setPosition(Vec2(chess->inGameScreenCoordinate.getX(), chess->inGameScreenCoordinate.getY()));
 	boardInGame[chess->inGameChessBoardCoordinate.getY()][chess->inGameChessBoardCoordinate.getX()] = 1;
 }
 
@@ -103,7 +106,8 @@ bool BattleLayer::init()
 	{
 		chessInitBeforeBattle(chess);
 	}
-	
+
+
 	// 调度启动update()函数，开始战斗
 	this->scheduleUpdate();
 
@@ -134,6 +138,9 @@ void BattleLayer::update(float delta)
 	{
 		// 取消对update函数的调度
 		this->unscheduleUpdate();
+		// 战后清算
+		detectWinner();
+
 		
 	}
 }
@@ -141,7 +148,101 @@ void BattleLayer::update(float delta)
 
 void BattleLayer::detectWinner()
 {
-	
+	auto config = ConfigController::getInstance();
+
+	int surviveNumMe = 0;
+	int surviveNumOPP = 0;
+
+	for (auto chess : *playerME->getBattleAreaChesses())
+	{
+		auto chessImage = chess->getChessSprite();
+		chessImage->setVisible(false);
+		if (chess->isDead())
+			continue;
+		surviveNumMe++;	
+	}
+
+	for (auto chess : *playerOPP->getBattleAreaChesses())
+	{
+		auto chessImage = chess->getChessSprite();
+		chessImage->setVisible(false);
+		if (chess->isDead())
+			continue;
+		surviveNumOPP++;
+	}
+
+	// 获取当前视图的大小和原点
+	Size visibleSize = Director::getInstance()->getVisibleSize();
+	Vec2 origin = Director::getInstance()->getVisibleOrigin();
+
+	if (surviveNumMe > 0)
+	{
+		playerOPP->DecreaseLifeValue(playerME->GetLevel() + surviveNumMe);
+		auto victoryImage = Sprite::create("/res/Victory.png");
+		// 设置在正中间
+		victoryImage->setPosition(Vec2(origin.x + visibleSize.width / 2,
+			origin.y + visibleSize.height / 2));
+		// 获取原始大小
+		Vec2 OriginSize = victoryImage->getContentSize();
+
+		// 缩放大小由config一起控制
+		float chessScaleX = 88.9 * config->getPx()->x / OriginSize.x;
+		float chessScaleY = 50 * config->getPx()->y / OriginSize.y;
+
+		// 设置大小
+		victoryImage->setScale(chessScaleX, chessScaleY);
+
+		// 将 Label 添加到当前场景
+		this->addChild(victoryImage);
+		auto endAction = ScaleBy::create(0.5f, 1.5f); // 缩放到原来的1.5倍
+		auto endActionReverse = endAction->reverse(); // 缩放回原始大小
+
+		auto callback = CallFunc::create([victoryImage]()
+			{
+				victoryImage->removeFromParent();
+			});
+
+		// 组合动作
+		Sequence* sequence = Sequence::create(endAction, endActionReverse, callback,nullptr);
+		victoryImage->runAction(sequence);
+		
+	}
+	else if (surviveNumOPP > 0)
+	{
+		playerME->DecreaseLifeValue(playerOPP->GetLevel() + surviveNumOPP);
+		auto defeatImage = Sprite::create("/res/Defeat.png");
+		defeatImage->setPosition(Vec2(origin.x + visibleSize.width / 2,
+			origin.y + visibleSize.height / 2));
+		// 将 Label 添加到当前场景
+		this->addChild(defeatImage);
+		auto endAction = ScaleBy::create(0.5f, 1.5f); // 缩放到原来的1.5倍
+		auto endActionReverse = endAction->reverse(); // 缩放回原始大小
+		auto callback = CallFunc::create([defeatImage]()
+			{
+				defeatImage->removeFromParent();
+			});
+		// 组合动作
+		Sequence* sequence = Sequence::create(endAction, endActionReverse,callback, nullptr);
+		defeatImage->runAction(sequence);
+	}
+	else 
+	{
+		auto drawImage = Sprite::create("/res/Draw.png");
+		drawImage->setPosition(Vec2(origin.x + visibleSize.width / 2,
+			origin.y + visibleSize.height / 2));
+		// 将 Label 添加到当前场景
+		this->addChild(drawImage);
+		auto endAction = ScaleBy::create(0.5f, 1.5f); // 缩放到原来的1.5倍
+		auto endActionReverse = endAction->reverse(); // 缩放回原始大小
+		auto callback = CallFunc::create([drawImage]()
+			{
+				drawImage->removeFromParent();
+			});
+		// 组合动作
+		Sequence* sequence = Sequence::create(endAction, endActionReverse,callback, nullptr);
+		drawImage->runAction(sequence);
+	}
+
 }
 
 // 封装英雄进行战斗的全流程——寻找、寻路、攻击
