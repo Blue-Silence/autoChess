@@ -85,15 +85,40 @@ int PlayerInfo::GetLifeValue() const
 	return lifeValue;
 }
 
+void PlayerInfo::setCoinNum(int num)
+{
+	coinNum = num;
+}
+
+int PlayerInfo::getLevel()const
+{
+	return level;
+}
+
 int PlayerInfo::getMaxBattleChessNum() const
 {
 	return maxBattleChessNum;
 }
 
-
 // 在玩家对战区放置棋子
 void PlayerInfo::putChessInBattleArea(shared_ptr<Chess> chess)
 {
+	//空数组直接加
+	if (chessInBattleArea.size() == 0)
+	{
+		chessInBattleArea.push_back(chess);
+		return;
+	}
+	//非空数组遍历空位加
+	for (int i = 0; i < chessInBattleArea.size(); i++)
+	{
+		if (chessInBattleArea[i] == nullptr)
+		{
+			chessInBattleArea[i] = chess;
+			return;
+		}
+	}
+	//无空位直接加
 	chessInBattleArea.push_back(chess);
 }
 
@@ -208,20 +233,24 @@ void PlayerInfo::arrZero(int arrName[])
 
 // 注意：每次购买完一个英雄后都要调用下面的遍历升星函数(把这个函数放到购买函数里)
 // 遍历升星判断函数
-void PlayerInfo::starRaiseLevel(int location,  int &delLoc_1, int &delLoc_2)
+//更改于12.22 mlx:通过返回值判断是否进行升星操作
+bool PlayerInfo::starRaiseLevel(int location, int& delLoc_1, int& delLoc_2)
 {
+	bool isRaising = 0;
 	arrZero(heroOneStarNumArr);
 	arrZero(heroTwoStarNumArr);
 	for (int i = 0; i < chessInBattleArea.size(); ++i)
 	{
-		switch (chessInBattleArea[i]->getChessLevel())
-		{
+		if (chessInBattleArea[i] != nullptr) {
+			switch (chessInBattleArea[i]->getChessLevel())
+			{
 			case 1:
 				heroOneStarNumArr[chessInBattleArea[i]->getChessName()]++;
 				break;
 			case 2:
 				heroTwoStarNumArr[chessInBattleArea[i]->getChessName()]++;
 				break;
+			}
 		}
 	}
 	for (int i = 0; i < chessInPreArea.size(); ++i)
@@ -230,33 +259,37 @@ void PlayerInfo::starRaiseLevel(int location,  int &delLoc_1, int &delLoc_2)
 		{
 			switch (chessInPreArea[i]->getChessLevel())
 			{
-				case 1:
-					heroOneStarNumArr[chessInPreArea[i]->getChessName()]++;
-					break;
-				case 2:
-					heroTwoStarNumArr[chessInPreArea[i]->getChessName()]++;
-					break;
+			case 1:
+				heroOneStarNumArr[chessInPreArea[i]->getChessName()]++;
+				break;
+			case 2:
+				heroTwoStarNumArr[chessInPreArea[i]->getChessName()]++;
+				break;
 			}
 		}
 	}
-
+	//每次升级只涉及一次改变
 	for (int i = 0; i < HERONUM; ++i)
 	{
 		if (heroOneStarNumArr[i] >= 3)
 		{
+			isRaising = 1;
 			heroOneStarNumArr[i] -= 3;
 			heroTwoStarNumArr[i]++;
 			deleteLowLevelChess(i, 1, location, delLoc_1, delLoc_2);
 			createHighLevelChess(i, 2, location);
+			break;
 		}
-		if (heroTwoStarNumArr[i] >= 3)
+		else if (heroTwoStarNumArr[i] >= 3)
 		{
+			isRaising = 1;
 			heroTwoStarNumArr[i] -= 3;
 			deleteLowLevelChess(i, 2, location, delLoc_1, delLoc_2);
 			createHighLevelChess(i, 3, location);
-
+			break;
 		}
 	}
+	return isRaising;
 }
 
 // 升星后低星英雄删除函数
@@ -268,15 +301,15 @@ void PlayerInfo::deleteLowLevelChess(int heroFlag, int level, int location, int&
 	{
 		if (chessInPreArea[i] != nullptr && chessInPreArea[i]->getChessName() == heroFlag && chessInPreArea[i]->getChessLevel() == level)
 		{
-			if (delLoc_1 == -1)
+			if (delLoc_1 == -1 && i != location)
 			{
 				delLoc_1 = i;
 			}
-			if (delLoc_1 != -1 && delLoc_2 == -1)
+			else if (delLoc_2 == -1 && i != location)
 			{
 				delLoc_2 = i;
 			}
-			
+
 			chessInPreArea[i] = nullptr;
 			count++;
 			if (count == 3)
@@ -289,16 +322,9 @@ void PlayerInfo::deleteLowLevelChess(int heroFlag, int level, int location, int&
 	// 然后从战斗区删除
 	for (int i = 0; i < chessInBattleArea.size(); ++i)
 	{
-		if (chessInBattleArea[i]->getChessName() == heroFlag && chessInBattleArea[i]->getChessLevel() == level)
+		if (chessInBattleArea[i] != nullptr
+			&& chessInBattleArea[i]->getChessName() == heroFlag && chessInBattleArea[i]->getChessLevel() == level)
 		{
-			if (delLoc_1 == -1)
-			{
-				delLoc_1 = i;
-			}
-			if (delLoc_1 != -1 && delLoc_2 == -1)
-			{
-				delLoc_2 = i;
-			}
 			chessInBattleArea[i] = nullptr;
 			count++;
 			if (count == 3)
@@ -346,4 +372,18 @@ int PlayerInfo::GetMinIndex()
 		}
 	}
 	return -1;
+}
+
+//mlx
+//更新场上棋子
+void PlayerInfo::ReBattleChess(shared_ptr<Chess> curChess, shared_ptr<Chess>newChess)
+{
+	for (int i = 0; i < chessInBattleArea.size(); i++)
+	{
+		if (chessInBattleArea[i] != nullptr && chessInBattleArea[i] == curChess)
+		{
+			chessInBattleArea[i] = newChess;
+			break;
+		}
+	}
 }

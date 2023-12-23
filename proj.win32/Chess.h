@@ -37,7 +37,8 @@ double const attackDistanceData[6] = { 3,3,2,2,1,1 };
 // 触发技能的攻击次数
 const int skillCooldowns[6] = {3,3,3,3,4,4 };
 // 英雄贴图地址  待添加
-string const chessImagePaths[6] = { "/res/DaJi.png","/res/DiaoChan.png","/res/HouYi.png","/res/DiRenJie.png","/res/XiangYu.png","/res/ZhangFei.png" };
+string const chessImagePaths[6] = { "/res/Hero/DaJi.png","/res/Hero/DiaoChan.png","/res/Hero/HouYi.png","/res/Hero/DiRenJie.png","/res/Hero/XiangYu.png","/res/Hero/ZhangFei.png" };
+
 
 
 using std::string;

@@ -97,6 +97,12 @@ void ChessBoard::OnBoard(int row, int col)
 	board[row][col] = true;
 }
 
+//mlx:棋子下场
+void ChessBoard::WithdrawBoard(int row, int col)
+{
+	board[row][col] = false;
+}
+
 //-------------------------------------------分界线-------------------------------------------//
 // 以下是有关备战席棋子如何移动到棋盘上的函数实现
 //-------------------//

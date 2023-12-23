@@ -74,6 +74,9 @@ public:
 	//mlx:得到下标最小的空位
 	int GetMinIndex();
 
+	//mlx:更新场上棋子
+	void ReBattleChess(shared_ptr<Chess> curChess, shared_ptr<Chess>newChess);
+
 	// 创建自己的商店对象
 	Market market;
 
@@ -88,6 +91,12 @@ public:
 
 	// 获取当前血量接口函数
 	int GetLifeValue() const;
+
+	// AI模式专有:设置金币数量
+	void setCoinNum(int num);
+
+	// 获取当前玩家等级
+	int getLevel()const;
 
 	// 获取当前能上场英雄最大值
 	int getMaxBattleChessNum() const;
@@ -126,7 +135,7 @@ public:
 	void arrZero(int arrName[]);
 
 	// 升星判断函数
-	void starRaiseLevel(int location, int &delLoc_1, int &delLoc_2);
+	bool starRaiseLevel(int location, int &delLoc_1, int &delLoc_2);
 
 	// 升星后低星英雄删除函数
 	void deleteLowLevelChess(int heroFlag, int level, int location, int& delLoc_1, int& delLoc_2);

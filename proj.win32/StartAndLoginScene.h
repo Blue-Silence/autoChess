@@ -38,7 +38,7 @@ public:
 
 private:
 	//预加载资源相关
-	const int totalFileNums = 46;
+	const int totalFileNums = 71;
 	int curFileNums;
 	//页面相关
 	Size pageSize;
