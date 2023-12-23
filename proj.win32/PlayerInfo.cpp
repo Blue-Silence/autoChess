@@ -85,6 +85,16 @@ int PlayerInfo::GetLifeValue() const
 	return lifeValue;
 }
 
+void PlayerInfo::setCoinNum(int num)
+{
+	coinNum = num;
+}
+
+int PlayerInfo::getLevel()const
+{
+	return level;
+}
+
 int PlayerInfo::getMaxBattleChessNum() const
 {
 	return maxBattleChessNum;

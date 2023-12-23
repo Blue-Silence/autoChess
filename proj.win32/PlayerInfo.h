@@ -89,6 +89,12 @@ public:
 	// 获取当前血量接口函数
 	int GetLifeValue() const;
 
+	// AI模式专有:设置金币数量
+	void setCoinNum(int num);
+
+	// 获取当前玩家等级
+	int getLevel()const;
+
 	// 获取当前能上场英雄最大值
 	int getMaxBattleChessNum() const;
 	// 对vector的修改函数接口

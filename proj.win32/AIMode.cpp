@@ -1,6 +1,8 @@
 
 #include "AIMode.h"
 
+int AIMode::turn = 0;
+
 //***************//
 //               //
 //  接口函数实现 //
@@ -21,7 +23,6 @@ vector<PlayerInfo>AIMode::getPlayersVectorInfo()
 // 构造函数实现
 AIMode::AIMode(int aiCount)
 {
-    turn = 0;
     // 根据AI数量创建PlayerInfo对象
     // players[1...aiCount]代表1号AI,2号AI...
     for (int i = 1; i <= aiCount; ++i)
@@ -96,14 +97,14 @@ void AIMode::initializeGame(int index)
     // 给出三种初始化阵容，根据随机数确定
     int randomNum = getRandomNumber(1, 3);
     shared_ptr<Chess> chess1, chess2, chess3;
+
+    ChessCoordinate* newPos = new ChessCoordinate;
     switch (randomNum)
     {
         case 1:
             players[index].putChessInBattleArea(make_shared<tank>(ZHANGFEI));
             players[index].putChessInBattleArea(make_shared<shooter>(DIRENJIE));
             players[index].putChessInBattleArea(make_shared<mage>(DIAOCHAN));
-
-            ChessCoordinate* newPos = new ChessCoordinate;
 
             chess1 = (*players[index].getBattleAreaChesses())[0];
             chess2 = (*players[index].getBattleAreaChesses())[1];
@@ -132,8 +133,6 @@ void AIMode::initializeGame(int index)
             players[index].putChessInBattleArea(make_shared<shooter>(HOUYI));
             players[index].putChessInBattleArea(make_shared<mage>(DAJI));
 
-            ChessCoordinate* newPos = new ChessCoordinate;
-
             chess1 = (*players[index].getBattleAreaChesses())[0];
             chess2 = (*players[index].getBattleAreaChesses())[1];
             chess3 = (*players[index].getBattleAreaChesses())[2];
@@ -161,8 +160,6 @@ void AIMode::initializeGame(int index)
             players[index].putChessInBattleArea(make_shared<shooter>(HOUYI));
             players[index].putChessInBattleArea(make_shared<mage>(DAJI));
 
-            ChessCoordinate* newPos = new ChessCoordinate;
-
             chess1 = (*players[index].getBattleAreaChesses())[0];
             chess2 = (*players[index].getBattleAreaChesses())[1];
             chess3 = (*players[index].getBattleAreaChesses())[2];
@@ -189,8 +186,6 @@ void AIMode::initializeGame(int index)
             players[index].putChessInBattleArea(make_shared<tank>(XIANGYU));
             players[index].putChessInBattleArea(make_shared<shooter>(HOUYI));
             players[index].putChessInBattleArea(make_shared<mage>(DAJI));
-
-            ChessCoordinate* newPos = new ChessCoordinate;
 
             chess1 = (*players[index].getBattleAreaChesses())[0];
             chess2 = (*players[index].getBattleAreaChesses())[1];
