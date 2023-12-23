@@ -1,11 +1,3 @@
-/********************************************
- * 功能：进入游戏界面
- * 作者：Gorgeous, VenusHui
- * 版本：1.1.0.beta
- * 游戏引擎：Cocos2d-x 4.0
- * ******************************************
- * 说明：数据仍需调整
- ********************************************/
 #pragma once
 #ifndef _PLAYSCENE_H_
 #define _PLAYSCENE_H_
@@ -97,14 +89,6 @@ private:
 	void menuBuyExpCallBack(Ref* sender);
 	// 购买棋子的点击事件
 	void BuyChess(Ref* sender,int index);
-	//按下回调
-	virtual int onTouchBegan(Touch* touch, Event* event);
-
-	//释放回调
-	virtual void onTouchEnded(Touch* touch, Event* event);
-
-	// 移动回调
-	void onMouseMove(Event* event);
 	
 };
 

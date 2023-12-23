@@ -16,16 +16,27 @@ using namespace ui;
 #include "ChessBoard.h"
 #include "StartAndLoginScene.h"
 
+//场上只允许前两排摆放
+#define RSIZE 2
+#define CSIZE 8
+
 class PreparationSeat :public Ref
 {
 private:
+	//屏幕相关
 	Size pageSize;
 	Vec2 pageCoord;
 	//备战席button集合
-	std::vector<Menu*> preAreaChessMenu;
+	std::vector<Menu*> preAreaChessMenu = vector<Menu*>(9, nullptr);
+	//对象指针
 	PlayerInfo* player;
 	ChessBoard* cBoard;
 	EventListenerMouse* listenerMouse;
+	//记录当前场上棋子数
+	int numOfBoard = 0;
+	//场上棋子位置记录
+	shared_ptr<Chess> onBoardChess[RSIZE][CSIZE];
+	Sprite* onBoardSprite[RSIZE][CSIZE];
 public:
 	// 玩家信息初始化函数
 	virtual bool init(PlayerInfo* pr, ChessBoard* board, EventListenerMouse* listener, Layer* preArea);
@@ -46,13 +57,11 @@ public:
 	//生成备战席精灵
 	void CreatePreAreaButton(shared_ptr<Chess> curHero, int index);
 
-	//上场回调函数
-	void menuToBattleCallBackCallBack(Ref* sender, Chess* curHero);
-
 	//按照下标得到备战席坐标
 	inline void GetCoordAndScale(int index, Vec2& coord, float& scale);
 
-	//绑定鼠标事件
-	void ChessBindMouseEvent(int index);
+	Sprite* ChessToBoard(const Vec2& onBoardCoord, int index);
+
+	void PromoteChessLevel(int index);
 };
 #endif

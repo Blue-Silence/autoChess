@@ -55,11 +55,6 @@ bool PlayScene::init()
 	
 	createShop(Vec2(-45 * config->getPx()->x, -45 * config->getPx()->y));	
 
-
-	
-
-
-
 	// 添加退出按钮
 	auto exitButton = StartAndLoginScene::createGameButton("/res/UI/ExitNormal.png", "/res/UI/ExitSelected.png", CC_CALLBACK_1(PlayScene::onBattleButtonClicked, this));
 
@@ -318,67 +313,11 @@ void PlayScene::BuyChess(Ref* sender, int index)
 		//备战席加入新棋子
 		shared_ptr<Chess> purchasedChess = shopModel->chessList[index];
 		playerA->chessInPreArea[location] = (purchasedChess);
-		playerA->starRaiseLevel(location, ref_delLoc_1, ref_delLoc_2);
-		purchasedChess = playerA->chessInPreArea[location];
-		preArea->CreatePreAreaButton(purchasedChess, location);
+		preArea->PromoteChessLevel(location);
 
 	}
 }
 void PlayScene::menuBuyExpCallBack(Ref* sender)
 {
 	
-}
-
-int PlayScene::onTouchBegan(Touch* touch, Event* event)
-{
-	Vec2 position = touch->getLocation();
-	if (position.x > chessBoard[1][1]->getPositionX() && position.x < chessBoard[1][9]->getPositionX() && 
-		position.y > chessBoard[1][1]->getPositionY() && position.y < chessBoard[5][1]->getPositionY()) // 鼠标在棋盘战斗区
-	{
-		CCLOG("WAR");
-		return IN_WAR_ZONE;
-	}
-	else if (position.x > chessBoard[0][1]->getPosition().x && position.x < chessBoard[0][9]->getPosition().x &&
-			 position.y > chessBoard[0][1]->getPosition().y && position.y < chessBoard[1][1]->getPosition().y)
-	{
-		CCLOG("READY");
-		return IN_READY_ZONE;
-	}
-	else
-	{
-		return NOT_IN_BOARD;
-	}
-}
-
-void PlayScene::onTouchEnded(Touch* touch, Event* event)
-{
-	Vec2 position = touch->getLocation();
-	ChessCoordinate* logPosition = coordingrevert(position);
-
-	// int clickType = PlayScene::onTouchBegan(touch, event);
-	/*switch (clickType)
-	{
-		case IN_WAR_ZONE:
-			if (board->getPlayerInfoA_WarZone_Pieces()[logPosition->getX()][logPosition->getY()] != nullptr)
-			{
-				chessBoard[logPosition->getY() + 1][logPosition->getX()]->setOpacity(50);
-			}
-			break;
-
-		case IN_READY_ZONE:
-			if (board->getPlayerInfoA_PreZone_Pieces()->at(logPosition->getX()) != nullptr)
-			{
-				chessBoard[0][logPosition->getX()]->setOpacity(50);
-			}
-			break;
-
-		default:
-			break;
-	}*/
-
-}
-
-void PlayScene::onMouseMove(Event* event)
-{
-	EventMouse* e = (EventMouse*)event;
 }

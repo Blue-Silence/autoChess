@@ -69,9 +69,9 @@ void StartAndLoginScene::LoadResource()
 {
 	GetAllMusic("res/MUSIC");
 	GetAllpng("res/Background");
-	GetAllpng("res/Books");
+	GetAllpng("res/Bond");
+	GetAllpng("res/Hero");
 	GetAllpng("res/Effect");
-	GetAllpng("res/Icons");
 	GetAllpng("res/UI");
 }
 
@@ -167,14 +167,14 @@ void StartAndLoginScene::LoadingCallBack(Ref* pSender)
 		//开始按键初始化
 		start = createGameButton("res/UI/PlayNormal.png", "res/UI/PlaySelected.png", CC_CALLBACK_1(StartAndLoginScene::MenuToPlayScene, this));
 		Size imageSize = start->getContentSize();
-		start->setPosition(Vec2(pageSize.width / 2 + pageCoord.x, 1 * pageSize.height / 6 + pageCoord.y));
-		start->setScale((pageSize.width / 10) / imageSize.width);
+		start->setPosition(Vec2(pageSize.width / 2 + pageCoord.x, 1 * pageSize.height / 4 + pageCoord.y));
+		start->setScale((pageSize.width / 4) / imageSize.width);
 		//退出按键初始化
 		exit = createGameButton("res/UI/ExitNormal.png", "res/UI/ExitSelected.png", CC_CALLBACK_1(StartAndLoginScene::MenuToExit, this));
 		imageSize = exit->getContentSize();
-		exit->setScale((pageSize.width / 10) / imageSize.width);
+		exit->setScale((pageSize.width / 4) / imageSize.width);
 		exit->setAnchorPoint(Vec2(1, 0));
-		exit->setPosition(Vec2(pageSize.width + pageCoord.x, 1 * pageSize.height / 6 + pageCoord.y));
+		exit->setPosition(Vec2(pageSize.width + pageCoord.x, 1 * pageSize.height / 9 + pageCoord.y));
 		//菜单化按键
 		Menu* menus = Menu::create(start, exit, NULL);
 		menus->setPosition(pageCoord);
