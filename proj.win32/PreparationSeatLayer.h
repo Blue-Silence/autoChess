@@ -13,6 +13,7 @@ USING_NS_CC;
 using namespace ui;
 #include "PlayerInfo.h"
 #include "Chess.h"
+#include "ConfigController.h"
 #include "ChessBoard.h"
 #include "StartAndLoginScene.h"
 
@@ -53,7 +54,12 @@ public:
 	void CallBack(Ref* sender, int index);
 	//备战席层
 	Layer* PreAreaLayer;
-
+	//羁绊图标
+	Sprite* PreviousBuffmage;
+	Sprite* PreviousBuffshooter;
+	Sprite* PreviousBufftank;
+	//羁绊图片改变
+	void PreparationSeat::ChangeBuffImage();
 	//生成备战席精灵
 	void CreatePreAreaButton(shared_ptr<Chess> curHero, int index);
 

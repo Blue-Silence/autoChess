@@ -12,7 +12,7 @@
 //-----------------------------------------------------//
 bool PlayerInfo::init()
 {
-	coinNum = 3;
+	coinNum = 50;
 	lifeValue = 50;
 	level = PLAYERLEVELINIT;
 	maxBattleChessNum = BATTLEINIT;
@@ -84,7 +84,15 @@ int PlayerInfo::GetLifeValue() const
 {
 	return lifeValue;
 }
+int PlayerInfo::getcoin() const
+{
+	return coinNum;
+}
 
+void PlayerInfo::PayForRefresh()
+{
+	coinNum -= 2;
+}
 void PlayerInfo::setCoinNum(int num)
 {
 	coinNum = num;
@@ -162,8 +170,15 @@ void PlayerInfo::removeChessFromPreArea(shared_ptr<Chess> chess)
 
 
 // 羁绊判断函数
-void PlayerInfo::buffJudgment()
+int* PlayerInfo::buffJudgment()
 {
+	int* buff = new int[3];//分别为法师，射手，坦克
+	buff[0] = 0;
+	buff[1] = 0;
+	buff[2] = 0;
+	mageNumInBattleArea = 0;
+	shooterNumInBattleArea = 0;
+	tankNumInBattleArea = 0;
 	for (int i = 0; i < chessInBattleArea.size(); ++i)
 	{
 		switch (chessInBattleArea[i]->getChessName())
@@ -191,6 +206,9 @@ void PlayerInfo::buffJudgment()
 				chessInBattleArea[i]->careerBuff();
 			}
 		}
+		buff[0] = 1;
+		int s = buff[0];
+		int a = 0;
 	}
 	if (shooterNumInBattleArea >= 2)
 	{
@@ -201,6 +219,7 @@ void PlayerInfo::buffJudgment()
 				chessInBattleArea[i]->careerBuff();
 			}
 		}
+		buff[1] = 1;
 	}
 	if (tankNumInBattleArea >= 2)
 	{
@@ -211,14 +230,9 @@ void PlayerInfo::buffJudgment()
 				chessInBattleArea[i]->careerBuff();
 			}
 		}
+		buff[2] = 1;
 	}
-	if (mageNumInBattleArea >= 1 && shooterNumInBattleArea >= 1 && tankNumInBattleArea >= 1)
-	{
-		for (int i = 0; i < chessInBattleArea.size(); ++i)
-		{
-			chessInBattleArea[i]->careerBuff();
-		}
-	}
+	return buff;
 }
 
 

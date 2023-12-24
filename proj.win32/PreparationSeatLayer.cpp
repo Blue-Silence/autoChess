@@ -79,6 +79,8 @@ void  PreparationSeat::CallBack(Ref* sender, int index)
 							player->chessInPreArea[index] = nullptr;
 							//场上棋子数+1
 							numOfBoard++;
+							//羁绊显示改变
+							ChangeBuffImage();
 						}
 					}
 					//非空位，交换
@@ -100,16 +102,61 @@ void  PreparationSeat::CallBack(Ref* sender, int index)
 							CreatePreAreaButton(onBoardChess[static_cast<int>(onBoardCoord.x)][static_cast<int>(onBoardCoord.y)], index);
 							onBoardChess[static_cast<int>(onBoardCoord.x)][static_cast<int>(onBoardCoord.y)] = chessToBoard;
 							player->ReBattleChess(chessToPre, chessToBoard);
+							ChangeBuffImage();
 						}
-
+						
 					}
 				}
 				delete boardCoord;
 			}
 		};
 }
-
-
+//显示羁绊
+void PreparationSeat::ChangeBuffImage()
+{
+	auto config = ConfigController::getInstance();
+	int n=0;//记录第几个羁绊
+	int* Buff= player->buffJudgment();
+	if (PreviousBuffmage) {
+		PreviousBuffmage->removeFromParent();
+	}
+	if (PreviousBufftank) {
+		PreviousBufftank->removeFromParent();
+	}
+	if (PreviousBuffshooter) {
+		PreviousBuffshooter->removeFromParent();
+	}
+	if (Buff[0]) {
+		n++;
+		Sprite* magebuff = Sprite::create("/res/Bond/mage.png");
+		Vec2 originSize1 = magebuff->getContentSize();
+		float scale1 = 13.5 * 16.9 / 15 * config->getPx()->x / originSize1.x;
+		magebuff->setScale(scale1);
+		magebuff->setPosition(50, 500);
+		PreAreaLayer->addChild(magebuff,5);
+		PreviousBuffmage = magebuff;
+	}
+	if (Buff[1]) {
+		Sprite* shooterbuff = Sprite::create("/res/Bond/shooter.png");
+		Vec2 originSize1 = shooterbuff->getContentSize();
+		float scale1 = 13.5 * 16.9 / 15 * config->getPx()->x / originSize1.x;
+		shooterbuff->setScale(scale1);
+		shooterbuff->setPosition(50, 500-n*50);
+		PreAreaLayer->addChild(shooterbuff, 5);
+		PreviousBuffshooter = shooterbuff;
+		n++;
+	}
+	if (Buff[2]) {
+		Sprite* tankbuff = Sprite::create("/res/Bond/tank.png");
+		Vec2 originSize1 = tankbuff->getContentSize();
+		float scale1 = 13.5 * 16.9 / 15 * config->getPx()->x / originSize1.x;
+		tankbuff->setScale(scale1);
+		tankbuff->setPosition(50, 500-n*50);
+		PreAreaLayer->addChild(tankbuff, 5);
+		PreviousBufftank = tankbuff;
+		n++;
+	}
+}
 void  PreparationSeat::CreatePreAreaButton(shared_ptr<Chess> curHero, int index)
 {
 	CC_SAFE_RETAIN(PreAreaLayer);

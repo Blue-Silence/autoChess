@@ -93,6 +93,9 @@ public:
 	// 获取当前血量接口函数
 	int GetLifeValue() const;
 
+	// 刷新扣除金币
+	void PayForRefresh();
+
 	bool isAlive() const { return lifeValue > 0; }
 
 	// AI模式专有:设置金币数量
@@ -101,6 +104,7 @@ public:
 	// 获取当前玩家等级
 	int getLevel()const;
 
+	int getcoin()const;
 	// 获取当前能上场英雄最大值
 	int getMaxBattleChessNum() const;
 	// 对vector的修改函数接口
@@ -132,7 +136,7 @@ public:
 
 
 	// 羁绊判断函数
-	void buffJudgment();
+	int* buffJudgment();
 
 	// 数组置零函数
 	void arrZero(int arrName[]);
