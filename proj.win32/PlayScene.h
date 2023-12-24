@@ -93,7 +93,9 @@ private:
 	// 对手玩家
 	PlayerInfo* playerOPP;
 
-
+	//金币显示和等级显示
+	Label* player_coin;
+	Label* player_level;
 	//备战席层
 	PreparationSeat* preArea;
 
@@ -108,6 +110,7 @@ private:
 
 	// 购买经验的点击事件
 	void menuBuyExpCallBack(Ref* sender);
+
 	// 购买棋子的点击事件
 	void BuyChess(Ref* sender,int index);
 
