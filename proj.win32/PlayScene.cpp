@@ -1,5 +1,8 @@
 #include "PlayScene.h"
 #include "StartAndLoginScene.h"
+
+#include "Hero.h"
+
 Scene* PlayScene::createScene()
 {
 	return PlayScene::create();
@@ -69,8 +72,13 @@ bool PlayScene::init()
 	///////²âÊÔÓÃ
 	
 	//////
-
-
+	{
+		auto littleHero = new Hero("/res/UI/LittleHero.png");
+		auto pos = Vec2(visibleSize.width / 2, visibleSize.height / 2);
+		littleHero->init(pos);
+		littleHero->setPosition(pos);
+		this->addChild(this, -100);
+	}
 
 
 
