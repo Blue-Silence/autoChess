@@ -69,17 +69,22 @@ bool PlayScene::init()
 	createShop(Vec2(-45 * config->getPx()->x, -45 * config->getPx()->y));
 
 
-	///////测试用
-	
-	//////
 	{
 		auto littleHero = new Hero("/res/UI/LittleHero.png");
+		if (littleHero == nullptr)
+			throw "";
 		auto pos = Vec2(visibleSize.width / 2, visibleSize.height / 2);
 		littleHero->init(pos);
 		littleHero->setPosition(pos);
-		this->addChild(this, -100);
+		littleHero->startListen();
+		this->addChild(littleHero, 6);
 	}
 
+
+	///////测试用
+	
+	//////
+	
 
 
 	// 添加退出按钮
