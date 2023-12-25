@@ -24,6 +24,7 @@ bool Hero::init(Vec2 location)
 
 
 	hero->setPosition(0, 0);
+	hero->setScale(0.2);
 	this->addChild(hero);
 
 	this->location = location;
