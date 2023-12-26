@@ -50,6 +50,12 @@ bool StartAndLoginScene::init()
 		gameLogo->setScale((pageSize.width / 2) / imageSize.width);
 		this->addChild(gameLogo);
 	}
+
+	//播放背景音乐
+	startSceneBGM = SimpleAudioEngine::getInstance();
+	startSceneBGM->playBackgroundMusic("res/Music/startScene_bgm.wav",true);
+
+	
 	//加载资源
 	curFileNums = 0;
 	loadLabel = Label::createWithTTF("0%", "fonts/Marker Felt.ttf", 50);
@@ -121,7 +127,7 @@ bool StartAndLoginScene::GetAllMusic(const std::string& path)
 		std::string contName = path;
 		contName += '/';
 		filename = contName + filename;
-		filename += ".mp3";
+		filename += ".wav";
 		//加载为bgm
 		if (filename.find("bgm") != -1)
 		{
@@ -191,6 +197,7 @@ void StartAndLoginScene::LoadingCallBack(Ref* pSender)
 void StartAndLoginScene::MenuToPlayScene(Ref* pSender)
 {
 	//Director::getInstance()->end();
+	startSceneBGM->stopBackgroundMusic();
 	Director::getInstance()->replaceScene(PlayScene::createScene());
 }
 

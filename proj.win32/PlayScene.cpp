@@ -1,5 +1,8 @@
 #include "PlayScene.h"
 #include "StartAndLoginScene.h"
+
+#include "Hero.h"
+
 Scene* PlayScene::createScene()
 {
 	return PlayScene::create();
@@ -10,6 +13,9 @@ bool PlayScene::init()
 {
 	if (!Scene::init()) // 对父类init方法的判断
 		return false;
+	//播放背景音乐
+	playSceneBGM = SimpleAudioEngine::getInstance();
+	playSceneBGM->playBackgroundMusic("res/Music/playScene_bgm.wav", true);
 
 	// 需要用到的单例工具
 	auto texture = Director::getInstance()->getTextureCache();
@@ -36,7 +42,9 @@ bool PlayScene::init()
 	Vec2 originSize = backGround->getContentSize();
 	backGround->setScale(visibleSize.height / originSize.y);
 	playLayer->addChild(backGround, 1);
-
+	//auto magebuff = cocos2d::Sprite::create("/res/Bond/mage.png");
+	//magebuff->setPosition(100, 100);
+	//playLayer->addChild(magebuff, 1);
 	// 创建棋盘
 	chessBoardModel = ChessBoard::create();
 	createBoard(Vec2(config->getPx()->x * 38, config->getPx()->y * 30));
@@ -47,39 +55,58 @@ bool PlayScene::init()
 	CC_SAFE_RETAIN(playerA);
 	CC_SAFE_RETAIN(playerOPP);
 
+	//创建金币显示
+	player_coin = Label::createWithTTF(std::to_string(playerA->getcoin()), "fonts/Marker Felt.ttf", 30);
+	player_coin->setPosition(Vec2(760, 140));
+	playLayer->addChild(player_coin, 5);
+	Sprite* coinImage = Sprite::create("/res/UI/coin.png");
+	coinImage->setPosition(Vec2(800, 140));
+	coinImage->setScale(0.07);
+	playLayer->addChild(coinImage, 5);
+
 	//初始化备战席
-	preArea = PreparationSeat::create(playerA, chessBoardModel, mouseListener, playLayer);
+	preArea = PreparationSeat::create(playerA, chessBoardModel, mouseListener, playLayer, &isInBattle,player_coin);
 	CC_SAFE_RETAIN(preArea);
+
+
+	//创建等级显示
+	player_level = Label::createWithTTF(std::to_string(playerA->getLevel()), "fonts/Marker Felt.ttf", 30);
+	player_level->setPosition(Vec2(760, 90));
+	playLayer->addChild(player_level, 5);
+	Sprite* levelImage = Sprite::create("res/UI/Level.png");
+	levelImage->setPosition(Vec2(800, 90));
+	levelImage->setScale(0.07);
+	playLayer->addChild(levelImage, 5);
+	// 创建血量显示
+	player_lifevalue = Label::createWithTTF(std::to_string(playerA->GetLifeValue()), "fonts/Marker Felt.ttf", 30);
+	player_lifevalue->setPosition(Vec2(760, 40));
+	playLayer->addChild(player_lifevalue, 5);
+	Sprite* lifeValue = Sprite::create("res/UI/lifeValue.png");
+	lifeValue->setPosition(Vec2(800, 40));
+	lifeValue->setScale(0.07);
+	playLayer->addChild(lifeValue, 5);
 
 	// 创建商店
 	
 	createShop(Vec2(-45 * config->getPx()->x, -45 * config->getPx()->y));
 
 
+	{
+		auto littleHero = new Hero("/res/UI/LittleHero.png");
+		if (littleHero == nullptr)
+			throw "";
+		auto pos = Vec2(visibleSize.width / 2, visibleSize.height / 2);
+		littleHero->init(pos);
+		littleHero->setPosition(pos);
+		littleHero->startListen();
+		this->addChild(littleHero, 6);
+	}
+
+
 	///////测试用
-	playerA->putChessInBattleArea(make_shared<shooter>(HOUYI));
-	playerA->putChessInBattleArea(make_shared<shooter>(DIRENJIE));
-
-	ChessCoordinate* newPos = new ChessCoordinate;
-
-	shared_ptr<Chess> daji = (*playerA->getBattleAreaChesses())[0];
-	shared_ptr<Chess> diaochan = (*playerA->getBattleAreaChesses())[1];
-
-	daji->setChessCoordinateByType(Vec2(3, 0), CoordinateType::chessBoardCoordinates);
-	CoordinateConvert(CoordinateType::screenCoordinates, Vec2(3, 0), newPos);
-	daji->setChessCoordinateByType(Vec2(newPos->getX(), newPos->getY()), CoordinateType::screenCoordinates);
-	//this->addChild(daji->createChess(Vec2(newPos->getX(), newPos->getY())));
-
-	diaochan->setChessCoordinateByType(Vec2(2, 1), CoordinateType::chessBoardCoordinates);
-	CoordinateConvert(CoordinateType::screenCoordinates, Vec2(2, 1), newPos);
-	diaochan->setChessCoordinateByType(Vec2(newPos->getX(), newPos->getY()), CoordinateType::screenCoordinates);
-	//this->addChild(diaochan->createChess(Vec2(newPos->getX(), newPos->getY())));
-
-	delete newPos;
+	
 	//////
-
-
-
+	
 
 
 	// 添加退出按钮
@@ -108,7 +135,7 @@ bool PlayScene::init()
 
 
 	// 调度启动update()函数，开始战斗
-	this->scheduleUpdate();
+	//this->scheduleUpdate();
 	
 
 	
@@ -370,73 +397,137 @@ void PlayScene::menuPieceCardCallBack(Ref* sender)
 void PlayScene::menuFreshShopCallBack(Ref* sender)
 {
 	auto config = ConfigController::getInstance();
-	shopModel = Market::create();
-	shopModel->RefreshMarket();
-	if(previousMenu){
-		previousMenu->removeFromParent();
+	if(playerA->getcoin()>=2)
+	{
+		playerA->PayForRefresh();
+		player_coin->setString(std::to_string(playerA->getcoin()));
+		shopModel = Market::create();
+		shopModel->RefreshMarket();
+		if (previousMenu) {
+			previousMenu->removeFromParent();
+		}
+
+
+		auto chess1 = StartAndLoginScene::createGameButton(shopModel->chessList[0]->getChessImagePath(), shopModel->chessList[0]->getChessImagePath(), CC_CALLBACK_1(PlayScene::BuyChess, this, 0));
+		auto chess2 = StartAndLoginScene::createGameButton(shopModel->chessList[1]->getChessImagePath(), shopModel->chessList[1]->getChessImagePath(), CC_CALLBACK_1(PlayScene::BuyChess, this, 1));
+		auto chess3 = StartAndLoginScene::createGameButton(shopModel->chessList[2]->getChessImagePath(), shopModel->chessList[2]->getChessImagePath(), CC_CALLBACK_1(PlayScene::BuyChess, this, 2));
+		auto chess4 = StartAndLoginScene::createGameButton(shopModel->chessList[3]->getChessImagePath(), shopModel->chessList[3]->getChessImagePath(), CC_CALLBACK_1(PlayScene::BuyChess, this, 3));
+		auto chess5 = StartAndLoginScene::createGameButton(shopModel->chessList[4]->getChessImagePath(), shopModel->chessList[4]->getChessImagePath(), CC_CALLBACK_1(PlayScene::BuyChess, this, 4));
+		chess1->setName("chess1");
+		chess2->setName("chess2");
+		chess3->setName("chess3");
+		chess4->setName("chess4");
+		chess5->setName("chess5");
+
+		Vec2 originSize1 = chess1->getContentSize();
+		float scale1 = 13.5 * 16.9 / 15 * config->getPx()->x / originSize1.x;
+		Vec2 originSize2 = chess2->getContentSize();
+		float scale2 = 13.5 * 16.9 / 15 * config->getPx()->x / originSize2.x;
+		Vec2 originSize3 = chess3->getContentSize();
+		float scale3 = 13.5 * 16.9 / 15 * config->getPx()->x / originSize3.x;
+		Vec2 originSize4 = chess4->getContentSize();
+		float scale4 = 13.5 * 16.9 / 15 * config->getPx()->x / originSize4.x;
+		Vec2 originSize5 = chess5->getContentSize();
+		float scale5 = 13.5 * 16.9 / 15 * config->getPx()->x / originSize5.x;
+		chess1->setScale(scale1);
+		chess2->setScale(scale2);
+		chess3->setScale(scale3);
+		chess4->setScale(scale4);
+		chess5->setScale(scale5);
+		chess1->setPosition(280, 80);
+		chess2->setPosition(280 + 100, 80);
+		chess3->setPosition(280 + 200, 80);
+		chess4->setPosition(280 + 300, 80);
+		chess5->setPosition(280 + 400, 80);
+		auto menu = Menu::create(chess1, chess2, chess3, chess4, chess5, NULL);
+		menu->setPosition(Vec2::ZERO);
+		menu->setName("ChessMenu");
+		playLayer->addChild(menu, 7);
+		previousMenu = menu;
+
+		//增加引用计数
+		CC_SAFE_RETAIN(shopModel);
 	}
-	
-	
-	auto chess1 = StartAndLoginScene::createGameButton(shopModel->chessList[0]->getChessImagePath(), shopModel->chessList[0]->getChessImagePath(), CC_CALLBACK_1(PlayScene::BuyChess, this,0));
-	auto chess2 = StartAndLoginScene::createGameButton(shopModel->chessList[1]->getChessImagePath(), shopModel->chessList[1]->getChessImagePath(), CC_CALLBACK_1(PlayScene::BuyChess, this,1));
-	auto chess3 = StartAndLoginScene::createGameButton(shopModel->chessList[2]->getChessImagePath(), shopModel->chessList[2]->getChessImagePath(), CC_CALLBACK_1(PlayScene::BuyChess, this,2));
-	auto chess4 = StartAndLoginScene::createGameButton(shopModel->chessList[3]->getChessImagePath(), shopModel->chessList[3]->getChessImagePath(), CC_CALLBACK_1(PlayScene::BuyChess, this,3));
-	auto chess5 = StartAndLoginScene::createGameButton(shopModel->chessList[4]->getChessImagePath(), shopModel->chessList[4]->getChessImagePath(), CC_CALLBACK_1(PlayScene::BuyChess, this,4));
-	chess1->setName("chess1");
-	chess2->setName("chess2");
-	chess3->setName("chess3");
-	chess4->setName("chess4");
-	chess5->setName("chess5");
+	else {
+		// 创建一个 Label，当没钱时显示
+		cocos2d::Label* label = cocos2d::Label::createWithTTF("No money!!!", "fonts/Marker Felt.ttf", 24);
+		label->setPosition(cocos2d::Vec2(500, 200));
+		this->addChild(label);
+		auto delayAction = cocos2d::DelayTime::create(1.0f);
+		auto removeLabel = cocos2d::CallFunc::create([label]() {
+			label->removeFromParent();
+			});
 
-	Vec2 originSize1 = chess1->getContentSize();
-	float scale1 = 13.5 * 16.9 / 15 * config->getPx()->x / originSize1.x;
-	Vec2 originSize2 = chess2->getContentSize();
-	float scale2 = 13.5 * 16.9 / 15 * config->getPx()->x / originSize2.x;
-	Vec2 originSize3 = chess3->getContentSize();
-	float scale3 = 13.5 * 16.9 / 15 * config->getPx()->x / originSize3.x;
-	Vec2 originSize4 = chess4->getContentSize();
-	float scale4 = 13.5 * 16.9 / 15 * config->getPx()->x / originSize4.x;
-	Vec2 originSize5 = chess5->getContentSize();
-	float scale5 = 13.5 * 16.9 / 15 * config->getPx()->x / originSize5.x;
-	chess1->setScale(scale1);
-	chess2->setScale(scale2);
-	chess3->setScale(scale3);
-	chess4->setScale(scale4);
-	chess5->setScale(scale5);
-	chess1->setPosition(280, 80);
-	chess2->setPosition(280+100, 80);
-	chess3->setPosition(280 + 200, 80);
-	chess4->setPosition(280 + 300, 80);
-	chess5->setPosition(280 + 400, 80);
-	auto menu = Menu::create(chess1,chess2,chess3,chess4,chess5, NULL);
-	menu->setPosition(Vec2::ZERO);
-	menu->setName("ChessMenu");
-	playLayer->addChild(menu, 7);
-	previousMenu = menu;
+		// 创建一个顺序动作，先延时，然后移除 Label
+		auto sequence = cocos2d::Sequence::create(delayAction, removeLabel, nullptr);
 
-	//增加引用计数
-	CC_SAFE_RETAIN(shopModel);
+		// 在 Label 上运行这个顺序动作
+		label->runAction(sequence);
+	}
 }
 
 //购买棋子的回调函数！！！
 void PlayScene::BuyChess(Ref* sender, int index)
 {
-	int location = playerA->GetMinIndex();
-	int delLoc_1 = -1;
-	int delLoc_2 = -1;
-	int& ref_delLoc_1 = delLoc_1;
-	int& ref_delLoc_2 = delLoc_2;
-	if (sender && location != -1) {
-		MenuItemImage* myButton = static_cast<MenuItemImage*>(sender);
-		myButton->removeFromParent();
-		//备战席加入新棋子
-		shared_ptr<Chess> purchasedChess = shopModel->chessList[index];
-		playerA->chessInPreArea[location] = (purchasedChess);
-		preArea->PromoteChessLevel(location);
+	if (playerA->getcoin() >= 3)
+	{
+		int location = playerA->GetMinIndex();
+		int delLoc_1 = -1;
+		int delLoc_2 = -1;
+		int& ref_delLoc_1 = delLoc_1;
+		int& ref_delLoc_2 = delLoc_2;
+		if (sender && location != -1) {
+			MenuItemImage* myButton = static_cast<MenuItemImage*>(sender);
+			myButton->removeFromParent();
+			playerA->payForHero();
+			player_coin->setString(std::to_string(playerA->getcoin()));
+			//备战席加入新棋子
+			shared_ptr<Chess> purchasedChess = shopModel->chessList[index];
+			playerA->chessInPreArea[location] = (purchasedChess);
+			preArea->PromoteChessLevel(location);
 
+		}
 	}
+	else
+	{
+		cocos2d::Label* label = cocos2d::Label::createWithTTF("No money!!!", "fonts/Marker Felt.ttf", 24);
+		label->setPosition(cocos2d::Vec2(500, 200));
+		this->addChild(label);
+		auto delayAction = cocos2d::DelayTime::create(1.0f);
+		auto removeLabel = cocos2d::CallFunc::create([label]() {
+			label->removeFromParent();
+			});
+
+		// 创建一个顺序动作，先延时，然后移除 Label
+		auto sequence = cocos2d::Sequence::create(delayAction, removeLabel, nullptr);
+
+		// 在 Label 上运行这个顺序动作
+		label->runAction(sequence);
+	}
+	
 }
+
+//升级回调函数
 void PlayScene::menuBuyExpCallBack(Ref* sender)
 {
-	
+	if (playerA->getcoin() >= 4) {
+		playerA->ChangeLevel();
+		player_level->setString(std::to_string(playerA->getLevel()));
+		player_coin->setString(std::to_string(playerA->getcoin()));
+	}
+	else {
+		cocos2d::Label* label = cocos2d::Label::createWithTTF("No money!!!", "fonts/Marker Felt.ttf", 24);
+		label->setPosition(cocos2d::Vec2(500, 200));
+		this->addChild(label);
+		auto delayAction = cocos2d::DelayTime::create(1.0f);
+		auto removeLabel = cocos2d::CallFunc::create([label]() {
+			label->removeFromParent();
+			});
+
+		// 创建一个顺序动作，先延时，然后移除 Label
+		auto sequence = cocos2d::Sequence::create(delayAction, removeLabel, nullptr);
+
+		// 在 Label 上运行这个顺序动作
+		label->runAction(sequence);
+	}
 }

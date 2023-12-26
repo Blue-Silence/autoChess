@@ -51,6 +51,9 @@ private:
 	// 当前玩家战斗区坦克数量
 	int tankNumInBattleArea;
 
+	// 当前玩家的羁绊增益
+	int buff[3];
+
 	// 记录当前玩家全部棋子中各英雄的数量的数组
 	int heroOneStarNumArr[HERONUM];
 	int heroTwoStarNumArr[HERONUM];
@@ -93,6 +96,16 @@ public:
 	// 获取当前血量接口函数
 	int GetLifeValue() const;
 
+	// 刷新扣除金币
+	void PayForRefresh();
+
+	// 购买英雄扣除金币
+	void payForHero();
+
+	// 根据英雄星级出售英雄增加金币
+	int getSellCoin(int index);
+
+	// 判断玩家是否还存活
 	bool isAlive() const { return lifeValue > 0; }
 
 	// AI模式专有:设置金币数量
@@ -101,6 +114,7 @@ public:
 	// 获取当前玩家等级
 	int getLevel()const;
 
+	int getcoin()const;
 	// 获取当前能上场英雄最大值
 	int getMaxBattleChessNum() const;
 	// 对vector的修改函数接口
@@ -141,7 +155,7 @@ public:
 
 
 	// 羁绊判断函数
-	void buffJudgment();
+	int* buffJudgment();
 
 	// 数组置零函数
 	void arrZero(int arrName[]);

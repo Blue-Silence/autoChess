@@ -8,6 +8,9 @@ USING_NS_CC;
 #include "ui/CocosGUI.h" 
 using namespace ui;
 
+#include "SimpleAudioEngine.h"
+using namespace CocosDenshion;
+
 #include <vector>
 using std::vector;
 
@@ -93,9 +96,17 @@ private:
 	// 对手玩家
 	PlayerInfo* playerOPP;
 
+	//金币显示和等级显示
+	Label* player_coin;
+	Label* player_level;
+	Label* player_lifevalue;
 
 	//备战席层
 	PreparationSeat* preArea;
+	SimpleAudioEngine* playSceneBGM;
+
+	//背景音乐
+
 
 	// 退出按钮的点击事件
 	void menuExitCallBack(Ref* sender);
@@ -108,6 +119,7 @@ private:
 
 	// 购买经验的点击事件
 	void menuBuyExpCallBack(Ref* sender);
+
 	// 购买棋子的点击事件
 	void BuyChess(Ref* sender,int index);
 
