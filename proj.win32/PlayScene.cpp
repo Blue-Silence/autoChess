@@ -13,6 +13,9 @@ bool PlayScene::init()
 {
 	if (!Scene::init()) // 对父类init方法的判断
 		return false;
+	//播放背景音乐
+	playSceneBGM = SimpleAudioEngine::getInstance();
+	playSceneBGM->playBackgroundMusic("res/Music/playScene_bgm.wav", true);
 
 	// 需要用到的单例工具
 	auto texture = Director::getInstance()->getTextureCache();
@@ -53,17 +56,34 @@ bool PlayScene::init()
 	CC_SAFE_RETAIN(playerOPP);
 
 	//初始化备战席
-	preArea = PreparationSeat::create(playerA, chessBoardModel, mouseListener, playLayer);
+	preArea = PreparationSeat::create(playerA, chessBoardModel, mouseListener, playLayer, &isInBattle);
 	CC_SAFE_RETAIN(preArea);
 
 	//创建金币显示
 	player_coin = Label::createWithTTF(std::to_string(playerA->getcoin()), "fonts/Marker Felt.ttf", 30);
-	player_coin->setPosition(Vec2(850,100));
+	player_coin->setPosition(Vec2(760, 140));
 	playLayer->addChild(player_coin, 5);
+	Sprite* coinImage = Sprite::create("/res/UI/coin.png");
+	coinImage->setPosition(Vec2(800, 140));
+	coinImage->setScale(0.07);
+	playLayer->addChild(coinImage, 5);
 	//创建等级显示
 	player_level = Label::createWithTTF(std::to_string(playerA->getLevel()), "fonts/Marker Felt.ttf", 30);
-	player_level->setPosition(Vec2(850, 70));
+	player_level->setPosition(Vec2(760, 90));
 	playLayer->addChild(player_level, 5);
+	Sprite* levelImage = Sprite::create("res/UI/Level.png");
+	levelImage->setPosition(Vec2(800, 90));
+	levelImage->setScale(0.07);
+	playLayer->addChild(levelImage, 5);
+	// 创建血量显示
+	player_lifevalue = Label::createWithTTF(std::to_string(playerA->GetLifeValue()), "fonts/Marker Felt.ttf", 30);
+	player_lifevalue->setPosition(Vec2(760, 40));
+	playLayer->addChild(player_lifevalue, 5);
+	Sprite* lifeValue = Sprite::create("res/UI/lifeValue.png");
+	lifeValue->setPosition(Vec2(800, 40));
+	lifeValue->setScale(0.07);
+	playLayer->addChild(lifeValue, 5);
+
 	// 创建商店
 	
 	createShop(Vec2(-45 * config->getPx()->x, -45 * config->getPx()->y));

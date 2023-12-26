@@ -48,6 +48,8 @@ private:
 	//开始和结束按键
 	MenuItemSprite* start;
 	MenuItemSprite* exit;
+	//背景音乐
+	SimpleAudioEngine* startSceneBGM;
 
 
 	//加载资源

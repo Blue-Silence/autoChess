@@ -38,13 +38,15 @@ private:
 	//场上棋子位置记录
 	shared_ptr<Chess> onBoardChess[RSIZE][CSIZE];
 	Sprite* onBoardSprite[RSIZE][CSIZE];
+	//是否在战斗中
+	bool* inBattle;
 public:
 	// 玩家信息初始化函数
-	virtual bool init(PlayerInfo* pr, ChessBoard* board, EventListenerMouse* listener, Layer* preArea);
+	virtual bool init(PlayerInfo* pr, ChessBoard* board, EventListenerMouse* listener, Layer* preArea, bool* battle);
 
 	// 创建对象
-	static PreparationSeat* create(PlayerInfo* pr, ChessBoard* board, EventListenerMouse* listener, Layer* preArea) {
-		PreparationSeat* pRet = new(std::nothrow) PreparationSeat(); if (pRet && pRet->init(pr, board, listener, preArea)) {
+	static PreparationSeat* create(PlayerInfo* pr, ChessBoard* board, EventListenerMouse* listener, Layer* preArea, bool* battle) {
+		PreparationSeat* pRet = new(std::nothrow) PreparationSeat(); if (pRet && pRet->init(pr, board, listener, preArea, battle)) {
 			pRet->autorelease(); return pRet;
 		}
 		else {

@@ -6,12 +6,13 @@
 * 函数返回值：
 * 函数注意事项：加载完成后显示“开始游戏”和“退出游戏”菜单
 */
-bool PreparationSeat::init(PlayerInfo* pr, ChessBoard* board, EventListenerMouse* listener, Layer* preArea)
+bool PreparationSeat::init(PlayerInfo* pr, ChessBoard* board, EventListenerMouse* listener, Layer* preArea,bool* battle)
 {
 	PreAreaLayer = preArea;
 	cBoard = board;
 	player = pr;
 	listenerMouse = listener;
+	inBattle = battle;
 	preAreaChessMenu.resize(9);
 	pageSize = Director::getInstance()->getVisibleSize();
 	pageCoord = Director::getInstance()->getVisibleOrigin();
@@ -29,87 +30,90 @@ inline void PreparationSeat::GetCoordAndScale(int index, Vec2& coord, float& sca
 
 void  PreparationSeat::CallBack(Ref* sender, int index)
 {
-	Menu* myButton = static_cast<Menu*>(sender);
-	int* counter = new int;
-	*counter = 0;
-	auto tp = listenerMouse;
-	listenerMouse->onMouseDown = [this, myButton, index, counter, tp](EventMouse* Event)
-		{
-			if (*counter == 1)
+	if (!(*inBattle))
+	{
+		Menu* myButton = static_cast<Menu*>(sender);
+		int* counter = new int;
+		*counter = 0;
+		auto tp = listenerMouse;
+		listenerMouse->onMouseDown = [this, myButton, index, counter, tp](EventMouse* Event)
 			{
-				tp->onMouseDown = [](EventMouse* Event) {};
-				delete counter;
-				return;
-			}
-			(*counter)++;
-			//获取鼠标位置
-			auto mouseX = Event->getCursorX();
-			auto mouseY = Event->getCursorY();
-			Vec2 coord = Vec2(mouseX, mouseY);
-			ChessCoordinate* boardCoord = new ChessCoordinate;
-			//判断鼠标点击是否在棋盘上
-			if (ChessBoard::isInBoard(coord))
-			{
-				//得到棋盘坐标
-				CoordinateConvert(CoordinateType::chessBoardCoordinates, coord, boardCoord);
-				Vec2 onBoardCoord;
-				onBoardCoord.x = boardCoord->getY();
-				onBoardCoord.y = boardCoord->getX();
-
-				if (onBoardCoord.x <= 1)
+				if (*counter == 1)
 				{
-					//是空位，考虑是否最大个数
-					if (this->cBoard->isAvailable(onBoardCoord.x, onBoardCoord.y))
-					{
-						//在选中状态下，清除备战席棋子，棋子上场
-						if (myButton->isVisible() && numOfBoard < player->getMaxBattleChessNum())
-						{
-							myButton->setVisible(false);
-							//精灵上场、记录
-							onBoardSprite[static_cast<int>(onBoardCoord.x)][static_cast<int>(onBoardCoord.y)] = ChessToBoard(onBoardCoord, index);
-							auto chess = player->chessInPreArea[index];
-							/*chess->setChessCoordinateByType(Vec2(boardCoord->getX(), boardCoord->getY()), CoordinateType::chessBoardCoordinates);
-							ChessCoordinate* screenPos = new ChessCoordinate;
-							CoordinateConvert(CoordinateType::screenCoordinates, Vec2(boardCoord->getX(), boardCoord->getY()), screenPos);
-							chess->setChessCoordinateByType(Vec2(screenPos->getX(), screenPos->getY()), CoordinateType::screenCoordinates);
-							delete screenPos;*/
-							player->putChessInBattleArea(chess);
-							//棋子记录
-							onBoardChess[static_cast<int>(onBoardCoord.x)][static_cast<int>(onBoardCoord.y)] = chess;
-							player->chessInPreArea[index] = nullptr;
-							//场上棋子数+1
-							numOfBoard++;
-							//羁绊显示改变
-							ChangeBuffImage();
-						}
-					}
-					//非空位，交换
-					else {
-						//在选中状态下，清除备战席棋子，棋子上场
-						if (myButton->isVisible())
-						{
-							//清除
-							myButton->setVisible(false);
-							onBoardSprite[static_cast<int>(onBoardCoord.x)][static_cast<int>(onBoardCoord.y)]->removeFromParent();
-
-							//交换记录
-							shared_ptr<Chess> chessToBoard = player->chessInPreArea[index];
-							shared_ptr<Chess> chessToPre = onBoardChess[static_cast<int>(onBoardCoord.x)][static_cast<int>(onBoardCoord.y)];
-							//精灵上场、记录
-							onBoardSprite[static_cast<int>(onBoardCoord.x)][static_cast<int>(onBoardCoord.y)] = ChessToBoard(onBoardCoord, index);
-							//备战席图像更新
-							player->chessInPreArea[index] = chessToPre;
-							CreatePreAreaButton(onBoardChess[static_cast<int>(onBoardCoord.x)][static_cast<int>(onBoardCoord.y)], index);
-							onBoardChess[static_cast<int>(onBoardCoord.x)][static_cast<int>(onBoardCoord.y)] = chessToBoard;
-							player->ReBattleChess(chessToPre, chessToBoard);
-							ChangeBuffImage();
-						}
-						
-					}
+					tp->onMouseDown = [](EventMouse* Event) {};
+					delete counter;
+					return;
 				}
-				delete boardCoord;
-			}
-		};
+				(*counter)++;
+				//获取鼠标位置
+				auto mouseX = Event->getCursorX();
+				auto mouseY = Event->getCursorY();
+				Vec2 coord = Vec2(mouseX, mouseY);
+				ChessCoordinate* boardCoord = new ChessCoordinate;
+				//判断鼠标点击是否在棋盘上
+				if (ChessBoard::isInBoard(coord))
+				{
+					//得到棋盘坐标
+					CoordinateConvert(CoordinateType::chessBoardCoordinates, coord, boardCoord);
+					Vec2 onBoardCoord;
+					onBoardCoord.x = boardCoord->getY();
+					onBoardCoord.y = boardCoord->getX();
+
+					if (onBoardCoord.x <= 1)
+					{
+						//是空位，考虑是否最大个数
+						if (this->cBoard->isAvailable(onBoardCoord.x, onBoardCoord.y))
+						{
+							//在选中状态下，清除备战席棋子，棋子上场
+							if (myButton->isVisible() && numOfBoard < player->getMaxBattleChessNum())
+							{
+								myButton->setVisible(false);
+								//精灵上场、记录
+								onBoardSprite[static_cast<int>(onBoardCoord.x)][static_cast<int>(onBoardCoord.y)] = ChessToBoard(onBoardCoord, index);
+								auto chess = player->chessInPreArea[index];
+								/*chess->setChessCoordinateByType(Vec2(boardCoord->getX(), boardCoord->getY()), CoordinateType::chessBoardCoordinates);
+								ChessCoordinate* screenPos = new ChessCoordinate;
+								CoordinateConvert(CoordinateType::screenCoordinates, Vec2(boardCoord->getX(), boardCoord->getY()), screenPos);
+								chess->setChessCoordinateByType(Vec2(screenPos->getX(), screenPos->getY()), CoordinateType::screenCoordinates);
+								delete screenPos;*/
+								player->putChessInBattleArea(chess);
+								//棋子记录
+								onBoardChess[static_cast<int>(onBoardCoord.x)][static_cast<int>(onBoardCoord.y)] = chess;
+								player->chessInPreArea[index] = nullptr;
+								//场上棋子数+1
+								numOfBoard++;
+								//羁绊显示改变
+								ChangeBuffImage();
+							}
+						}
+						//非空位，交换
+						else {
+							//在选中状态下，清除备战席棋子，棋子上场
+							if (myButton->isVisible())
+							{
+								//清除
+								myButton->setVisible(false);
+								onBoardSprite[static_cast<int>(onBoardCoord.x)][static_cast<int>(onBoardCoord.y)]->removeFromParent();
+
+								//交换记录
+								shared_ptr<Chess> chessToBoard = player->chessInPreArea[index];
+								shared_ptr<Chess> chessToPre = onBoardChess[static_cast<int>(onBoardCoord.x)][static_cast<int>(onBoardCoord.y)];
+								//精灵上场、记录
+								onBoardSprite[static_cast<int>(onBoardCoord.x)][static_cast<int>(onBoardCoord.y)] = ChessToBoard(onBoardCoord, index);
+								//备战席图像更新
+								player->chessInPreArea[index] = chessToPre;
+								CreatePreAreaButton(onBoardChess[static_cast<int>(onBoardCoord.x)][static_cast<int>(onBoardCoord.y)], index);
+								onBoardChess[static_cast<int>(onBoardCoord.x)][static_cast<int>(onBoardCoord.y)] = chessToBoard;
+								player->ReBattleChess(chessToPre, chessToBoard);
+								ChangeBuffImage();
+							}
+
+						}
+					}
+					delete boardCoord;
+				}
+			};
+	}
 }
 //显示羁绊
 void PreparationSeat::ChangeBuffImage()
