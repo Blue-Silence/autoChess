@@ -447,20 +447,42 @@ void PlayScene::menuFreshShopCallBack(Ref* sender)
 //购买棋子的回调函数！！！
 void PlayScene::BuyChess(Ref* sender, int index)
 {
-	int location = playerA->GetMinIndex();
-	int delLoc_1 = -1;
-	int delLoc_2 = -1;
-	int& ref_delLoc_1 = delLoc_1;
-	int& ref_delLoc_2 = delLoc_2;
-	if (sender && location != -1) {
-		MenuItemImage* myButton = static_cast<MenuItemImage*>(sender);
-		myButton->removeFromParent();
-		//备战席加入新棋子
-		shared_ptr<Chess> purchasedChess = shopModel->chessList[index];
-		playerA->chessInPreArea[location] = (purchasedChess);
-		preArea->PromoteChessLevel(location);
+	if (playerA->getcoin() >= 3)
+	{
+		int location = playerA->GetMinIndex();
+		int delLoc_1 = -1;
+		int delLoc_2 = -1;
+		int& ref_delLoc_1 = delLoc_1;
+		int& ref_delLoc_2 = delLoc_2;
+		if (sender && location != -1) {
+			MenuItemImage* myButton = static_cast<MenuItemImage*>(sender);
+			myButton->removeFromParent();
+			playerA->payForHero();
+			player_coin->setString(std::to_string(playerA->getcoin()));
+			//备战席加入新棋子
+			shared_ptr<Chess> purchasedChess = shopModel->chessList[index];
+			playerA->chessInPreArea[location] = (purchasedChess);
+			preArea->PromoteChessLevel(location);
 
+		}
 	}
+	else
+	{
+		cocos2d::Label* label = cocos2d::Label::createWithTTF("No money!!!", "fonts/Marker Felt.ttf", 24);
+		label->setPosition(cocos2d::Vec2(500, 200));
+		this->addChild(label);
+		auto delayAction = cocos2d::DelayTime::create(1.0f);
+		auto removeLabel = cocos2d::CallFunc::create([label]() {
+			label->removeFromParent();
+			});
+
+		// 创建一个顺序动作，先延时，然后移除 Label
+		auto sequence = cocos2d::Sequence::create(delayAction, removeLabel, nullptr);
+
+		// 在 Label 上运行这个顺序动作
+		label->runAction(sequence);
+	}
+	
 }
 
 //升级回调函数

@@ -51,6 +51,9 @@ private:
 	// 当前玩家战斗区坦克数量
 	int tankNumInBattleArea;
 
+	// 当前玩家的羁绊增益
+	int buff[3];
+
 	// 记录当前玩家全部棋子中各英雄的数量的数组
 	int heroOneStarNumArr[HERONUM];
 	int heroTwoStarNumArr[HERONUM];
@@ -95,6 +98,9 @@ public:
 
 	// 刷新扣除金币
 	void PayForRefresh();
+
+	//购买英雄扣除金币
+	void payForHero();
 
 	bool isAlive() const { return lifeValue > 0; }
 

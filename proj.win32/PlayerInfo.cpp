@@ -93,6 +93,12 @@ void PlayerInfo::PayForRefresh()
 {
 	coinNum -= 2;
 }
+
+void PlayerInfo::payForHero()
+{
+	coinNum -= 3;
+}
+
 void PlayerInfo::setCoinNum(int num)
 {
 	coinNum = num;
@@ -172,7 +178,7 @@ void PlayerInfo::removeChessFromPreArea(shared_ptr<Chess> chess)
 // 羁绊判断函数
 int* PlayerInfo::buffJudgment()
 {
-	int* buff = new int[3];//分别为法师，射手，坦克
+	//int* buff = new int[3];//分别为法师，射手，坦克
 	buff[0] = 0;
 	buff[1] = 0;
 	buff[2] = 0;
