@@ -104,12 +104,15 @@ int PlayerInfo::getSellCoin(int index)
 	switch (chessInPreArea[index]->getChessLevel())
 	{
 		case 1:
+			coinNum += 3;
 			return 3;
 			break;
 		case 2:
+			coinNum += 6;
 			return 6;
 			break;
 		case 3:
+			coinNum += 9;
 			return 9;
 			break;
 		default:

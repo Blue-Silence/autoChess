@@ -6,7 +6,7 @@
 * 函数返回值：
 * 函数注意事项：加载完成后显示“开始游戏”和“退出游戏”菜单
 */
-bool PreparationSeat::init(PlayerInfo* pr, ChessBoard* board, EventListenerMouse* listener, Layer* preArea,bool* battle)
+bool PreparationSeat::init(PlayerInfo* pr, ChessBoard* board, EventListenerMouse* listener, Layer* preArea,bool* battle, Label* player_coin)
 {
 	PreAreaLayer = preArea;
 	cBoard = board;
@@ -16,7 +16,15 @@ bool PreparationSeat::init(PlayerInfo* pr, ChessBoard* board, EventListenerMouse
 	preAreaChessMenu.resize(9);
 	pageSize = Director::getInstance()->getVisibleSize();
 	pageCoord = Director::getInstance()->getVisibleOrigin();
-	//设置大小
+	playerCoin = player_coin;
+	//设置出售席
+	auto sellOutArea = StartAndLoginScene::createGameButton("/res/UI/sellOut.png", "/res/UI/sellOut.png", CC_CALLBACK_1(PreparationSeat::SellOut, this));
+	sellOutArea->setPosition(Vec2(900, 200));
+	sellOutArea->setScale(0.16);
+	auto sellMenu = Menu::create(sellOutArea, NULL);
+	sellMenu->setPosition(Vec2::ZERO);
+	sellMenu->setName("PreAreaMenu");
+	PreAreaLayer->addChild(sellMenu, 8);
 	return true;
 }
 
@@ -30,6 +38,8 @@ inline void PreparationSeat::GetCoordAndScale(int index, Vec2& coord, float& sca
 
 void  PreparationSeat::CallBack(Ref* sender, int index)
 {
+	curHero.first = static_cast<Menu*>(sender);
+	curHero.second = index;
 	if (!(*inBattle))
 	{
 		Menu* myButton = static_cast<Menu*>(sender);
@@ -71,11 +81,6 @@ void  PreparationSeat::CallBack(Ref* sender, int index)
 								//精灵上场、记录
 								onBoardSprite[static_cast<int>(onBoardCoord.x)][static_cast<int>(onBoardCoord.y)] = ChessToBoard(onBoardCoord, index);
 								auto chess = player->chessInPreArea[index];
-								/*chess->setChessCoordinateByType(Vec2(boardCoord->getX(), boardCoord->getY()), CoordinateType::chessBoardCoordinates);
-								ChessCoordinate* screenPos = new ChessCoordinate;
-								CoordinateConvert(CoordinateType::screenCoordinates, Vec2(boardCoord->getX(), boardCoord->getY()), screenPos);
-								chess->setChessCoordinateByType(Vec2(screenPos->getX(), screenPos->getY()), CoordinateType::screenCoordinates);
-								delete screenPos;*/
 								player->putChessInBattleArea(chess);
 								//棋子记录
 								onBoardChess[static_cast<int>(onBoardCoord.x)][static_cast<int>(onBoardCoord.y)] = chess;
@@ -260,4 +265,18 @@ void PreparationSeat::PromoteChessLevel(int index)
 	}
 	//购买棋子加入备战席
 	CreatePreAreaButton(curHero, index);
+}
+
+//出售回调函数
+void PreparationSeat::SellOut(Ref* sender)
+{
+	if (curHero.first != nullptr && curHero.first->isVisible())
+	{
+		//出售棋子
+		player->getSellCoin(curHero.second);
+		player->chessInPreArea[curHero.second] = nullptr;
+		playerCoin->setString(std::to_string(player->getcoin()));
+		//移除图像
+		curHero.first->removeFromParent();
+	}
 }

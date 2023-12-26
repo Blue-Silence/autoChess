@@ -55,10 +55,6 @@ bool PlayScene::init()
 	CC_SAFE_RETAIN(playerA);
 	CC_SAFE_RETAIN(playerOPP);
 
-	//初始化备战席
-	preArea = PreparationSeat::create(playerA, chessBoardModel, mouseListener, playLayer, &isInBattle);
-	CC_SAFE_RETAIN(preArea);
-
 	//创建金币显示
 	player_coin = Label::createWithTTF(std::to_string(playerA->getcoin()), "fonts/Marker Felt.ttf", 30);
 	player_coin->setPosition(Vec2(760, 140));
@@ -67,6 +63,12 @@ bool PlayScene::init()
 	coinImage->setPosition(Vec2(800, 140));
 	coinImage->setScale(0.07);
 	playLayer->addChild(coinImage, 5);
+
+	//初始化备战席
+	preArea = PreparationSeat::create(playerA, chessBoardModel, mouseListener, playLayer, &isInBattle,player_coin);
+	CC_SAFE_RETAIN(preArea);
+
+
 	//创建等级显示
 	player_level = Label::createWithTTF(std::to_string(playerA->getLevel()), "fonts/Marker Felt.ttf", 30);
 	player_level->setPosition(Vec2(760, 90));

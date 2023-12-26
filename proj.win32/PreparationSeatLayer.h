@@ -7,6 +7,8 @@
 #ifndef _PREPARATIONSEATLAYER_H_
 #define  _PREPARATIONSEATLAYER_H_
 
+#include <utility>
+
 #include "cocos2d.h"
 USING_NS_CC;
 #include "ui/CocosGUI.h" 
@@ -33,6 +35,7 @@ private:
 	PlayerInfo* player;
 	ChessBoard* cBoard;
 	EventListenerMouse* listenerMouse;
+	Label* playerCoin;
 	//记录当前场上棋子数
 	int numOfBoard = 0;
 	//场上棋子位置记录
@@ -40,13 +43,15 @@ private:
 	Sprite* onBoardSprite[RSIZE][CSIZE];
 	//是否在战斗中
 	bool* inBattle;
+	//当前选中备战席
+	pair < Menu*, int >curHero = { nullptr, -1 };
 public:
 	// 玩家信息初始化函数
-	virtual bool init(PlayerInfo* pr, ChessBoard* board, EventListenerMouse* listener, Layer* preArea, bool* battle);
+	virtual bool init(PlayerInfo* pr, ChessBoard* board, EventListenerMouse* listener, Layer* preArea, bool* battle,Label* player_coin);
 
 	// 创建对象
-	static PreparationSeat* create(PlayerInfo* pr, ChessBoard* board, EventListenerMouse* listener, Layer* preArea, bool* battle) {
-		PreparationSeat* pRet = new(std::nothrow) PreparationSeat(); if (pRet && pRet->init(pr, board, listener, preArea, battle)) {
+	static PreparationSeat* create(PlayerInfo* pr, ChessBoard* board, EventListenerMouse* listener, Layer* preArea, bool* battle, Label* player_coin) {
+		PreparationSeat* pRet = new(std::nothrow) PreparationSeat(); if (pRet && pRet->init(pr, board, listener, preArea, battle,player_coin)) {
 			pRet->autorelease(); return pRet;
 		}
 		else {
@@ -71,5 +76,8 @@ public:
 	Sprite* ChessToBoard(const Vec2& onBoardCoord, int index);
 
 	void PromoteChessLevel(int index);
+
+	//卖出备战席棋子的回调函数
+	void SellOut(Ref* sender);
 };
 #endif
