@@ -18,7 +18,7 @@ private:
 
     int liveAINum=0;
 
-    int turn;
+    int turn=0;
 
 public:
     //-------------------//

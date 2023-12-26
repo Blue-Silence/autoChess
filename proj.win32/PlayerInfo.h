@@ -18,7 +18,7 @@ const int BATTLEMAX = 7;
 const int BATTLEINIT = 3;
 const int PLAYERLEVELMAX = 10;
 const int PLAYERLEVELINIT = 1;
-const int BATTLE_LAYER_TAG = 100;
+
 //mlx:此处为不报错，注意更改
 //hjw:已修改
 const int HERONUM = 6;
@@ -123,6 +123,15 @@ public:
 
 	// 从玩家备战区移去棋子
 	void removeChessFromPreArea(shared_ptr<Chess> chess);
+
+	// 获取场上法师数量
+	int getMagesNum() { return mageNumInBattleArea; }
+
+	// 获取场上战士数量
+	int getTankNum() { return tankNumInBattleArea; }
+
+	// 获取场上射手数量
+	int getShooterNum() { return shooterNumInBattleArea; }
 
 	// 以下是有关羁绊判断和升级星级的判断
 	//-------------------//

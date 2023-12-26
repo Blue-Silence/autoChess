@@ -518,14 +518,14 @@ Sprite* tank::createAttack()
 
 	// 取路径中的图片代表普通攻击，这里也写死了
 	if (chessName == XIANGYU)
-		attackImage = Sprite::createWithTexture(texture->getTextureForKey("/res/Attack/tank/normal/XIANGYU"));
+		attackImage = Sprite::create("/res/Attack/tank/normal/XIANGYU");
 	else
-		attackImage = Sprite::createWithTexture(texture->getTextureForKey("/res/Attack/tank/normal/ZHNAGFEI"));
+		attackImage = Sprite::create("/res/Attack/tank/normal/ZHNAGFEI");
 
 	// 后续再调整
 	// 可以根据需要设置攻击精灵的位置和缩放
 	// 这里假设我们将攻击放置在棋子的旁边
-	Vec2 attackPosition = chessImage->getPosition() + Vec2(100, 0); // 举例，右侧100像素
+	Vec2 attackPosition = chessImage->getPosition(); // 举例，右侧100像素
 	attackImage->setPosition(attackPosition);
 
 	// 可以设置其他属性，比如缩放、旋转等
@@ -546,7 +546,7 @@ Sprite* tank::createSkill()
 	// 后续再调整
 	// 可以根据需要设置攻击精灵的位置和缩放
 	// 这里假设我们将攻击放置在棋子的旁边
-	Vec2 attackPosition = chessImage->getPosition() + Vec2(100, 0); // 举例，右侧100像素
+	Vec2 attackPosition = chessImage->getPosition();// 举例，右侧100像素
 	skillImage->setPosition(attackPosition);
 
 	// 可以设置其他属性，比如缩放、旋转等

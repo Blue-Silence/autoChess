@@ -253,7 +253,7 @@ void AIMode::initializeGame(int index)
 // 随等级增加而增加英雄
 void AIMode::addHero()
 {
-    for (int i = 1; i <= players.size(); ++i)
+    for (int i = 1; i < players.size(); ++i)
     {
         if (players[i].getLevel() == 3 || players[i].getLevel() == 5 || players[i].getLevel() == 7 || players[i].getLevel() == 9)
         {
@@ -312,7 +312,7 @@ void AIMode::addHero()
 // 提升玩家等级(每2回合提升一次等级)
 void AIMode::promoteLevel()
 {
-    for (int i = 1; i <= players.size(); ++i)
+    for (int i = 1; i < players.size(); ++i)
     {
         if (turn % 2 == 0)
         {
@@ -324,9 +324,9 @@ void AIMode::promoteLevel()
 // 提升英雄星级(回合数为2 5 7 10随机提升一个英雄星级)
 void AIMode::promoteHeroStar()
 {
-    for (int i = 1; i <= players.size(); ++i)
+    for (int i = 1; i < players.size(); ++i)
     {
-        int randomNum = getRandomNumber(1, players[i].getMaxBattleChessNum());
+        int randomNum = getRandomNumber(0, players[i].getMaxBattleChessNum()-1);
         if (turn == 2 || turn == 5 || turn == 7 || turn == 10)
         {
             if ((*players[i].getBattleAreaChesses())[randomNum]->getChessLevel() == 1)

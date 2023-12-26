@@ -6,6 +6,7 @@
 #pragma once
 #include"PlayerInfo.h"
 #include"ChessBoard.h"
+#include "audio/include/SimpleAudioEngine.h"
 
 class BattleLayer :public Layer
 {
@@ -31,7 +32,7 @@ public:
 		return nullptr;
 	}
 
-	void chessInitBeforeBattle(shared_ptr<Chess> chess);
+	void chessInitBeforeBattle(shared_ptr<Chess> chess,bool isME);
 
 	//计算两个棋子之间的曼哈顿距离，输入参数为两个棋子的棋格坐标
 	double getDistance(ChessCoordinate* start, ChessCoordinate* end);

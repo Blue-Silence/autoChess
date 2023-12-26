@@ -3,8 +3,6 @@
 
 
 
-
-
 void BattleLayer::AItest()
 {
 	
@@ -63,7 +61,7 @@ void BattleLayer::AItest()
 }
 
 // 战斗前初始化棋子的战斗数据
-void BattleLayer::chessInitBeforeBattle(shared_ptr<Chess> chess)
+void BattleLayer::chessInitBeforeBattle(shared_ptr<Chess> chess,bool isME)
 {
 	
 	chess->state = Chess::State::Idle;
@@ -76,12 +74,15 @@ void BattleLayer::chessInitBeforeBattle(shared_ptr<Chess> chess)
 	chess->inGameScreenCoordinate.setX(chess->getChessCoordinateByType(CoordinateType::screenCoordinates)->getX());
 	chess->inGameScreenCoordinate.setY(chess->getChessCoordinateByType(CoordinateType::screenCoordinates)->getY());
 	
+	if (!isME)
+	{
+		chess->createChess(Vec2(chess->inGameScreenCoordinate.getX(), chess->inGameScreenCoordinate.getY()));
+		addChild(chess->getChessSprite());
+		
+	}
 	
-	chess->createChess(Vec2(chess->inGameScreenCoordinate.getX(), chess->inGameScreenCoordinate.getY()));
-	addChild(chess->getChessSprite());
-	
-
 	chess->getChessSprite()->setVisible(true);
+	
 
 	boardInGame[chess->inGameChessBoardCoordinate.getY()][chess->inGameChessBoardCoordinate.getX()] = 1;
 	// 更新红蓝条
@@ -99,6 +100,15 @@ inline bool BattleLayer::isAvailable(int row, int col)
 
 bool BattleLayer::init()
 {
+
+	// 加载音效 
+	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("/res/Music/张飞大招.wav");
+	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("/res/Music/弓箭.wav");
+	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("/res/Music/daji.wav");
+	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("/res/Music/onlinedo-output(1).wav");
+	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("/res/Music/onlinedo-output(2).wav");
+	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("/res/Music/victory.wav");
+	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("/res/Music/defeat.wav");
 	gameOver = false;
 
 	memset(boardInGame, 0, sizeof boardInGame);
@@ -108,12 +118,13 @@ bool BattleLayer::init()
 
 	for (shared_ptr<Chess> chess : *playerME->getBattleAreaChesses())
 	{
-		chessInitBeforeBattle(chess);
+		
+		chessInitBeforeBattle(chess,true);
 	}
 
 	for (shared_ptr<Chess> chess : *playerOPP->getBattleAreaChesses())
 	{
-		chessInitBeforeBattle(chess);
+		chessInitBeforeBattle(chess,false);
 	}
 
 
@@ -147,7 +158,7 @@ void BattleLayer::update(float delta)
 	{
 		// 取消对update函数的调度
 		this->unscheduleUpdate();
-
+		
 
 		// 战后清算
 		//detectWinner();
@@ -157,14 +168,39 @@ void BattleLayer::update(float delta)
 		this->addChild(delayNode); // 添加到当前层
 
 		// 创建延时动作
-		auto delayAction = DelayTime::create(1.0f); // 2秒延时
+		auto delayAction = DelayTime::create(2.0f); // 2秒延时
 
-		auto callbackAction = CallFunc::create([this, delayNode]() {
+		auto callbackActionForEnd = CallFunc::create([this, delayNode]() {
 			detectWinner();
+			// 清理音效
+			auto audio = CocosDenshion::SimpleAudioEngine::getInstance();
+			audio->unloadEffect("/res/Music/张飞大招.wav");
+			audio->unloadEffect("/res/Music/弓箭.wav");
+			audio->unloadEffect("/res/Music/daji.wav");
+			audio->unloadEffect("/res/Music/onlinedo-output (1).wav");
+			audio->unloadEffect("/res/Music/onlinedo-output (2).wav");
+			audio->unloadEffect("/res/Music/victory.wav");
+			audio->unloadEffect("/res/Music/defeat.wav");
+			
+
 			});
 
+		auto callbackActionForStart = CallFunc::create([this, delayNode]() {
+
+			for (auto chess : *playerME->getBattleAreaChesses())
+			{
+				//chess->getChessSprite()->removeFromParent();
+				auto chessImage = chess->getChessSprite();
+				auto chessScreenPos = chess->getChessCoordinateByType(CoordinateType::screenCoordinates);
+				chessImage->setPosition(Vec2(chessScreenPos->getX(), chessScreenPos->getY()));
+				chessImage->setVisible(true);
+			}
+			*isInBattle = false;
+			});
+		
+
 		// 创建动作序列
-		auto sequence = Sequence::create(delayAction,callbackAction, nullptr);
+		auto sequence = Sequence::create(delayAction,callbackActionForEnd,callbackActionForStart, nullptr);
 
 		// 运行动作
 		delayNode->runAction(sequence);
@@ -181,10 +217,7 @@ void BattleLayer::detectWinner()
 	int surviveNumOPP = 0;
 
 	for (auto chess : *playerME->getBattleAreaChesses())
-	{
-		chess->getChessSprite()->removeFromParent();
-		//auto chessImage = chess->getChessSprite();
-		//chessImage->setVisible(false);
+	{	
 		if (chess->isDead())
 			continue;
 		surviveNumMe++;	
@@ -228,11 +261,12 @@ void BattleLayer::detectWinner()
 		auto callback = CallFunc::create([victoryImage,this]()
 			{
 				victoryImage->removeFromParent();
-				*isInBattle = false;
+				
 			});
 
 		// 组合动作
 		Sequence* sequence = Sequence::create(endAction, endActionReverse, callback,nullptr);
+		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("/res/Music/victory.wav");
 		victoryImage->runAction(sequence);
 		
 	}
@@ -260,10 +294,11 @@ void BattleLayer::detectWinner()
 		auto callback = CallFunc::create([defeatImage,this]()
 			{
 				defeatImage->removeFromParent();
-				*isInBattle = false;
+				
 			});
 		// 组合动作
 		Sequence* sequence = Sequence::create(endAction, endActionReverse,callback, nullptr);
+		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("/res/Music/defeat.wav");
 		defeatImage->runAction(sequence);
 	}
 	else 
@@ -288,7 +323,7 @@ void BattleLayer::detectWinner()
 		auto callback = CallFunc::create([drawImage,this]()
 			{
 				drawImage->removeFromParent();
-				*isInBattle = false;
+				
 			});
 		// 组合动作
 		Sequence* sequence = Sequence::create(endAction, endActionReverse,callback, nullptr);
@@ -305,7 +340,7 @@ void BattleLayer::playGame(shared_ptr<Chess> chess,PlayerInfo* opp)
 	{
 		shared_ptr<Chess> targetChess = findEnemy(chess, opp);
 		// 没有攻击目标，游戏结束了
-		if (targetChess == nullptr || gameOver)
+		if (targetChess == nullptr )
 		{
 			gameOver = true;
 		}
@@ -313,16 +348,17 @@ void BattleLayer::playGame(shared_ptr<Chess> chess,PlayerInfo* opp)
 	}
 	// 棋子处于移动状态但没有在移动时需要调用
 	else if (chess->state == Chess::State::Moving && !chess->isMoving)
-	{
+	{  
+		double distance = getDistance(&(chess->inGameChessBoardCoordinate), &(chess->targetChess->inGameChessBoardCoordinate));
+		
 		// 进入攻击范围了，不需要再移动了，设置棋子状态为攻击
-		if (getDistance(&chess->inGameChessBoardCoordinate,
-			&chess->targetChess->inGameChessBoardCoordinate)
-			< (chess->getChessCondition()->improvedAttackDistance+1))
+		if (distance < (chess->getChessCondition()->improvedAttackDistance + 1))
 		{
 			chess->isMoving = false;
 			chess->state = Chess::State::Attacking;
 			// 注意，虽然进入攻击状态，但还没有开始攻击
 			chess->isAttacking = false;
+			return;
 		}
 		// 设置为开始移动，必须等findPathToEnemy()执行完毕后在函数结尾将isMoving重新置为false才能进入本分支再次调用
 		chess->isMoving = true;
@@ -364,7 +400,7 @@ double BattleLayer::getDistance(ChessCoordinate* start,ChessCoordinate* end)
 // 寻找攻击目标，选择距离最近的敌方英雄
 shared_ptr<Chess> BattleLayer::findEnemy(shared_ptr<Chess> damageMaker, PlayerInfo* enemy)
 {
-	double distance = 999;
+	double distance = 9999;
 
 	shared_ptr<Chess> targetChess = nullptr;
 
@@ -373,10 +409,10 @@ shared_ptr<Chess> BattleLayer::findEnemy(shared_ptr<Chess> damageMaker, PlayerIn
 		if (chess->isDead())
 			continue;
 
-		int tmp = getDistance(&damageMaker->inGameChessBoardCoordinate,
+		double tmp = getDistance(&damageMaker->inGameChessBoardCoordinate,
 			(&chess->inGameChessBoardCoordinate));
 
-		if (tmp < distance)
+		if (tmp <= distance)
 		{
 			targetChess = chess;
 			distance = tmp;
@@ -400,16 +436,7 @@ shared_ptr<Chess> BattleLayer::findEnemy(shared_ptr<Chess> damageMaker, PlayerIn
 // 将精灵移动到指定位置，坐标需为屏幕坐标
 void BattleLayer::moveChess(shared_ptr<Chess> movingChess,Vec2 targetPosition)
 {
-	// 移动前先更新棋盘坐标，抢占位置，避免位置冲突
-	ChessCoordinate* newPos = new ChessCoordinate;
-	CoordinateConvert(CoordinateType::chessBoardCoordinates, targetPosition, newPos);
-	int oldRow = movingChess->inGameChessBoardCoordinate.getY();
-	int oldCol = movingChess->inGameChessBoardCoordinate.getX();
-	boardInGame[oldRow][oldCol] = 0;
-	movingChess->inGameChessBoardCoordinate.setX(newPos->getX());
-	movingChess->inGameChessBoardCoordinate.setY(newPos->getY());
-	boardInGame[newPos->getY()][newPos->getX()] = 1;
-	delete newPos;
+	
 
 	// 开始移动
 	Sprite* movingChessImage = movingChess->getChessSprite();
@@ -419,7 +446,9 @@ void BattleLayer::moveChess(shared_ptr<Chess> movingChess,Vec2 targetPosition)
 		{
 			
 			// 移动完成后的处理
-			// 移动完成才更新棋子在游戏中的屏幕坐标
+			// 移动完成才更新棋子在游戏中的坐标
+			// 移动前先更新棋盘坐标，抢占位置，避免位置冲突
+			
 			movingChess->inGameScreenCoordinate.setX(int(targetPosition.x));
 			movingChess->inGameScreenCoordinate.setY(int(targetPosition.y));
 			
@@ -458,24 +487,35 @@ void BattleLayer::findPathToEnemy(shared_ptr<Chess> damageMaker, shared_ptr<Ches
 	// 先走y方向
 	if (yOfdamageMaker < yOftargetChess && isAvailable(yOfdamageMaker + 1, xOfdamageMaker))
 	{
+		boardInGame[yOfdamageMaker][xOfdamageMaker] = 0;
+		boardInGame[yOfdamageMaker + 1][xOfdamageMaker] = 1;
 		dy = 1;
 	}
 	else if (yOfdamageMaker > yOftargetChess && isAvailable(yOfdamageMaker - 1, xOfdamageMaker))
 	{
+		boardInGame[yOfdamageMaker][xOfdamageMaker] = 0;
+		boardInGame[yOfdamageMaker - 1][xOfdamageMaker] = 1;
 		dy = -1;
 	}
 	// 再走x方向
 	else if (xOfdamageMaker < xOftargetChess && isAvailable(yOfdamageMaker, xOfdamageMaker + 1))
 	{
+		boardInGame[yOfdamageMaker][xOfdamageMaker] = 0;
+		boardInGame[yOfdamageMaker][xOfdamageMaker + 1] = 1;
 		dx = 1;
 	}
 	else if (xOfdamageMaker > xOftargetChess && isAvailable(yOfdamageMaker, xOfdamageMaker - 1))
 	{
+		boardInGame[yOfdamageMaker][xOfdamageMaker] = 0;
+		boardInGame[yOfdamageMaker][xOfdamageMaker - 1] = 1;
 		dx = -1;
 	}
-	
 
+	
 	CoordinateConvert(CoordinateType::screenCoordinates, Vec2(int(xOfdamageMaker + dx),int(yOfdamageMaker + dy)), newPos);
+
+	damageMaker->inGameChessBoardCoordinate.setX(int(xOfdamageMaker + dx));
+	damageMaker->inGameChessBoardCoordinate.setY(int(yOfdamageMaker + dy));
 	damageMaker->targetPos = Vec2(newPos->getX(),newPos->getY());
 	delete newPos;
 	moveChess(damageMaker, damageMaker->targetPos);
@@ -512,7 +552,12 @@ void BattleLayer::doAttack(shared_ptr<Chess> damageMaker, shared_ptr<Chess> targ
 		float angleDegrees = CC_RADIANS_TO_DEGREES(-angleRadians);
 		// 设置技能贴图的初始旋转角度
 		damageMakerSkillImage->setRotation(angleDegrees);
-
+		Vec2 OriginSize = damageMakerSkillImage->getContentSize();
+		// 缩放大小由config一起控制
+		auto config = ConfigController::getInstance();
+		float ScaleX = 8 * config->getPx()->x / OriginSize.x;
+		float ScaleY = OriginSize.y * 8 * config->getPx()->x / (OriginSize.y * OriginSize.x);
+		damageMakerSkillImage->setScale(ScaleX, ScaleY);
 		// 把技能的贴图添加到当前层或场景中
 		this->addChild(damageMakerSkillImage);
 		// 移动到目标所需的时间，以秒为单位
@@ -530,6 +575,8 @@ void BattleLayer::doAttack(shared_ptr<Chess> damageMaker, shared_ptr<Chess> targ
 		// 击中目标后的数值处理
 		auto callback = CallFunc::create([this, targetRow, targetCol, damageMaker, targetEnemy, damageMakerImage, targetChessImage]()
 			{
+				
+
 				// 数值逻辑
 				damageMaker->skill(*targetEnemy);
 				// 更新对手生命条进度
@@ -542,9 +589,7 @@ void BattleLayer::doAttack(shared_ptr<Chess> damageMaker, shared_ptr<Chess> targ
 				// 判断自己是否死了
 				if (damageMaker->isDead())
 				{
-
 					damageMaker->state = Chess::State::Dead;
-
 				}
 
 				// 对方已死，停止攻击,重新开始寻找攻击目标
@@ -559,11 +604,18 @@ void BattleLayer::doAttack(shared_ptr<Chess> damageMaker, shared_ptr<Chess> targ
 
 				damageMaker->isAttacking = false;
 			});
-
+			
 			// 组合动作
 			auto sequence = Sequence::create(skillAttack, callback, nullptr);
+			
 			// 执行技能动画和逻辑计算
 			damageMakerSkillImage->runAction(sequence);
+			if (damageMaker->getChessName() == ZHANGFEI)
+				CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("/res/Music/张飞大招.wav");
+			else if (damageMaker->getChessName() == DAJI)
+				CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("/res/Music/daji.wav");
+			else
+				CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("/res/Music/onlinedo-output (1).wav");
 		
 	}
 	// 进行一次普通攻击，待添加音效
@@ -586,7 +638,12 @@ void BattleLayer::doAttack(shared_ptr<Chess> damageMaker, shared_ptr<Chess> targ
 			float angleDegrees = CC_RADIANS_TO_DEGREES(-angleRadians);
 			// 设置技能贴图的初始旋转角度
 			damageMakerAttackImage->setRotation(angleDegrees);
-
+			Vec2 OriginSize = damageMakerAttackImage->getContentSize();
+			// 缩放大小由config一起控制
+			auto config = ConfigController::getInstance();
+			float ScaleX = 8 * config->getPx()->x / OriginSize.x;
+			float ScaleY = OriginSize.y * 8 * config->getPx()->x / (OriginSize.y * OriginSize.x);
+			damageMakerAttackImage->setScale(ScaleX, ScaleY);
 			// 把普通攻击的贴图添加到当前层或场景中
 			this->addChild(damageMakerAttackImage);
 			// 移动到目标所需的时间，以秒为单位
@@ -632,8 +689,14 @@ void BattleLayer::doAttack(shared_ptr<Chess> damageMaker, shared_ptr<Chess> targ
 					damageMaker->isAttacking = false;
 				});
 			auto sequence = Sequence::create(normalAttack, callback, nullptr);
+			
+			
 			// 执行技能动画和逻辑计算
 			damageMakerAttackImage->runAction(sequence);
+			if (damageMaker->getChessName() == HOUYI)
+				CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("/res/Music/弓箭.wav");
+			else
+				CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("/res/Music/onlinedo-output (2).wav");
 			
 		}
 		else
@@ -648,6 +711,7 @@ void BattleLayer::doAttack(shared_ptr<Chess> damageMaker, shared_ptr<Chess> targ
 			// 技能移动到目标位置击中目标后的处理
 			auto callback = CallFunc::create([this, targetRow, targetCol, damageMaker, targetEnemy, damageMakerImage,targetChessImage]()
 				{
+					
 					// 数值逻辑
 					damageMaker->attackOne(*targetEnemy);
 
@@ -679,8 +743,11 @@ void BattleLayer::doAttack(shared_ptr<Chess> damageMaker, shared_ptr<Chess> targ
 					damageMaker->isAttacking = false;
 			});
 			auto sequence = Sequence::create(normalAttack, callback, nullptr);
+			
+			
 			// 执行技能动画和逻辑计算
 			damageMakerImage->runAction(sequence);
+			CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("/res/Music/onlinedo-output (2).wav");
 		}
 	}
 }
