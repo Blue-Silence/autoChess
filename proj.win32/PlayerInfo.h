@@ -99,9 +99,13 @@ public:
 	// 刷新扣除金币
 	void PayForRefresh();
 
-	//购买英雄扣除金币
+	// 购买英雄扣除金币
 	void payForHero();
 
+	// 根据英雄星级出售英雄增加金币
+	int getSellCoin(int index);
+
+	// 判断玩家是否还存活
 	bool isAlive() const { return lifeValue > 0; }
 
 	// AI模式专有:设置金币数量

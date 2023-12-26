@@ -99,6 +99,25 @@ void PlayerInfo::payForHero()
 	coinNum -= 3;
 }
 
+int PlayerInfo::getSellCoin(int index)
+{
+	switch (chessInPreArea[index]->getChessLevel())
+	{
+		case 1:
+			return 3;
+			break;
+		case 2:
+			return 6;
+			break;
+		case 3:
+			return 9;
+			break;
+		default:
+			return 0;
+			break;
+	}
+}
+
 void PlayerInfo::setCoinNum(int num)
 {
 	coinNum = num;
