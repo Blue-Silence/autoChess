@@ -1,3 +1,7 @@
+/******************************************************/
+/*                  文件名：AIMode.h                  */
+/*                  功能：AI玩家的信息                */
+/******************************************************/
 #pragma once
 #ifndef _AIMODE_H_
 #define _AIMODE_H_
@@ -12,21 +16,23 @@ private:
     // 存储所有玩家和AI的信息
     vector<PlayerInfo> players;
 
+    // 存储我方棋盘信息
     int chessBoard[BOARDMAXR][BOARDMAXC] = { 0 };
 
+    // 总的AI玩家数目
     int totalAINum = 0;
 
-    int liveAINum=0;
+    // 存活的AI玩家数目
+    int liveAINum = 0;
 
-    int turn=0;
+    // 回合数
+    int turn = 0;
 
 public:
     //-------------------//
     //     接口函数      //
     //-------------------//
     vector<PlayerInfo>* getPlayersVectorInfo();
-
-    
 
     //-------------------//
     //     功能函数      //
@@ -40,9 +46,6 @@ public:
 
     // 声明赋值运算符
     AIMode& operator=(const AIMode& other);
-
-    // 重载后置递增运算符 主要功能便于回合数+1
-   // AIMode operator++(int);
 
     // AI玩家阵亡一个
     void deleteOneAI() { liveAINum--; }
@@ -69,7 +72,6 @@ public:
     void promoteHeroStar();            
 
     // 集成每个回合结束后需要进行的工作 注意在调用该函数前回合数需要+1
-    // 即在该函数前一定要有AIMode实例的后置++操作
     void eachTurnOver();                     
 };
 

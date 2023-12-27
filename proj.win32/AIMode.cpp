@@ -1,7 +1,9 @@
+/******************************************************/
+/*                  文件名：AIMode.cpp                */
+/*                  功能：AI玩家的信息                */
+/******************************************************/
 
 #include "AIMode.h"
-
-//int AIMode::turn = 0;
 
 //***************//
 //               //
@@ -25,7 +27,6 @@ AIMode::AIMode(int aiCount)
 {
     // 根据AI数量创建PlayerInfo对象
     // players[1...aiCount]代表1号AI,2号AI...
-    
     players.emplace_back(*PlayerInfo::create());
 
     totalAINum = aiCount;
@@ -39,14 +40,16 @@ AIMode::AIMode(int aiCount)
     }
 }
 
-
+// 随机扣血函数
 void AIMode::randomBloodLose(int AIInBattle)
 {
     turn++;
     for (int i = 1; i <= totalAINum; ++i)
     {
         if (i == AIInBattle || !players[i].isAlive())
+        {
             continue;
+        }
         
        // 扣除一定的血量
         players[i].DecreaseLifeValue(players[i].getLevel() + i % 5);
@@ -95,13 +98,6 @@ AIMode& AIMode::operator=(const AIMode& other)
     return *this;
 }
 
-//// 重载后置递增运算符
-//AIMode AIMode::operator++(int)
-//{
-//    AIMode temp(*this); // 创建一个临时对象保存当前状态
-//    turn++;             // 对 turn 进行递增
-//    return temp;        // 返回保存的临时对象
-//}
 
 // 随机数获取 范围minNum - maxNum
 int AIMode::getRandomNumber(int minNum, int maxNum)
@@ -119,10 +115,11 @@ void AIMode::initializeGame(int index)
 {
     // 给出三种初始化阵容，根据随机数确定
     int randomNum = getRandomNumber(1, 3);
+
     shared_ptr<Chess> chess1, chess2, chess3;
    
-
     ChessCoordinate* newPos = new ChessCoordinate;
+
     switch (randomNum)
     {
         case 1:
@@ -137,23 +134,18 @@ void AIMode::initializeGame(int index)
             chess1->setChessCoordinateByType(Vec2(3, 3), CoordinateType::chessBoardCoordinates);
             CoordinateConvert(CoordinateType::screenCoordinates, Vec2(3, 3), newPos);
             chess1->setChessCoordinateByType(Vec2(newPos->getX(), newPos->getY()), CoordinateType::screenCoordinates);
-            //this->addChild(chess1->createChess(Vec2(newPos->getX(), newPos->getY())));
-            //chess1->getChessSprite()->setVisible(false);
             
 
             chess2->setChessCoordinateByType(Vec2(3, 4), CoordinateType::chessBoardCoordinates);
             CoordinateConvert(CoordinateType::screenCoordinates, Vec2(3, 4), newPos);
             chess2->setChessCoordinateByType(Vec2(newPos->getX(), newPos->getY()), CoordinateType::screenCoordinates);
-            //this->addChild(chess2->createChess(Vec2(newPos->getX(), newPos->getY())));
-            //chess2->getChessSprite()->setVisible(false);
 
             chess3->setChessCoordinateByType(Vec2(2, 3), CoordinateType::chessBoardCoordinates);
             CoordinateConvert(CoordinateType::screenCoordinates, Vec2(2, 3), newPos);
             chess3->setChessCoordinateByType(Vec2(newPos->getX(), newPos->getY()), CoordinateType::screenCoordinates);
-            //this->addChild(chess3->createChess(Vec2(newPos->getX(), newPos->getY())));
-            //chess3->getChessSprite()->setVisible(false);
 
             chessBoard[3][3] = chessBoard[3][4] = chessBoard[2][3] = 1;
+
             delete newPos;
             break;
         case 2:
@@ -168,22 +160,17 @@ void AIMode::initializeGame(int index)
             chess1->setChessCoordinateByType(Vec2(4, 3), CoordinateType::chessBoardCoordinates);
             CoordinateConvert(CoordinateType::screenCoordinates, Vec2(4, 3), newPos);
             chess1->setChessCoordinateByType(Vec2(newPos->getX(), newPos->getY()), CoordinateType::screenCoordinates);
-            //this->addChild(chess1->createChess(Vec2(newPos->getX(), newPos->getY())));
-            //chess1->getChessSprite()->setVisible(false);
 
             chess2->setChessCoordinateByType(Vec2(3, 4), CoordinateType::chessBoardCoordinates);
             CoordinateConvert(CoordinateType::screenCoordinates, Vec2(3, 4), newPos);
             chess2->setChessCoordinateByType(Vec2(newPos->getX(), newPos->getY()), CoordinateType::screenCoordinates);
-            //this->addChild(chess2->createChess(Vec2(newPos->getX(), newPos->getY())));
-            //chess2->getChessSprite()->setVisible(false);
 
             chess3->setChessCoordinateByType(Vec2(3, 3), CoordinateType::chessBoardCoordinates);
             CoordinateConvert(CoordinateType::screenCoordinates, Vec2(3, 3), newPos);
             chess3->setChessCoordinateByType(Vec2(newPos->getX(), newPos->getY()), CoordinateType::screenCoordinates);
-            //this->addChild(chess3->createChess(Vec2(newPos->getX(), newPos->getY())));
-            //chess3->getChessSprite()->setVisible(false);
 
             chessBoard[4][3] = chessBoard[3][4] = chessBoard[3][3] = 1;
+
             delete newPos;
             break;
         case 3:
@@ -198,22 +185,17 @@ void AIMode::initializeGame(int index)
             chess1->setChessCoordinateByType(Vec2(5, 3), CoordinateType::chessBoardCoordinates);
             CoordinateConvert(CoordinateType::screenCoordinates, Vec2(5, 3), newPos);
             chess1->setChessCoordinateByType(Vec2(newPos->getX(), newPos->getY()), CoordinateType::screenCoordinates);
-            //this->addChild(chess1->createChess(Vec2(newPos->getX(), newPos->getY())));
-            //chess1->getChessSprite()->setVisible(false);
 
             chess2->setChessCoordinateByType(Vec2(4, 4), CoordinateType::chessBoardCoordinates);
             CoordinateConvert(CoordinateType::screenCoordinates, Vec2(4, 4), newPos);
             chess2->setChessCoordinateByType(Vec2(newPos->getX(), newPos->getY()), CoordinateType::screenCoordinates);
-            //this->addChild(chess2->createChess(Vec2(newPos->getX(), newPos->getY())));
-            //chess2->getChessSprite()->setVisible(false);
 
             chess3->setChessCoordinateByType(Vec2(3, 3), CoordinateType::chessBoardCoordinates);
             CoordinateConvert(CoordinateType::screenCoordinates, Vec2(3, 3), newPos);
             chess3->setChessCoordinateByType(Vec2(newPos->getX(), newPos->getY()), CoordinateType::screenCoordinates);
-            //this->addChild(chess3->createChess(Vec2(newPos->getX(), newPos->getY())));
-            //chess3->getChessSprite()->setVisible(false);
 
             chessBoard[5][3] = chessBoard[4][4] = chessBoard[3][3] = 1;
+
             delete newPos;
             break;
         default:
@@ -228,22 +210,17 @@ void AIMode::initializeGame(int index)
             chess1->setChessCoordinateByType(Vec2(4, 3), CoordinateType::chessBoardCoordinates);
             CoordinateConvert(CoordinateType::screenCoordinates, Vec2(4, 3), newPos);
             chess1->setChessCoordinateByType(Vec2(newPos->getX(), newPos->getY()), CoordinateType::screenCoordinates); 
-            //this->addChild(chess1->createChess(Vec2(newPos->getX(), newPos->getY())));
-            //chess1->getChessSprite()->setVisible(false);
 
             chess2->setChessCoordinateByType(Vec2(4, 4), CoordinateType::chessBoardCoordinates);
             CoordinateConvert(CoordinateType::screenCoordinates, Vec2(4, 4), newPos);
             chess2->setChessCoordinateByType(Vec2(newPos->getX(), newPos->getY()), CoordinateType::screenCoordinates);
-            //this->addChild(chess2->createChess(Vec2(newPos->getX(), newPos->getY())));
-            //chess2->getChessSprite()->setVisible(false);
 
             chess3->setChessCoordinateByType(Vec2(3, 3), CoordinateType::chessBoardCoordinates);
             CoordinateConvert(CoordinateType::screenCoordinates, Vec2(3, 3), newPos);
             chess3->setChessCoordinateByType(Vec2(newPos->getX(), newPos->getY()), CoordinateType::screenCoordinates);
-            //this->addChild(chess3->createChess(Vec2(newPos->getX(), newPos->getY())));
-            //chess3->getChessSprite()->setVisible(false);
 
             chessBoard[4][3] = chessBoard[4][4] = chessBoard[3][3] = 1;
+
             delete newPos;
             break;
     }
@@ -298,10 +275,9 @@ void AIMode::addHero()
             chess->setChessCoordinateByType(Vec2(col, row), CoordinateType::chessBoardCoordinates);
             CoordinateConvert(CoordinateType::screenCoordinates, Vec2(col, row), newPos);
             chess->setChessCoordinateByType(Vec2(newPos->getX(), newPos->getY()), CoordinateType::screenCoordinates);
-            //this->addChild(chess->createChess(Vec2(newPos->getX(), newPos->getY())));
-            //chess->getChessSprite()->setVisible(false);
 
             chessBoard[row][col] = 1;
+
             delete newPos;
         }
     }
@@ -341,6 +317,7 @@ void AIMode::promoteHeroStar()
     }
 }
 
+// 每回合结束需要做的工作集成
 void AIMode::eachTurnOver()
 {
     promoteLevel();

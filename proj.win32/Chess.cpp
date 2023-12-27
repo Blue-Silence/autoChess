@@ -1,12 +1,14 @@
-/********************************************
- * 功能：棋子模型cpp文件
- * 作者：郑伟丞
- * 最新修改日期：12.09
- ********************************************/
+/******************************************************/
+/*                  文件名：Chess.cpp                 */
+/*                  功能：棋子模型                    */
+/******************************************************/
 
 #include "Chess.h"
 
-// ChessCoordinate类实现
+//-----------------------//
+// ChessCoordinate类实现 //
+//-----------------------//
+
 int ChessCoordinate::getX() const
 {
 	return x;
@@ -32,8 +34,11 @@ void ChessCoordinate::setY(const int Y)
 }
 
 
-// Chess类实现
+//-----------------------//
+// Chess类实现           //
+//-----------------------//
 
+// 初始化棋子信息
 void Chess::initCondition()
 {
 	chessCondition.maxHP = chessCondition.HP = hpData[chessName];
@@ -43,26 +48,31 @@ void Chess::initCondition()
 	chessCondition.skillCooldown = skillCooldowns[chessName];
 }
 
+// 获取棋子的类别
 string Chess::GetCareer()
 {
 	return career;
  }
 
+// 获取棋子图片路径
 const string Chess::getChessImagePath()
 {
 	return chessImagePath;
 }
 
+// 获取棋子名
 const int Chess::getChessName()
 {
 	return chessName;
 }
 
+// 获取棋子状态
 ChessInfo* Chess::getChessCondition()
 {
 	return &chessCondition;
 }
 
+// 获取棋子等级
 const int Chess::getChessLevel()
 {
 	return chessLevel;
@@ -86,7 +96,7 @@ ChessCoordinate* Chess::getChessCoordinateByType(CoordinateType type)
 	}
 }
 
-
+// 设置棋子等级
 void Chess::setChessLevel(const int newLevel)
 {
 	if (newLevel > 3)
@@ -106,21 +116,18 @@ void Chess::promoteRank(int dstRank)
 		chessCondition.improvedAttack = chessCondition.basicAttack = attackData[chessName] * pow(promoteScale, dstRank);
 		chessCondition.improvedDefence = chessCondition.basicDefence = defenceData[chessName] * pow(promoteScale, dstRank);
 		chessCondition.improvedAttackDistance = chessCondition.basicAttackDistance = attackDistanceData[chessName] * pow(promoteScale, dstRank);
-		
 
 	}
 	return;
 }
 
-
-
-//攻击函数，返回攻击值,作为攻击目标的被攻击函数的输入
+// 攻击函数，返回攻击值,作为攻击目标的被攻击函数的输入
 int Chess::myAttack()
 {
 	return chessCondition.improvedAttack;
 }
 
-//被攻击函数,自身的当前生命值扣除对手伤害量和自身的防御值的一半的差值
+// 被攻击函数,自身的当前生命值扣除对手伤害量和自身的防御值的一半的差值
 void Chess::beenAttack(int oppAttack)
 {
 	int damage = oppAttack - 0.5 * chessCondition.basicDefence;
@@ -130,7 +137,6 @@ void Chess::beenAttack(int oppAttack)
 		else
 			chessCondition.HP = 0;
 }
-
 
 // 执行一次攻击，包含动画
 void Chess::attackOne(Chess& OPP)
@@ -144,14 +150,12 @@ bool Chess::isDead()
 	return chessCondition.HP == 0;
 }
 
-
 // 可视化棋子
 Sprite* Chess::createChess(Vec2 chessPosition)
 {
 	// 设置棋子的位置
 	setChessCoordinateByType(chessPosition, CoordinateType::screenCoordinates);
 
-	
 	auto config = ConfigController::getInstance();
 
 	//CsvParser csv;
@@ -226,8 +230,6 @@ Sprite* Chess::createChess(Vec2 chessPosition)
 	chessImage->addChild(hpBarProgress);
 	chessImage->addChild(mpBarProgress);
 
-	
-
 	return chessImage;
 }
 
@@ -275,7 +277,7 @@ void Chess::updateMpBar()
 	mpBarProgress->setPercentage(attackNum / chessCondition.skillCooldown * 100);
 }
 
-
+// 重载赋值运算符便于赋值操作
 Chess& Chess::operator=(const Chess& other) 
 {
 	if (this == &other) 
@@ -324,7 +326,7 @@ Chess& Chess::operator=(const Chess& other)
 
 // 以下是具体到职业的棋子子类
 
-//----------------- 法师类
+//----------------- 法师类 -----------------//
 // 初始化
 mage::mage(int name)
 {
@@ -339,8 +341,6 @@ mage::mage(int name)
 // 对目标使用技能
 void mage::skill(Chess& OPP)
 {
-	// 技能可视化
-	// 
 	// 技能可视化
 
 	OPP.beenAttack(skillScale * myAttack());
@@ -402,10 +402,8 @@ Sprite* mage::createSkill()
 }
 
 
-//----------------- 法师类
 
-
-//----------------- 射手类
+//----------------- 射手类 -----------------//
 // 初始化
 shooter::shooter(int name)
 {
@@ -417,8 +415,6 @@ shooter::shooter(int name)
 // 对目标使用技能
 void shooter::skill(Chess& OPP)
 {
-	// 技能可视化
-	// 
 	// 技能可视化
 
 	OPP.beenAttack(skillScale * myAttack());
@@ -478,10 +474,8 @@ Sprite* shooter::createSkill()
 	return skillImage;
 }
 
-//----------------- 射手类
 
-
-//----------------- 坦克类
+//----------------- 坦克类 -----------------//
 tank::tank(int name)
 {
 	chessName = name;
@@ -492,8 +486,6 @@ tank::tank(int name)
 // 对目标使用技能
 void tank::skill(Chess& OPP)
 {
-	// 技能可视化
-	// 
 	// 技能可视化
 
 	OPP.beenAttack(skillScale * myAttack());
@@ -510,7 +502,6 @@ void tank::removeCareerBuff()
 {
 	chessCondition.improvedDefence /= 1.2;
 }
-
 
 Sprite* tank::createAttack()
 {
@@ -552,6 +543,5 @@ Sprite* tank::createSkill()
 	// 可以设置其他属性，比如缩放、旋转等
 	skillImage->setScale(1.0); // 示例缩放
 	return skillImage;
-}
-//----------------- 坦克类
+}	
 

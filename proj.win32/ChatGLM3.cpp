@@ -1,3 +1,8 @@
+/******************************************************/
+/*                  文件名：ChatGLM3.cpp              */
+/*          功能：利用AI分析场面局势并给出建议        */
+/******************************************************/
+
 #include"ChatGLM3.h"
 
 CurlWrapper::CurlWrapper()
@@ -18,10 +23,12 @@ CurlWrapper::~CurlWrapper()
 
 std::string  CurlWrapper::performRequest(const std::string& url, const std::string& userMessage)
 {
-    if (curl) {
+    if (curl) 
+    {
         std::string readBuffer;
 
-        std::string prompt = "Now that you are a master of AutoChess games, I will give you structured information"
+        std::string prompt =
+            "Now that you are a master of AutoChess games, I will give you structured information"
             "about the current situation and ask you to provide valuable suggestions to players "
             "based on the current situation."
             "No need to reply with any polite words, just reply with short suggestions directly."
@@ -56,10 +63,12 @@ std::string  CurlWrapper::performRequest(const std::string& url, const std::stri
 
         // 执行请求并处理响应
         CURLcode res = curl_easy_perform(curl);
-        if (res != CURLE_OK) {
+        if (res != CURLE_OK) 
+        {
             std::cerr << "curl_easy_perform() failed: " << curl_easy_strerror(res) << std::endl;
         }
-        else {
+        else 
+        {
             // 清理
             curl_slist_free_all(headers);
             return readBuffer;
@@ -74,11 +83,13 @@ std::string  CurlWrapper::performRequest(const std::string& url, const std::stri
 
 std::string CurlWrapper::extractContent(const std::string& response)
 {
-    try {
+    try 
+    {
         auto j = json::parse(response);
         return j["choices"][0]["message"]["content"];
     }
-    catch (json::parse_error& e) {
+    catch (json::parse_error& e)
+    {
         std::cerr << "JSON parse error: " << e.what() << std::endl;
         return "";
     }
