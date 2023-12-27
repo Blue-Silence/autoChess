@@ -23,6 +23,8 @@ using std::vector;
 #include "PreparationSeatLayer.h"
 #include "BattleLayer.h"
 #include "AIMode.h"
+#include "ChatGLM3.h"
+#include "Clock.h"
 
 #define ROW_BOARD			5
 #define COL_BOARD			8
@@ -61,6 +63,12 @@ public:
 	CREATE_FUNC(PlayScene);
 
 private:
+	string url = "https://u207393-9f64-1bb9f03b.westc.gpuhub.com:8443/v1/chat/completions";
+
+	CurlWrapper chatAI;
+
+	Label* AILabel = Label::createWithTTF("欢迎进入游戏，我是你的AI小助手，让我来协助你战斗！", "fonts/Marker Felt.ttf", 24);;
+
 	// AI 选手池
 	AIMode* AI = nullptr;
 

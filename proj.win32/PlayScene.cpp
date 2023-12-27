@@ -77,6 +77,7 @@ bool PlayScene::init()
 	levelImage->setPosition(Vec2(800, 90));
 	levelImage->setScale(0.07);
 	playLayer->addChild(levelImage, 5);
+
 	// 创建血量显示
 	player_lifevalue = Label::createWithTTF(std::to_string(playerA->GetLifeValue()), "fonts/Marker Felt.ttf", 30);
 	player_lifevalue->setPosition(Vec2(760, 40));
@@ -87,10 +88,7 @@ bool PlayScene::init()
 	playLayer->addChild(lifeValue, 5);
 
 	// 创建商店
-	
 	createShop(Vec2(-45 * config->getPx()->x, -45 * config->getPx()->y));
-
-
 	{
 		auto littleHero = new Hero("/res/UI/LittleHero.png");
 		if (littleHero == nullptr)
@@ -102,15 +100,16 @@ bool PlayScene::init()
 		this->addChild(littleHero, 6);
 	}
 
-
-	///////测试用
 	
-	//////
-	
+	// 添加AI建议框
+	AILabel->setPosition(Vec2(240, 160)); // 根据需要调整位置
+	AILabel->setColor(Color3B::WHITE); // 设置颜色
+	// 将标签添加到场景或层中
+	this->addChild(AILabel);
 
 
 	// 添加退出按钮
-	auto exitButton = StartAndLoginScene::createGameButton("/res/UI/ExitNormal.png", "/res/UI/ExitSelected.png", CC_CALLBACK_1(PlayScene::onBattleButtonClicked, this));
+	auto exitButton = StartAndLoginScene::createGameButton("/res/UI/ExitNormal.png", "/res/UI/ExitSelected.png", CC_CALLBACK_1(PlayScene::menuExitCallBack, this));
 
 	exitButton->setAnchorPoint(Vec2::ANCHOR_MIDDLE);
 	originSize = exitButton->getContentSize();
@@ -122,20 +121,8 @@ bool PlayScene::init()
 	playLayer->addChild(menu, 5);
 
 
-	//// 进行多次对战
-	//while (true)
-	//{
-	//	// AI类实例接收杨神的数字，生成相应数量的AI对象
-	//	// 
-	//	// 每次确定两个相互对战的对象
-	//	// 将两个对象传入BattleLayer::create(),每调用一次BattleLayer就进行一次两两对战
-	//	// 重复上述两个步骤，直到有角色死亡之类
-
-	//}
-
-
 	// 调度启动update()函数，开始战斗
-	//this->scheduleUpdate();
+	this->scheduleUpdate();
 	
 
 	
@@ -149,16 +136,24 @@ void PlayScene::update(float delta)
 		if (AI == nullptr && AINum != 0)
 			AI = new AIMode(AINum);
 
+
 		if (!isInBattle && AI != nullptr)
 		{
 			isInBattle = true;
+			AI->eachTurnOver();
 			if (!AI->existLiveAI())
 			{
 				// 战斗结束,玩家获胜
+				// 
+				// 取消对update函数的调度
+				this->unscheduleUpdate();
 			}
 			else if (!playerA->isAlive())
 			{
 				// AI获胜
+				// 
+				// 取消对update函数的调度
+				this->unscheduleUpdate();
 			}
 
 			//AI++;
@@ -171,23 +166,21 @@ void PlayScene::update(float delta)
 			playerOPP = &(*AI->getPlayersVectorInfo())[TargetAI];
 			// 其余的AI随机扣血
 			AI->randomBloodLose(TargetAI);
-			
 
 			// 玩家和AI开始对战！
-			// 计时器
-			// 
-			// 
-			// 
-			// 检查并移除现有的 BattleLayer
-			auto existingLayer = this->getChildByTag(BATTLE_LAYER_TAG);
-			if (existingLayer) {
-				this->removeChild(existingLayer, true);
-			}
+			// 计时器,计时结束后开始对战
+			auto clockLayer = Clock::create(playerA, playerOPP, &isInBattle);
+			this->addChild(clockLayer, 6);
 
-			// 创建并添加新的 BattleLayer
-			auto battleLayer = BattleLayer::create(playerA, playerOPP, &isInBattle);
-			battleLayer->setTag(BATTLE_LAYER_TAG); // 设置标签以便识别
-			this->addChild(battleLayer, 6);
+			// 向AI发送API请求
+			/*string message = "The number of my tank heroes is " + to_string(playerA->getTankNum())
+				+ ", the number of mage heroes is " + to_string(playerA->getMagesNum()) + ",the number of shooter is " + to_string(playerA->getShooterNum())
+				+ ", my level is" + to_string(playerA->getLevel());*/
+			string message = "tank,mages,shooters,which one should I buy firstly,please speak in short english";
+			string response = chatAI.performRequest(url, message);
+			string content = chatAI.extractContent(response);
+			AILabel->setString(content);
+
 
 
 
@@ -197,16 +190,10 @@ void PlayScene::update(float delta)
 	else if (gameMode == "联机对战")
 	{
 
+
+
 	}
 }
-
-
-
-
-
-
-
-
 
 
 void PlayScene::onBattleButtonClicked(Ref* sender) 
