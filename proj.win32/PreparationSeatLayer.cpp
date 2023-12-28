@@ -6,13 +6,13 @@
 * 函数返回值：
 * 函数注意事项：加载完成后显示“开始游戏”和“退出游戏”菜单
 */
-bool PreparationSeat::init(PlayerInfo* pr, ChessBoard* board, EventListenerMouse* listener, Layer* preArea,bool* battle, Label* player_coin)
+bool PreparationSeat::init(PlayerInfo* pr, ChessBoard* board, EventListenerMouse* listener, Layer* preArea,bool* buyChess, Label* player_coin)
 {
 	PreAreaLayer = preArea;
 	cBoard = board;
 	player = pr;
 	listenerMouse = listener;
-	inBattle = battle;
+	canBuyChess = buyChess;
 	preAreaChessMenu.resize(9);
 	pageSize = Director::getInstance()->getVisibleSize();
 	pageCoord = Director::getInstance()->getVisibleOrigin();
@@ -40,7 +40,7 @@ void  PreparationSeat::CallBack(Ref* sender, int index)
 {
 	curHero.first = static_cast<Menu*>(sender);
 	curHero.second = index;
-	if (!(*inBattle))
+	if (*canBuyChess)
 	{
 		Menu* myButton = static_cast<Menu*>(sender);
 		int* counter = new int;

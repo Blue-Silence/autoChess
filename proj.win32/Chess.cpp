@@ -43,7 +43,7 @@ void Chess::initCondition()
 	chessCondition.skillCooldown = skillCooldowns[chessName];
 }
 
-string Chess::GetCareer()
+string Chess::getCareer()
 {
 	return career;
  }

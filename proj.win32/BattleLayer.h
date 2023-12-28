@@ -4,6 +4,7 @@
  ********************************************/
 
 #pragma once
+#include <atomic>
 #include"PlayerInfo.h"
 #include"ChessBoard.h"
 #include "audio/include/SimpleAudioEngine.h"
@@ -19,10 +20,10 @@ public:
 	//CREATE_FUNC(BattleLayer);
 
 	// 自定义的静态创建函数
-	static BattleLayer* create(PlayerInfo* playerME, PlayerInfo* playerOPP,bool* isInBattle) 
+	static BattleLayer* create(PlayerInfo* playerME, PlayerInfo* playerOPP,bool* isInBattle,bool* canBuyChess) 
 	{
 		;
-		BattleLayer* layer = new (std::nothrow) BattleLayer(playerME, playerOPP,isInBattle);
+		BattleLayer* layer = new (std::nothrow) BattleLayer(playerME, playerOPP,isInBattle,canBuyChess);
 		if (layer && layer->init()) 
 		{
 			layer->autorelease();
@@ -67,20 +68,21 @@ public:
 private:
 
 	// 私有构造函数
-	BattleLayer(PlayerInfo* playerOfMe, PlayerInfo* playerOfOpp,bool* inBattle)
+	BattleLayer(PlayerInfo* playerOfMe, PlayerInfo* playerOfOpp,bool* inBattle,bool* BuyChess)
 	{
-		playerME = playerOfMe; playerOPP = playerOfOpp; isInBattle = inBattle;
+		playerME = playerOfMe; playerOPP = playerOfOpp; isInBattle = inBattle; canBuyChess = BuyChess;
 	}
 
 	bool gameOver = false;
 
-	int boardInGame[BOARDMAXR][BOARDMAXC] = { 0 };
+	std::atomic<int> boardInGame[BOARDMAXR][BOARDMAXC] = { 0 };
 
 	PlayerInfo* playerME;
 
 	PlayerInfo* playerOPP;
 
 	bool* isInBattle;
+	bool* canBuyChess;
 
 	
 };

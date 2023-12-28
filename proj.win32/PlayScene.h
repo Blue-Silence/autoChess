@@ -25,6 +25,7 @@ using std::vector;
 #include "AIMode.h"
 #include "ChatGLM3.h"
 #include "Clock.h"
+#include "network.h"
 
 #define ROW_BOARD			5
 #define COL_BOARD			8
@@ -55,7 +56,14 @@ public:
 	// 创建可视化棋子卡片
 	MenuItemSprite* createPieceCard(string pieceName, string piecePicPath, Vec2 position, const ccMenuCallback& callback);
 
+	// 点击触发战斗
 	void PlayScene::onBattleButtonClicked(Ref* sender);
+
+	// 联网下：打包我方场上棋子信息
+	void packageInfo();
+
+	// 联网下：提取对方场上棋子信息
+	void extractInfo();
 
 	// 坐标转换函数
 	static ChessCoordinate* coordingrevert(Vec2 realPosition);
@@ -63,7 +71,13 @@ public:
 	CREATE_FUNC(PlayScene);
 
 private:
-	string url = "https://u207393-9f64-1bb9f03b.westc.gpuhub.com:8443/v1/chat/completions";
+	// 联网模式下对我方场上棋子信息的打包
+	Packet myInfo;
+	
+	// 接收的敌方棋子信息包
+	Packet oppInfo;
+
+	string url = "https://u207393-a5b8-10e2f069.westb.seetacloud.com:8443/v1/chat/completions";
 
 	CurlWrapper chatAI;
 
@@ -84,6 +98,15 @@ private:
 	// 游戏状态
 	bool isInBattle = false;
 
+	// 能否买棋子
+	bool canBuyChess = true;
+
+	// 是否处于信息传输中
+	bool isTransmittingInfo = false;
+
+	// 联机模式是否开战
+	bool beginFighting = false;
+
 	// 场景层
 	Layer* playLayer;
 
@@ -98,8 +121,8 @@ private:
 	
 	vector<MenuItemSprite*> shop;
 
-	// 玩家
-	PlayerInfo* playerA;
+	// 我方玩家
+	PlayerInfo* playerME;
 
 	// 对手玩家
 	PlayerInfo* playerOPP;

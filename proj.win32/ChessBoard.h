@@ -22,7 +22,7 @@ USING_NS_CC;
 
 
 // 棋盘坐标与屏幕坐标的转化,转入的为对战区左下角第一格棋盘对应的精灵
-void CoordinateConvert(CoordinateType type, Vec2 oldPos, ChessCoordinate* newPos);
+void CoordinateConvert(CoordinateType targetType, Vec2 oldPos, ChessCoordinate* newPos);
 
 class ChessBoard :public Ref
 {

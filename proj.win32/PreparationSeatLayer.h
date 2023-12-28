@@ -42,16 +42,16 @@ private:
 	shared_ptr<Chess> onBoardChess[RSIZE][CSIZE];
 	Sprite* onBoardSprite[RSIZE][CSIZE];
 	//是否在战斗中
-	bool* inBattle;
+	bool* canBuyChess;
 	//当前选中备战席
 	pair < Menu*, int >curHero = { nullptr, -1 };
 public:
 	// 玩家信息初始化函数
-	virtual bool init(PlayerInfo* pr, ChessBoard* board, EventListenerMouse* listener, Layer* preArea, bool* battle,Label* player_coin);
+	virtual bool init(PlayerInfo* pr, ChessBoard* board, EventListenerMouse* listener, Layer* preArea, bool* buyChess,Label* player_coin);
 
 	// 创建对象
-	static PreparationSeat* create(PlayerInfo* pr, ChessBoard* board, EventListenerMouse* listener, Layer* preArea, bool* battle, Label* player_coin) {
-		PreparationSeat* pRet = new(std::nothrow) PreparationSeat(); if (pRet && pRet->init(pr, board, listener, preArea, battle,player_coin)) {
+	static PreparationSeat* create(PlayerInfo* pr, ChessBoard* board, EventListenerMouse* listener, Layer* preArea, bool* buyChess, Label* player_coin) {
+		PreparationSeat* pRet = new(std::nothrow) PreparationSeat(); if (pRet && pRet->init(pr, board, listener, preArea, buyChess,player_coin)) {
 			pRet->autorelease(); return pRet;
 		}
 		else {

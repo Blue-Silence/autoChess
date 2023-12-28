@@ -27,7 +27,8 @@ public:
             s->append((char*)contents, newLength);
             return newLength;
         }
-        catch (std::bad_alloc& e) {
+        catch (std::bad_alloc& e) 
+        {
             return 0;
         }
     }

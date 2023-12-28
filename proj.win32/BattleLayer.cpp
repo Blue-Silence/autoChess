@@ -63,7 +63,7 @@ void BattleLayer::AItest()
 // 战斗前初始化棋子的战斗数据
 void BattleLayer::chessInitBeforeBattle(shared_ptr<Chess> chess,bool isME)
 {
-	
+	*canBuyChess = false;
 	chess->state = Chess::State::Idle;
 	chess->isAttacking = false;
 	chess->isMoving = false;
@@ -76,8 +76,21 @@ void BattleLayer::chessInitBeforeBattle(shared_ptr<Chess> chess,bool isME)
 	
 	if (!isME)
 	{
+		
 		chess->createChess(Vec2(chess->inGameScreenCoordinate.getX(), chess->inGameScreenCoordinate.getY()));
-		addChild(chess->getChessSprite());
+		auto chessImage = chess->getChessSprite();
+		double nowWidth = chessImage->getContentSize().width;
+		double nowHeight = chessImage->getContentSize().height;
+		// 创建敌方标志
+		auto config = ConfigController::getInstance();
+		auto enemy = Sprite::create("/res/enemy.png");
+		Vec2 originSize = enemy->getContentSize();
+		float scaleX = 20 * config->getPx()->x / originSize.x;
+		float scaleY = 20 * config->getPx()->y / originSize.y;
+		enemy->setScale(scaleX, scaleY);
+		enemy->setPosition(Vec2(chess->inGameScreenCoordinate.getX()+0.5*nowWidth, chess->inGameScreenCoordinate.getY()+0.8*nowHeight));
+		chessImage->addChild(enemy);
+		addChild(chessImage);
 		
 	}
 	
@@ -196,6 +209,7 @@ void BattleLayer::update(float delta)
 				chessImage->setVisible(true);
 			}
 			*isInBattle = false;
+			*canBuyChess = true;
 			});
 		
 
@@ -527,7 +541,7 @@ void BattleLayer::findPathToEnemy(shared_ptr<Chess> damageMaker, shared_ptr<Ches
 void BattleLayer::doAttack(shared_ptr<Chess> damageMaker, shared_ptr<Chess> targetEnemy)
 {
 	Sprite* damageMakerImage = damageMaker->getChessSprite();
-	string damageMakerCareer = damageMaker->GetCareer();
+	string damageMakerCareer = damageMaker->getCareer();
 	Sprite* targetChessImage = targetEnemy->getChessSprite();
 	
 	int targetRow = targetEnemy->getChessCoordinateByType(CoordinateType::chessBoardCoordinates)->getY();

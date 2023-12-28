@@ -229,7 +229,7 @@ int* PlayerInfo::buffJudgment()
 	{
 		for (int i = 0; i < chessInBattleArea.size(); ++i)
 		{
-			if (chessInBattleArea[i]->GetCareer() == "mage")
+			if (chessInBattleArea[i]->getCareer() == "mage")
 			{
 				chessInBattleArea[i]->careerBuff();
 			}
@@ -242,7 +242,7 @@ int* PlayerInfo::buffJudgment()
 	{
 		for (int i = 0; i < chessInBattleArea.size(); ++i)
 		{
-			if (chessInBattleArea[i]->GetCareer() == "shooter")
+			if (chessInBattleArea[i]->getCareer() == "shooter")
 			{
 				chessInBattleArea[i]->careerBuff();
 			}
@@ -253,7 +253,7 @@ int* PlayerInfo::buffJudgment()
 	{
 		for (int i = 0; i < chessInBattleArea.size(); ++i)
 		{
-			if (chessInBattleArea[i]->GetCareer() == "tank")
+			if (chessInBattleArea[i]->getCareer() == "tank")
 			{
 				chessInBattleArea[i]->careerBuff();
 			}

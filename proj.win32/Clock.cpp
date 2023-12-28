@@ -51,15 +51,22 @@ void Clock::update(float dt)
 		this->unscheduleUpdate();
 		timeLabel->removeFromParent();
 		
-		//归零后的操作。待实现。
+
+		//归零后的操作
 		auto existingLayer = this->getChildByTag(BATTLE_LAYER_TAG);
 		if (existingLayer) {
 			this->removeChild(existingLayer, true);
 		}
-
-		// 创建并添加新的 BattleLayer
-		auto battleLayer = BattleLayer::create(playerME, playerOPP, isInBattle);
-		battleLayer->setTag(BATTLE_LAYER_TAG); // 设置标签以便识别
-		this->addChild(battleLayer, 7);
+		if(gameMode=="人机对战")
+		{
+			// 创建并添加新的 BattleLayer
+			auto battleLayer = BattleLayer::create(playerME, playerOPP, isInBattle, canBuyChess);
+			battleLayer->setTag(BATTLE_LAYER_TAG); // 设置标签以便识别
+			this->addChild(battleLayer, 7);
+		}
+		else if (gameMode == "联机对战")
+		{
+			*isTransmittingInfo = true;
+		}
 	}
 }

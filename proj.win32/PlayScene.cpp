@@ -50,13 +50,13 @@ bool PlayScene::init()
 	createBoard(Vec2(config->getPx()->x * 38, config->getPx()->y * 30));
 	CC_SAFE_RETAIN(chessBoardModel);
 	// 创建玩家
-	playerA = PlayerInfo::create();
+	playerME = PlayerInfo::create();
 	playerOPP = PlayerInfo::create();
-	CC_SAFE_RETAIN(playerA);
+	CC_SAFE_RETAIN(playerME);
 	CC_SAFE_RETAIN(playerOPP);
 
 	//创建金币显示
-	player_coin = Label::createWithTTF(std::to_string(playerA->getcoin()), "fonts/Marker Felt.ttf", 30);
+	player_coin = Label::createWithTTF(std::to_string(playerME->getcoin()), "fonts/Marker Felt.ttf", 30);
 	player_coin->setPosition(Vec2(760, 140));
 	playLayer->addChild(player_coin, 5);
 	Sprite* coinImage = Sprite::create("/res/UI/coin.png");
@@ -65,12 +65,12 @@ bool PlayScene::init()
 	playLayer->addChild(coinImage, 5);
 
 	//初始化备战席
-	preArea = PreparationSeat::create(playerA, chessBoardModel, mouseListener, playLayer, &isInBattle,player_coin);
+	preArea = PreparationSeat::create(playerME, chessBoardModel, mouseListener, playLayer, &canBuyChess,player_coin);
 	CC_SAFE_RETAIN(preArea);
 
 
 	//创建等级显示
-	player_level = Label::createWithTTF(std::to_string(playerA->getLevel()), "fonts/Marker Felt.ttf", 30);
+	player_level = Label::createWithTTF(std::to_string(playerME->getLevel()), "fonts/Marker Felt.ttf", 30);
 	player_level->setPosition(Vec2(760, 90));
 	playLayer->addChild(player_level, 5);
 	Sprite* levelImage = Sprite::create("res/UI/Level.png");
@@ -79,7 +79,7 @@ bool PlayScene::init()
 	playLayer->addChild(levelImage, 5);
 
 	// 创建血量显示
-	player_lifevalue = Label::createWithTTF(std::to_string(playerA->GetLifeValue()), "fonts/Marker Felt.ttf", 30);
+	player_lifevalue = Label::createWithTTF(std::to_string(playerME->GetLifeValue()), "fonts/Marker Felt.ttf", 30);
 	player_lifevalue->setPosition(Vec2(760, 40));
 	playLayer->addChild(player_lifevalue, 5);
 	Sprite* lifeValue = Sprite::create("res/UI/lifeValue.png");
@@ -136,9 +136,9 @@ void PlayScene::update(float delta)
 		if (AI == nullptr && AINum != 0)
 			AI = new AIMode(AINum);
 
-
 		if (!isInBattle && AI != nullptr)
 		{
+			player_lifevalue->setString(to_string(playerME->GetLifeValue()));
 			isInBattle = true;
 			AI->eachTurnOver();
 			if (!AI->existLiveAI())
@@ -148,7 +148,7 @@ void PlayScene::update(float delta)
 				// 取消对update函数的调度
 				this->unscheduleUpdate();
 			}
-			else if (!playerA->isAlive())
+			else if (!playerME->isAlive())
 			{
 				// AI获胜
 				// 
@@ -169,31 +169,118 @@ void PlayScene::update(float delta)
 
 			// 玩家和AI开始对战！
 			// 计时器,计时结束后开始对战
-			auto clockLayer = Clock::create(playerA, playerOPP, &isInBattle);
+			auto clockLayer = Clock::create(playerME, playerOPP, &isInBattle,&canBuyChess,&isTransmittingInfo,gameMode);
 			this->addChild(clockLayer, 6);
 
 			// 向AI发送API请求
-			/*string message = "The number of my tank heroes is " + to_string(playerA->getTankNum())
-				+ ", the number of mage heroes is " + to_string(playerA->getMagesNum()) + ",the number of shooter is " + to_string(playerA->getShooterNum())
-				+ ", my level is" + to_string(playerA->getLevel());*/
-			string message = "tank,mages,shooters,which one should I buy firstly,please speak in short english";
-			string response = chatAI.performRequest(url, message);
-			string content = chatAI.extractContent(response);
-			AILabel->setString(content);
+			//string message = "The number of my tank heroes is " + to_string(playerME->getTankNum())
+			//	+ ", the number of mage heroes is " + to_string(playerME->getMagesNum()) + ",the number of shooter is " + to_string(playerME->getShooterNum())
+			//	+ ", my level is" + to_string(playerME->getLevel());
 
-
-
-
-
+			////string message = "tank,mages,shooters,which one should I buy firstly,please speak in short english";
+			//string response = chatAI.performRequest(url, message);
+			//string content = chatAI.extractContent(response);
+			AILabel->setString("未启用");
 		}
 	}
 	else if (gameMode == "联机对战")
 	{
+		if(!isInBattle)
+		{
+			isInBattle = true;
+			// 计时器,计时结束后打包传送信息
+			auto clockLayer = Clock::create(playerME, playerOPP, &isInBattle, &canBuyChess,&isTransmittingInfo,gameMode);
+			this->addChild(clockLayer, 6);
+			
+		}
+		else if (isTransmittingInfo)
+		{
+			isTransmittingInfo = false;
+			canBuyChess = false;
+			// 1-打包信息
+			packageInfo();
+			// 2-发送信息
+			/////////////
+			// 
+			// 
+			// 
+			// 
+			// 3-接收信息
+			/////////////
+			// 把接收到的信息赋值给成员变量oppInfo
+			// 
+			// 
+			// 
+			// 
+			// 4-提取信息
+			extractInfo();
+			// 接收成功后,才执行下面这一句
+			beginFighting = true;
 
+		}
+		else if (beginFighting)
+		{
+			beginFighting = false;
+			// 检查并移除现有的 BattleLayer
+			auto existingLayer = this->getChildByTag(BATTLE_LAYER_TAG);
+			if (existingLayer) {
+				this->removeChild(existingLayer, true);
+			}
 
-
+			// 创建并添加新的 BattleLayer,开始战斗
+			auto battleLayer = BattleLayer::create(playerME, playerOPP, &isInBattle, &canBuyChess);
+			battleLayer->setTag(BATTLE_LAYER_TAG); // 设置标签以便识别
+			this->addChild(battleLayer, 6);
+		}
 	}
 }
+
+// 联网下：打包我方场上棋子信息
+void PlayScene::packageInfo()
+{
+	for (auto chess : *playerME->getBattleAreaChesses())
+	{
+		string career = chess->getCareer();
+		int name = chess->getChessName();
+		int level = chess->getChessLevel();
+		int posX = chess->getChessCoordinateByType(CoordinateType::chessBoardCoordinates)->getX();
+		int posY = chess->getChessCoordinateByType(CoordinateType::chessBoardCoordinates)->getY();
+
+		myInfo.chesses[myInfo.totalChessNum++] = { career, name, level, posX, posY };
+	}
+}
+
+// 联网下：提取对方场上棋子信息
+void PlayScene::extractInfo()
+{
+	shared_ptr<Chess> chess = nullptr;
+	for (int i = 0; i < oppInfo.totalChessNum; ++i)
+	{
+		string career = oppInfo.chesses[i].chessCareer;
+		int name = oppInfo.chesses[i].chessName;
+		int level = oppInfo.chesses[i].chessLevel;
+		int posX = oppInfo.chesses[i].chessBoardPosX;
+		int posY = oppInfo.chesses[i].chessBoardPosY;
+
+		if (career == "shooter")
+			playerOPP->putChessInBattleArea(make_shared<shooter>(name));
+		else if (career == "mage")
+			playerOPP->putChessInBattleArea(make_shared<mage>(name));
+		else
+			playerOPP->putChessInBattleArea(make_shared<tank>(name));
+
+		chess = playerOPP->getBattleAreaChesses()->back();
+		chess->setChessLevel(level);
+		chess->setChessCoordinateByType(Vec2(posX, posY), CoordinateType::chessBoardCoordinates);
+		ChessCoordinate* newPos = new ChessCoordinate;
+		CoordinateConvert(CoordinateType::screenCoordinates, Vec2(posX, posY), newPos);
+		chess->setChessCoordinateByType(Vec2(newPos->getX(), newPos->getY()), CoordinateType::screenCoordinates);
+		delete newPos;
+	}
+}
+
+
+
 
 
 void PlayScene::onBattleButtonClicked(Ref* sender) 
@@ -205,7 +292,7 @@ void PlayScene::onBattleButtonClicked(Ref* sender)
 	}
 
 	// 创建并添加新的 BattleLayer
-	auto battleLayer = BattleLayer::create(playerA, playerOPP, &isInBattle);
+	auto battleLayer = BattleLayer::create(playerME, playerOPP, &isInBattle,&canBuyChess);
 	battleLayer->setTag(BATTLE_LAYER_TAG); // 设置标签以便识别
 	this->addChild(battleLayer, 6);
 }
@@ -384,10 +471,10 @@ void PlayScene::menuPieceCardCallBack(Ref* sender)
 void PlayScene::menuFreshShopCallBack(Ref* sender)
 {
 	auto config = ConfigController::getInstance();
-	if(playerA->getcoin()>=2)
+	if(playerME->getcoin()>=2)
 	{
-		playerA->PayForRefresh();
-		player_coin->setString(std::to_string(playerA->getcoin()));
+		playerME->PayForRefresh();
+		player_coin->setString(std::to_string(playerME->getcoin()));
 		shopModel = Market::create();
 		shopModel->RefreshMarket();
 		if (previousMenu) {
@@ -456,9 +543,9 @@ void PlayScene::menuFreshShopCallBack(Ref* sender)
 //购买棋子的回调函数！！！
 void PlayScene::BuyChess(Ref* sender, int index)
 {
-	if (playerA->getcoin() >= 3)
+	if (playerME->getcoin() >= 3)
 	{
-		int location = playerA->GetMinIndex();
+		int location = playerME->GetMinIndex();
 		int delLoc_1 = -1;
 		int delLoc_2 = -1;
 		int& ref_delLoc_1 = delLoc_1;
@@ -466,11 +553,11 @@ void PlayScene::BuyChess(Ref* sender, int index)
 		if (sender && location != -1) {
 			MenuItemImage* myButton = static_cast<MenuItemImage*>(sender);
 			myButton->removeFromParent();
-			playerA->payForHero();
-			player_coin->setString(std::to_string(playerA->getcoin()));
+			playerME->payForHero();
+			player_coin->setString(std::to_string(playerME->getcoin()));
 			//备战席加入新棋子
 			shared_ptr<Chess> purchasedChess = shopModel->chessList[index];
-			playerA->chessInPreArea[location] = (purchasedChess);
+			playerME->chessInPreArea[location] = (purchasedChess);
 			preArea->PromoteChessLevel(location);
 
 		}
@@ -497,10 +584,10 @@ void PlayScene::BuyChess(Ref* sender, int index)
 //升级回调函数
 void PlayScene::menuBuyExpCallBack(Ref* sender)
 {
-	if (playerA->getcoin() >= 4) {
-		playerA->ChangeLevel();
-		player_level->setString(std::to_string(playerA->getLevel()));
-		player_coin->setString(std::to_string(playerA->getcoin()));
+	if (playerME->getcoin() >= 4) {
+		playerME->ChangeLevel();
+		player_level->setString(std::to_string(playerME->getLevel()));
+		player_coin->setString(std::to_string(playerME->getcoin()));
 	}
 	else {
 		cocos2d::Label* label = cocos2d::Label::createWithTTF("No money!!!", "fonts/Marker Felt.ttf", 24);

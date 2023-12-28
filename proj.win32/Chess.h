@@ -192,7 +192,7 @@ public:
 	//void initPieceIfo();
 
 	// 获取英雄职业
-	string GetCareer();
+	string getCareer();
 
 	// 更新棋子状态
 	//bool updatePieceInfo(const double damage, ChessCoordinate* newScreenCoordinate);
