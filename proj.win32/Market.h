@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <vector>
-#include "Storage.h"
+#include "Chess.h"
 
 const int MAXEQUIPPMENT = 6;
 const int HEROCATAGORY = 6;
@@ -18,8 +18,6 @@ const int HEROCATAGORY = 6;
 class Market :public Ref
 {
 private:
-	
-
 	// 装备库里的装备
 	int equippment;
 

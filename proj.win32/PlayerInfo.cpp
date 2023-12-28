@@ -1,7 +1,8 @@
-/*
-功能：玩家模型信息
-作者：Hu Junwei
-*/
+/******************************************************/
+/*               文件名：PlayerInfo.cpp               */
+/*               功能：存储玩家信息                   */
+/******************************************************/
+
 #include "PlayerInfo.h"
 
 //-----------------------------------------------------//
@@ -200,7 +201,7 @@ void PlayerInfo::removeChessFromPreArea(shared_ptr<Chess> chess)
 // 羁绊判断函数
 int* PlayerInfo::buffJudgment()
 {
-	//int* buff = new int[3];//分别为法师，射手，坦克
+	//分别为法师，射手，坦克
 	buff[0] = 0;
 	buff[1] = 0;
 	buff[2] = 0;
@@ -235,8 +236,6 @@ int* PlayerInfo::buffJudgment()
 			}
 		}
 		buff[0] = 1;
-		int s = buff[0];
-		int a = 0;
 	}
 	if (shooterNumInBattleArea >= 2)
 	{
@@ -275,7 +274,7 @@ void PlayerInfo::arrZero(int arrName[])
 
 // 注意：每次购买完一个英雄后都要调用下面的遍历升星函数(把这个函数放到购买函数里)
 // 遍历升星判断函数
-//更改于12.22 mlx:通过返回值判断是否进行升星操作
+// 更改于12.22 mlx:通过返回值判断是否进行升星操作
 bool PlayerInfo::starRaiseLevel(int location, int& delLoc_1, int& delLoc_2)
 {
 	bool isRaising = 0;
@@ -283,7 +282,8 @@ bool PlayerInfo::starRaiseLevel(int location, int& delLoc_1, int& delLoc_2)
 	arrZero(heroTwoStarNumArr);
 	for (int i = 0; i < chessInBattleArea.size(); ++i)
 	{
-		if (chessInBattleArea[i] != nullptr) {
+		if (chessInBattleArea[i] != nullptr) 
+		{
 			switch (chessInBattleArea[i]->getChessLevel())
 			{
 			case 1:
@@ -364,8 +364,7 @@ void PlayerInfo::deleteLowLevelChess(int heroFlag, int level, int location, int&
 	// 然后从战斗区删除
 	for (int i = 0; i < chessInBattleArea.size(); ++i)
 	{
-		if (chessInBattleArea[i] != nullptr
-			&& chessInBattleArea[i]->getChessName() == heroFlag && chessInBattleArea[i]->getChessLevel() == level)
+		if (chessInBattleArea[i] != nullptr&& chessInBattleArea[i]->getChessName() == heroFlag && chessInBattleArea[i]->getChessLevel() == level)
 		{
 			chessInBattleArea[i] = nullptr;
 			count++;
@@ -377,8 +376,7 @@ void PlayerInfo::deleteLowLevelChess(int heroFlag, int level, int location, int&
 	}
 }
 
-// 此处new的对象在最后整个战斗结束后要进行释放
-// 升星后高星英雄出现在战斗区函数
+// 升星后高星英雄出现在备战区函数
 void PlayerInfo::createHighLevelChess(int heroflag, int level, int location)
 {
 	shared_ptr<Chess> chess;
