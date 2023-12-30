@@ -67,6 +67,7 @@ void CoordinateConvert(CoordinateType targetType, Vec2 oldPos, ChessCoordinate* 
 	}
 }
 
+
 // 鼠标是否在棋盘区域,输入坐标为
 bool ChessBoard::isInBoard(Vec2 posi)
 {

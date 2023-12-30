@@ -32,8 +32,6 @@ private:
 	static int turn;
 
 	//记录棋盘上哪里为空哪里有棋子
-	//仅用来确定是否可以移动，无法确定具体位置的具体棋子是什么
-	//vector<Sprite*>board[BOARD_SIZE];
 	bool board[BOARDMAXR][BOARDMAXC];
 
 public:
@@ -46,11 +44,8 @@ public:
 
 	CREATE_FUNC(ChessBoard);
 
+	// 初始化函数
 	virtual bool init();
-
-	//CREATE_FUNC(ChessBoard);
-
-
 
 	//检测鼠标是否在棋盘范围内
 	static bool isInBoard(Vec2 posi);
@@ -75,35 +70,11 @@ public:
 	// 当前选中的棋子
 	Chess* selectedChess;
 
-	//// 处理鼠标点击事件
-	//void onMouseDown(Event* event);
-
-	//// 创建并设置鼠标事件监听器
-	//bool createMouseListener(Node* targetNode);
-
 	// 判断鼠标点击位置是否在备战区
 	bool isInPreparationZone(const Vec2& position);
 
 	// 获取备战区棋子的信息
 	shared_ptr<Chess> getChessAtPreparationZone(const Vec2& position);
-
-	//// 将备战区的棋子移动至战斗区
-	//void moveChessFromPreZoneToWarZone(Chess* selectedChess, int targetRow, int targetCol);
-
-
-	// TODO
-	// 坐标的问题，棋盘大小应该没改吧，直接按他们原来的来
-	// 屏幕坐标x,y,(0,0)应该是左下角吧
-	// 
-	// 有些位置，蓝条和红条，技能贴图和普通攻击贴图，对，普通攻击怎么贴图
-	// 
-	// 在战斗中，移动各自贴图还没写吧
-	// 
-	// 坐标坐标和棋盘坐标的转化，返回值要注意！有时候需要反过来，x相当于列，y相当于行
-	// 寻路
-	// 
-	// 确定攻击目标之类的
-
 };
 
 #endif // !_CHESSBOARD_H_
