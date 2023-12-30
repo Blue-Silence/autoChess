@@ -138,6 +138,7 @@ void PlayScene::update(float delta)
 
 		if (!isInBattle && AI != nullptr)
 		{
+			
 			player_lifevalue->setString(to_string(playerME->GetLifeValue()));
 			isInBattle = true;
 			AI->eachTurnOver();
@@ -201,6 +202,7 @@ void PlayScene::update(float delta)
 			packageInfo();
 			// 2-发送信息
 			/////////////
+			// 把成员变量myInfo发送过去
 			// 
 			// 
 			// 
