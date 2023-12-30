@@ -29,9 +29,9 @@ double const hpData[6] = { 3229,3019,3182,3242,3500,3450 };
 // 攻击值
 double const attackData[6] = { 170,168,180,169,157,153 };
 // 防御值
-double const defenceData[6] = { 86,89,86,95,103,125 };
+double const defenceData[6] = { 86,89,86,95,133,145 };
 // 攻击距离，指与对手在棋盘上的曼哈顿距离
-double const attackDistanceData[6] = { 3,3,2,2,1,1 };
+double const attackDistanceData[6] = { 2,2,2,2,1,1 };
 // 触发技能的攻击次数
 const int skillCooldowns[6] = {4,4,3,3,4,4 };
 // 英雄贴图地址 

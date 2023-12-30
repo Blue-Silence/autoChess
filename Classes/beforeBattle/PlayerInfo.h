@@ -108,6 +108,9 @@ public:
 	// 判断玩家是否还存活
 	bool isAlive() const { return lifeValue > 0; }
 
+	// 获胜后获得5个金币
+	void gainCoin() { coinNum = min(50, coinNum + 5);};
+
 	// AI模式专有:设置金币数量
 	void setCoinNum(int num);
 

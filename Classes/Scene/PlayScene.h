@@ -86,7 +86,7 @@ private:
 	// 接收的敌方棋子信息包
 	Packet oppInfo;
 
-	string url = "https://u207393-a5b8-10e2f069.westb.seetacloud.com:8443/v1/chat/completions";
+	string url = "https://u207393-9f64-1bb9f03b.westc.gpuhub.com:8443/v1/chat/completions";
 
 	CurlWrapper chatAI;
 

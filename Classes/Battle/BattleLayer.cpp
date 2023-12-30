@@ -372,6 +372,7 @@ void BattleLayer::detectWinner()
 	// 根据存活棋子数量判断游戏结果，并展示相应动画
 	if (surviveNumMe > 0) // 玩家胜利
 	{
+		playerME->gainCoin();
 		playerOPP->DecreaseLifeValue(playerME->getLevel() + surviveNumMe);
 		showEndGameAnimation("Win");
 	}

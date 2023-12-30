@@ -116,8 +116,8 @@ void Chess::promoteRank(int dstRank)
 		chessCondition.HP = chessCondition.maxHP = hpData[chessName]*pow(promoteScale, dstRank);
 		chessCondition.improvedAttack = chessCondition.basicAttack = attackData[chessName] * pow(promoteScale, dstRank);
 		chessCondition.improvedDefence = chessCondition.basicDefence = defenceData[chessName] * pow(promoteScale, dstRank);
-		if(career!="tank")
-			chessCondition.improvedAttackDistance = chessCondition.basicAttackDistance = attackDistanceData[chessName] * pow(promoteScale, dstRank);
+		if (career != "tank")
+			chessCondition.improvedAttackDistance = chessCondition.basicAttackDistance = attackDistanceData[chessName] + dstRank - 1;
 
 	}
 	return;

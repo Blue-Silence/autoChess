@@ -108,14 +108,31 @@ bool PlayScene::init()
 	}
 
 	
-	// 添加AI建议框
-	AILabel->setPosition(Vec2(visibleSize.width/ 2, visibleSize.height*4 / 5)); // 根据需要调整位置
+	// 添加AI建议文本栏
+	AILabel->setPosition(Vec2(visibleSize.width*0.25, visibleSize.height*0.78)); // 根据需要调整位置
+	AILabel->setAnchorPoint(Vec2::ANCHOR_BOTTOM_LEFT);
 	AILabel->setColor(Color3B::WHITE); // 设置颜色
 	// 将标签添加到场景或层中
 	this->addChild(AILabel);
 
+	// 添加AI对话助手图像
+	Sprite* chatGPT = Sprite::create("/res/Background/ChatGPT_logo.png");
+	chatGPT->setPosition(Vec2(visibleSize.width *0.15, visibleSize.height * 0.75));
+	chatGPT->setAnchorPoint(Vec2::ANCHOR_BOTTOM_LEFT);
+	originSize = chatGPT->getContentSize();
+	float scaleX = 13 * config->getPx()->x / originSize.x;
+	float scaleY = 10 * config->getPx()->y / originSize.y;
+	chatGPT->setScale(scaleX, scaleY);
+	this->addChild(chatGPT, 5);
 
-
+	// 添加时钟图像
+    Sprite* clock = Sprite::create("/res/Background/clock.png");
+    clock->setPosition(Vec2(visibleSize.width / 22, visibleSize.height * 9 / 10));
+	originSize = clock->getContentSize();
+	scaleX = 10 * config->getPx()->x / originSize.x;
+	scaleY = 10 * config->getPx()->y / originSize.y;
+	clock->setScale(scaleX,scaleY);
+	this->addChild(clock, 5);
 
 
 	// 添加退出按钮
@@ -197,7 +214,7 @@ void PlayScene::update(float delta)
 
 		if (!isInBattle && AI != nullptr)
 		{
-			
+			player_coin->setString(std::to_string(playerME->getcoin()));
 			player_lifevalue->setString(to_string(playerME->GetLifeValue()));
 			isInBattle = true;
 			AI->eachTurnOver();
@@ -235,14 +252,14 @@ void PlayScene::update(float delta)
 			this->addChild(clockLayer, 6);
 
 			// 向AI发送API请求
-			//string message = "The number of my tank heroes is " + to_string(playerME->getTankNum())
-			//	+ ", the number of mage heroes is " + to_string(playerME->getMagesNum()) + ",the number of shooter is " + to_string(playerME->getShooterNum())
-			//	+ ", my level is" + to_string(playerME->getLevel());
+			string message = "The number of my tank heroes is " + to_string(playerME->getTankNum())
+				+ ", the number of mage heroes is " + to_string(playerME->getMagesNum()) + ",the number of shooter is " + to_string(playerME->getShooterNum())
+				+ ", my level is " + to_string(playerME->getLevel())+",my lifevalue is "+to_string(playerME->GetLifeValue());
 
 			////string message = "tank,mages,shooters,which one should I buy firstly,please speak in short english";
-			//string response = chatAI.performRequest(url, message);
-			//string content = chatAI.extractContent(response);
-			AILabel->setString("aaaa");
+			string response = chatAI.performRequest(url, message);
+			string content = chatAI.extractContent(response);
+			AILabel->setString(content);
 		}
 	}
 	else if (gameMode == "联机对战")
