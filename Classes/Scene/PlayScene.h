@@ -69,6 +69,9 @@ public:
 	// 坐标转换函数
 	static ChessCoordinate* coordingrevert(Vec2 realPosition);
 
+	// 结算动画
+	void PlayScene::showEndGameAnimation(const string& gameResult);
+
 	CREATE_FUNC(PlayScene);
 
 	void changeMode(string mode) { gameMode = mode; }
@@ -99,7 +102,7 @@ private:
 	int AINum = 2;
 
 	// 当前对战的AI
-	int TargetAI = 0;
+	int TargetAI = -1;
 
 	// 游戏状态
 	bool isInBattle = false;

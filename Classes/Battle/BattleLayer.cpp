@@ -324,14 +324,21 @@ void BattleLayer::showEndGameAnimation(const string& gameResult)
 	this->addChild(endGameImage);
 	auto endAction = ScaleBy::create(0.5f, 1.5f);
 	auto endActionReverse = endAction->reverse();
-	auto callback = CallFunc::create([endGameImage, this]() 
+	auto callback = CallFunc::create([soundEffectPath,endGameImage, this]() 
 		{
 			endGameImage->removeFromParent();
+			CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(soundEffectPath.c_str());
 		});
 	Sequence* sequence = Sequence::create(endAction, endActionReverse, callback, nullptr);
 
+	// 获取 SimpleAudioEngine 实例
+	//auto audioEngine = CocosDenshion::SimpleAudioEngine::getInstance();
+
+	// 设置音效音量为最大
+	//audioEngine->setEffectsVolume(1.0f);
 	// 播放音效
-	CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(soundEffectPath.c_str());
+	
+	//audioEngine->playEffect(soundEffectPath.c_str());
 	endGameImage->runAction(sequence);
 }
 

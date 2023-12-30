@@ -15,12 +15,14 @@ bool PlayScene::init()
 {
 	if (!Scene::init()) // 对父类init方法的判断
 		return false;
+
 	//播放背景音乐
 	playSceneBGM = SimpleAudioEngine::getInstance();
 	
+	
+	//playSceneBGM->playBackgroundMusic("res/Music/playScene_bgm.wav", true);
 	// 设置背景音乐的音量为 50%
-	playSceneBGM->setBackgroundMusicVolume(0.0f);
-	playSceneBGM->playBackgroundMusic("res/Music/playScene_bgm.wav", true);
+	//playSceneBGM->setBackgroundMusicVolume(0.0f);
 
 	// 需要用到的单例工具
 	auto texture = Director::getInstance()->getTextureCache();
@@ -114,6 +116,8 @@ bool PlayScene::init()
 
 
 
+
+
 	// 添加退出按钮
 	auto exitButton = StartAndLoginScene::createGameButton("/res/UI/ExitNormal.png", "/res/UI/ExitSelected.png", CC_CALLBACK_1(PlayScene::menuExitCallBack, this));
 
@@ -135,6 +139,55 @@ bool PlayScene::init()
 	return true;
 }
 
+void PlayScene::showEndGameAnimation(const string& gameResult)
+{
+	string imagePath = "";
+	string soundEffectPath = "";
+	if (gameResult == "Win")
+	{
+		imagePath = "/res/Victory.png";
+		soundEffectPath = "/res/Music/victory.wav";
+	}
+	else if (gameResult == "Lost")
+	{
+		imagePath = "/res/Defeat.png";
+		soundEffectPath = "/res/Music/defeat.wav";
+	}
+	else if (gameResult == "Draw")
+	{
+		imagePath = "/res/Draw.png";
+		soundEffectPath = "/res/Music/draw.wav";
+	}
+
+	auto config = ConfigController::getInstance();
+
+	// 获取当前视图的大小和原点
+	Size visibleSize = Director::getInstance()->getVisibleSize();
+	Vec2 origin = Director::getInstance()->getVisibleOrigin();
+
+	// 创建并设置图片
+	auto endGameImage = Sprite::create(imagePath);
+	endGameImage->setPosition(Vec2(origin.x + visibleSize.width / 2,
+		origin.y + visibleSize.height / 2));
+	Vec2 OriginSize = endGameImage->getContentSize();
+	float chessScaleX = 88.9 * config->getPx()->x / OriginSize.x;
+	float chessScaleY = 50 * config->getPx()->y / OriginSize.y;
+	endGameImage->setScale(chessScaleX, chessScaleY);
+
+	// 添加图片到当前场景并执行动画
+	this->addChild(endGameImage);
+	auto endAction = ScaleBy::create(5.0f, 2.0f);
+	auto endActionReverse = endAction->reverse();
+	auto callback = CallFunc::create([soundEffectPath, endGameImage, this]()
+		{
+			endGameImage->removeFromParent();
+			CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(soundEffectPath.c_str());
+		});
+	Sequence* sequence = Sequence::create(endAction, endActionReverse, callback, nullptr);
+
+	endGameImage->runAction(sequence);
+}
+
 void PlayScene::update(float delta)
 {
 	if (gameMode == "人机对战")
@@ -150,24 +203,26 @@ void PlayScene::update(float delta)
 			AI->eachTurnOver();
 			if (!AI->existLiveAI())
 			{
+
 				// 战斗结束,玩家获胜
-				// 
+				showEndGameAnimation("Win");
+
 				// 取消对update函数的调度
 				this->unscheduleUpdate();
 			}
 			else if (!playerME->isAlive())
 			{
 				// AI获胜
-				// 
+				showEndGameAnimation("Lost");
 				// 取消对update函数的调度
 				this->unscheduleUpdate();
 			}
 
 			//AI++;
-			TargetAI = (TargetAI) % (AINum)+1;
+			TargetAI = (TargetAI+1) % (AINum)+1;
 			while (!(*AI->getPlayersVectorInfo())[TargetAI].isAlive())
 			{
-				TargetAI = (TargetAI) % (AINum)+1;
+				TargetAI = (TargetAI+1) % (AINum)+1;
 			}
 			// 选定好本轮对战的AI选手
 			playerOPP = &(*AI->getPlayersVectorInfo())[TargetAI];

@@ -55,7 +55,7 @@ void PlayerInfo::ChangeLevel()
 {
 	// 升级 扣除金币
 	++level;
-	coinNum -= 4;
+	coinNum = max(0, coinNum - 4);
 
 	// 棋子数修改：3、5、7、9级更改
 	if (level == 3 || level == 5 || level == 7 || level == 9)
@@ -72,7 +72,7 @@ void PlayerInfo::ChangeLevel()
 //-----------------------------------------------------//
 void PlayerInfo::DecreaseLifeValue(int hurt)
 {
-	lifeValue -= hurt;
+	lifeValue = max(0, lifeValue - hurt);
 }
 
 //-----------------------------------------------------//
