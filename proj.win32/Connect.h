@@ -38,19 +38,10 @@ inline void ConPort::connect(bool isServer) {
 	this->socket = new tcp::socket{ *(this->io_context) };
 
 	if (!isServer)
-	{
-		try
-		{
-			this->socket->connect(tcp::endpoint(asio::ip::address::from_string(addr), port));
-		}
-		catch (...)
-		{
-			this->socket->close();
-		}
-	}
+		this->socket->connect(tcp::endpoint(asio::ip::address::from_string(addr), port));
 	else
 	{
-		tcp::acceptor acceptor(*(this->io_context), tcp::endpoint(tcp::v4(), 13));
+		tcp::acceptor acceptor(*(this->io_context), tcp::endpoint(tcp::v4(), port));
 
 		acceptor.accept(*(this->socket));
 	}
@@ -59,8 +50,6 @@ inline void ConPort::connect(bool isServer) {
 
 inline char* ConPort::getPack(size_t size) {
 	if (this->socket == nullptr)
-		return nullptr;
-	if (!this->checkValid())
 		return nullptr;
 	if (this->socket->available() >= size)
 	{
@@ -71,6 +60,8 @@ inline char* ConPort::getPack(size_t size) {
 			re[i] = buf[i];
 		return re;
 	}
+	else
+		std::cout << this->socket->available() << "\n";
 	return nullptr;
 }
 
