@@ -51,9 +51,21 @@ void NetworkConfigSetting::confirmButtonEvent(Ref* sender, cocos2d::ui::Widget::
         // 比如获取输入框中的IP和端口，检查主机/客户端选择器的状态，然后尝试连接或执行其他操作
         delete this->conPort;
         this->conPort = new  ConPort(ipInput->getString(), std::atoi(portInput->getString().c_str()));
-        this->conPort->connect(hostCheckBox->getSelectedState());
+        bool isServer = hostCheckBox->getSelectedState();
+        this->conPort->connect(isServer);
+
+        //char testStr[4] = "123";
+        //conPort->sendPack(testStr, 4);
         if (!this->conPort->checkValid())
-            throw "";
+        {
+           
+        }
+        else
+        {
+            //跳转界面
+            Director::getInstance()->replaceScene(PlayScene::createScene("联机对战"));
+        }
+
     }
 }
 
