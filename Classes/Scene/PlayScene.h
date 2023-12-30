@@ -28,6 +28,7 @@ using std::vector;
 #include "Network/network.h"
 #include "Network/Connect.h"
 #include "Config/ConfigScene.h"
+#include "Network/NetworkConfigSetting.h"
 
 #define ROW_BOARD			5
 #define COL_BOARD			8
@@ -81,7 +82,20 @@ public:
 	// 点击进入设置页面
 	void menuSettingsCallBack(cocos2d::Ref* pSender);
 
+	// 点击进入网络设置页面
+	void PlayScene::menuNetworkSettingsCallBack(cocos2d::Ref* pSender);
+
 private:
+	
+	// IP地址
+	string ip;
+	
+	// 端口
+	int port;
+
+	// 主/副
+	bool isServer;
+	
 	//网络连接
 	ConPort* connection;
 
@@ -104,7 +118,7 @@ private:
 	string gameMode = "人机对战";
 
 	// AI玩家数量
-	int AINum = 2;
+	int AINum = 0;
 
 	// 当前对战的AI
 	int TargetAI = -1;

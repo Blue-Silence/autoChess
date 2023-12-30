@@ -37,13 +37,12 @@ USING_NS_CC;
 using namespace cocos2d::ui;
 
 
-void ConfigScene::setConfigPortal(int* musicOn, int* playerNum) {
-    this->musicPercent = musicPercent;
+void ConfigScene::setConfigPortal(int* playerNum) {
     this->playerNum = playerNum;
 }
 
 
-Scene* ConfigScene::createScene()
+ConfigScene* ConfigScene::createScene()
 {
     return ConfigScene::create();
 }
@@ -254,10 +253,19 @@ void ConfigScene::menuCloseCallback(Ref* pSender)
 {
     //Close the cocos2d-x game scene and quit the application
     Director::getInstance()->popScene();
-    if(this->musicPercent!=nullptr)
-          *this->musicPercent = this->musicPercentTMP;
-    if(this->playerNum!=nullptr)
-          *this->playerNum = this->playerNumTMP;
+
+
+    using namespace CocosDenshion;
+
+    auto audio = SimpleAudioEngine::getInstance();
+
+    // setting the volume specifying value as a float
+    // set default volume
+    audio->setEffectsVolume(double(musicPercentTMP)/100.0);
+    audio->setBackgroundMusicVolume(double(musicPercentTMP) / 100.0);
+
+    if (this->playerNum != nullptr)
+        *this->playerNum = this->playerNumTMP;
  
 }
 
