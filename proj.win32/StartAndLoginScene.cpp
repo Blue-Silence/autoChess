@@ -1,3 +1,8 @@
+/******************************************************/
+/*              文件名：StartAndLoginScene.cpp        */
+/*              功能：欢迎界面，预加载资源            */
+/******************************************************/
+
 #include "StartAndLoginScene.h"
 USING_NS_CC;
 
@@ -5,6 +10,7 @@ Scene* StartAndLoginScene::CreateScene()
 {
 	return StartAndLoginScene::create();
 }
+
 /*
 * 函数参数：
 * 函数功能：覆盖父类init函数
@@ -143,6 +149,12 @@ bool StartAndLoginScene::GetAllMusic(const std::string& path)
 	return 1;
 }
 
+/*
+* 函数参数：std::string normalPicPath, std::string pressedPicPath, const ccMenuCallback& callback
+* 函数功能：以参数图片路径和回调函数创建MenuItemSprite
+* 函数返回值：返回MenuItemSprite对象
+* 函数注意事项：
+*/
 MenuItemSprite* StartAndLoginScene::createGameButton(std::string normalPicPath, std::string pressedPicPath, const ccMenuCallback& callback)
 {
 	//得到图片
@@ -153,8 +165,6 @@ MenuItemSprite* StartAndLoginScene::createGameButton(std::string normalPicPath, 
 
 	return item;
 }
-
-
 
 /*
 * 函数参数：Ref* pSender
@@ -175,12 +185,14 @@ void StartAndLoginScene::LoadingCallBack(Ref* pSender)
 		Size imageSize = start->getContentSize();
 		start->setPosition(Vec2(pageSize.width / 2 + pageCoord.x, 1 * pageSize.height / 4 + pageCoord.y));
 		start->setScale((pageSize.width / 4) / imageSize.width);
+
 		//退出按键初始化
 		exit = createGameButton("res/UI/ExitNormal.png", "res/UI/ExitSelected.png", CC_CALLBACK_1(StartAndLoginScene::MenuToExit, this));
 		imageSize = exit->getContentSize();
 		exit->setScale((pageSize.width / 4) / imageSize.width);
 		exit->setAnchorPoint(Vec2(1, 0));
 		exit->setPosition(Vec2(pageSize.width + pageCoord.x, 1 * pageSize.height / 9 + pageCoord.y));
+
 		//菜单化按键
 		Menu* menus = Menu::create(start, exit, NULL);
 		menus->setPosition(pageCoord);
@@ -196,8 +208,9 @@ void StartAndLoginScene::LoadingCallBack(Ref* pSender)
 */
 void StartAndLoginScene::MenuToPlayScene(Ref* pSender)
 {
-	//Director::getInstance()->end();
+	//停止播放音乐
 	startSceneBGM->stopBackgroundMusic();
+	//跳转界面
 	Director::getInstance()->replaceScene(PlayScene::createScene());
 }
 

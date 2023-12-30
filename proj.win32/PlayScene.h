@@ -26,6 +26,7 @@ using std::vector;
 #include "ChatGLM3.h"
 #include "Clock.h"
 #include "network.h"
+#include "Connect.h"
 
 #define ROW_BOARD			5
 #define COL_BOARD			8
@@ -71,6 +72,9 @@ public:
 	CREATE_FUNC(PlayScene);
 
 private:
+	//网络连接
+	ConPort* connection;
+
 	// 联网模式下对我方场上棋子信息的打包
 	Packet myInfo;
 	

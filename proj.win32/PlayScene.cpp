@@ -202,17 +202,29 @@ void PlayScene::update(float delta)
 			packageInfo();
 			// 2-发送信息
 			/////////////
-			// 把成员变量myInfo发送过去
-			// 
-			// 
-			// 
+			if(!this->connection)
+				throw "Connection lost";
+			if(!this->connection->checkValid())
+				throw "Connection lost";
+			this->connection->sendPack((const char*)&(this->myInfo), sizeof(this->myInfo));
 			// 
 			// 3-接收信息
-			/////////////
 			// 把接收到的信息赋值给成员变量oppInfo
 			// 
-			// 
-			// 
+			for (;;)
+			{
+				if (!this->connection->checkValid())
+					throw "Connection lost";
+				Packet* packRecv = (Packet*)this->connection->getPack(sizeof(this->oppInfo));
+				if (packRecv)
+				{
+					this->oppInfo = *packRecv;
+					delete packRecv;
+					break;
+				}
+				Sleep(200); //等待200ms再试
+
+			}
 			// 
 			// 4-提取信息
 			extractInfo();
