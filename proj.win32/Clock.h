@@ -42,7 +42,7 @@ private:
     Clock(PlayerInfo* ME, PlayerInfo* OPP, bool* inBattle, bool* BuyChess,bool* TransmittingInfo,string mode) :
         playerME(ME), playerOPP(OPP), isInBattle(inBattle), canBuyChess(BuyChess),isTransmittingInfo(TransmittingInfo),gameMode(mode) {}
 	Label* timeLabel = Label::createWithSystemFont("", "Arial", 60);
-	float timeLeft=5;
+	float timeLeft=10;
     bool*  isInBattle;
     bool* canBuyChess;
     bool* isTransmittingInfo;
