@@ -27,41 +27,54 @@ using namespace ui;
 class StartAndLoginScene :public Scene
 {
 public:
+	// 创建开始界面
 	static Scene* CreateScene();
 
+	// 初始化函数
 	virtual bool init();
 
+	// 创建对象
 	CREATE_FUNC(StartAndLoginScene);
 
-	//创建按钮函数
+	// 创建按钮函数
 	static MenuItemSprite* createGameButton(std::string normalPicPath, std::string pressedPicPath, const ccMenuCallback& callback);
 
 private:
-	//预加载资源相关
+
+	// 预加载资源相关
 	const int totalFileNums = 71;
 	int curFileNums;
-	//页面相关
+
+	// 页面相关
 	Size pageSize;
 	Vec2 pageCoord;
-	//加载进度显示
+
+	// 加载进度显示
 	Label* loadLabel;
-	//开始和结束按键
+
+	// 开始和结束按键
 	MenuItemSprite* start;
 	MenuItemSprite* exit;
-	//背景音乐
+
+	// 背景音乐
 	SimpleAudioEngine* startSceneBGM;
 
 
-	//加载资源
+	// 加载资源
 	void LoadResource();
-	//加载图片资源
+
+	// 加载图片资源
 	bool GetAllpng(const std::string& path);
-	//加载音乐资源
+
+	// 加载音乐资源
 	bool GetAllMusic(const std::string& path);
-	//加载资源回调函数
+
+	// 加载资源回调函数
 	void LoadingCallBack(Ref* pSender);
-	//开始游戏按键回调函数
+
+	// 开始游戏按键回调函数
 	void MenuToPlayScene(Ref* pSender);
-	//退出按键回调函数
+
+	// 退出按键回调函数
 	void MenuToExit(Ref* pSender);
 };
