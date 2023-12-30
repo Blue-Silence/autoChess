@@ -27,6 +27,7 @@ using std::vector;
 #include "Battle/Clock.h"
 #include "Network/network.h"
 #include "Network/Connect.h"
+#include "Config/ConfigScene.h"
 
 #define ROW_BOARD			5
 #define COL_BOARD			8
@@ -38,7 +39,7 @@ using std::vector;
 class PlayScene : public Scene
 {
 public:
-	static Scene* createScene(string gameMode="人机对战");
+	static Scene* createScene(const string& gameMode="人机对战");
 
 	Market* shopModel;
 
@@ -74,7 +75,11 @@ public:
 
 	CREATE_FUNC(PlayScene);
 
+	// 修改游戏模式
 	void changeMode(string mode) { gameMode = mode; }
+
+	// 点击进入设置页面
+	void menuSettingsCallBack(cocos2d::Ref* pSender);
 
 private:
 	//网络连接
@@ -144,6 +149,7 @@ private:
 	SimpleAudioEngine* playSceneBGM;
 
 	//背景音乐
+
 
 
 	// 退出按钮的点击事件
