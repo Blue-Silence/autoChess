@@ -38,7 +38,7 @@ using std::vector;
 class PlayScene : public Scene
 {
 public:
-	static Scene* createScene();
+	static Scene* createScene(string gameMode="人机对战");
 
 	Market* shopModel;
 
@@ -71,6 +71,8 @@ public:
 
 	CREATE_FUNC(PlayScene);
 
+	void changeMode(string mode) { gameMode = mode; }
+
 private:
 	//网络连接
 	ConPort* connection;
@@ -94,7 +96,7 @@ private:
 	string gameMode = "人机对战";
 
 	// AI玩家数量
-	int AINum = 4;
+	int AINum = 2;
 
 	// 当前对战的AI
 	int TargetAI = 0;
@@ -118,11 +120,9 @@ private:
 	ChessBoard* chessBoardModel;
 	vector<Sprite*> chessBoard[ROW_BOARD];
 
-
 	//五个商店里的棋子
 	Menu* previousMenu;
 	// 商店
-	
 	vector<MenuItemSprite*> shop;
 
 	// 我方玩家
@@ -157,8 +157,6 @@ private:
 
 	// 购买棋子的点击事件
 	void BuyChess(Ref* sender,int index);
-
-
 	
 };
 

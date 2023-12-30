@@ -214,6 +214,7 @@ void StartAndLoginScene::MenuToPlayScene(Ref* pSender)
 	Director::getInstance()->replaceScene(PlayScene::createScene());
 }
 
+
 /*
 * 函数参数：Ref* pSender
 * 函数功能：开始按键的回调函数

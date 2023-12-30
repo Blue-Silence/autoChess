@@ -3,9 +3,11 @@
 
 #include "Hero.h"
 
-Scene* PlayScene::createScene()
+Scene* PlayScene::createScene(string gamemode)
 {
-	return PlayScene::create();
+	auto p=PlayScene::create();
+	p->changeMode(gamemode);
+	return p;
 }
 
 
@@ -109,6 +111,7 @@ bool PlayScene::init()
 	AILabel->setColor(Color3B::WHITE); // 设置颜色
 	// 将标签添加到场景或层中
 	this->addChild(AILabel);
+
 
 
 	// 添加退出按钮
