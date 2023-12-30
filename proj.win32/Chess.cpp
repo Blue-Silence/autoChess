@@ -1,6 +1,7 @@
 /******************************************************/
 /*                  文件名：Chess.cpp                 */
-/*                  功能：棋子模型                    */
+/*                  功能：棋子模型具体实现            */
+/*                  作者：郑伟丞                      */
 /******************************************************/
 
 #include "Chess.h"
@@ -19,14 +20,14 @@ int ChessCoordinate::getY() const
 	return y;
 }
 
-void ChessCoordinate::setX(const int X) 
+void ChessCoordinate::setX(const int& X) 
 {
 	
 	x = X;
 	return;
 }
 
-void ChessCoordinate::setY(const int Y)
+void ChessCoordinate::setY(const int& Y)
 {
 	
 	y = Y;
@@ -48,19 +49,20 @@ void Chess::initCondition()
 	chessCondition.skillCooldown = skillCooldowns[chessName];
 }
 
-string Chess::getCareer()
+// 获取棋子职业属性
+const string Chess::getCareer() const
 {
 	return career;
  }
 
 // 获取棋子图片路径
-const string Chess::getChessImagePath()
+const string Chess::getChessImagePath() const
 {
 	return chessImagePath;
 }
 
 // 获取棋子名
-const int Chess::getChessName()
+const int Chess::getChessName() const
 {
 	return chessName;
 }
@@ -72,7 +74,7 @@ ChessInfo* Chess::getChessCondition()
 }
 
 // 获取棋子等级
-const int Chess::getChessLevel()
+const int Chess::getChessLevel() const
 {
 	return chessLevel;
 }
@@ -114,14 +116,15 @@ void Chess::promoteRank(int dstRank)
 		chessCondition.HP = chessCondition.maxHP = hpData[chessName]*pow(promoteScale, dstRank);
 		chessCondition.improvedAttack = chessCondition.basicAttack = attackData[chessName] * pow(promoteScale, dstRank);
 		chessCondition.improvedDefence = chessCondition.basicDefence = defenceData[chessName] * pow(promoteScale, dstRank);
-		chessCondition.improvedAttackDistance = chessCondition.basicAttackDistance = attackDistanceData[chessName] * pow(promoteScale, dstRank);
+		if(career!="tank")
+			chessCondition.improvedAttackDistance = chessCondition.basicAttackDistance = attackDistanceData[chessName] * pow(promoteScale, dstRank);
 
 	}
 	return;
 }
 
 // 攻击函数，返回攻击值,作为攻击目标的被攻击函数的输入
-int Chess::myAttack()
+const int Chess::myAttack() const
 {
 	return chessCondition.improvedAttack;
 }
@@ -129,27 +132,29 @@ int Chess::myAttack()
 // 被攻击函数,自身的当前生命值扣除对手伤害量和自身的防御值的一半的差值
 void Chess::beenAttack(int oppAttack)
 {
-	int damage = oppAttack - 0.5 * chessCondition.basicDefence;
+	double damage = oppAttack - 0.5 * chessCondition.basicDefence;
 	if (damage > 0)
-		if (chessCondition.HP > damage)
-			chessCondition.HP -= damage;
-		else
-			chessCondition.HP = 0;
+		chessCondition.HP = max(0.0, chessCondition.HP - damage);
 }
 
-// 执行一次攻击，包含动画
+// 执行一次攻击，
 void Chess::attackOne(Chess& OPP)
 {
 	OPP.beenAttack(myAttack());
 }
 
 // 判断棋子是否死亡
-bool Chess::isDead()
+const bool Chess::isDead() const
 {
 	return chessCondition.HP == 0;
 }
 
-// 可视化棋子
+//-----------------------------------------------------//
+// 函数参数：chessPosition（棋子在屏幕上的位置）       //
+// 函数功能：创建并可视化棋子，包括生命条和技能条      //
+// 函数返回值：Sprite*，创建的棋子精灵对象             //
+// 函数注意事项：设置棋子的位置、大小和进度条          //
+//-----------------------------------------------------//
 Sprite* Chess::createChess(Vec2 chessPosition)
 {
 	// 设置棋子的位置
@@ -157,8 +162,6 @@ Sprite* Chess::createChess(Vec2 chessPosition)
 
 	auto config = ConfigController::getInstance();
 
-	//CsvParser csv;
-	//csv.parseWithFile("Data/PiecesData.csv");
 
 	// 创建三个精灵对象
 	std::string imageHeroPath = getChessImagePath();
@@ -195,23 +198,17 @@ Sprite* Chess::createChess(Vec2 chessPosition)
 	Vec2 hpBarOriginSize = hpBarProgress->getContentSize();
 	Vec2 mpBarOriginSize = mpBarProgress->getContentSize();
 
-
 	
 	// 缩放大小由config一起控制
 	float chessScaleX = 6 * config->getPx()->x / chessOriginSize.x;
 	float chessScaleY = 7.5 * config->getPx()->y / chessOriginSize.y;
-
-	
-	
 	float hpBarScaleX = 10 * config->getPx()->x / hpBarOriginSize.x;
 	float hpBarScaleY = 1 * config->getPx()->y / hpBarOriginSize.y;
 	float mpBarScaleX = 10 * config->getPx()->x / mpBarOriginSize.x;
 	float mpBarScaleY = 1 * config->getPx()->y / mpBarOriginSize.y;
 	
-	// 设置三个精灵大小
+	// 设置三个精灵大小，缩放，旋转的锚点
 	chessImage->setScale(chessScaleX,chessScaleY);
-
-	// 设置缩放，旋转的锚点
 	chessImage->setAnchorPoint(Vec2::ANCHOR_MIDDLE);
 	hpBarProgress->setAnchorPoint(Vec2::ANCHOR_MIDDLE);
 	mpBarProgress->setAnchorPoint(Vec2::ANCHOR_MIDDLE);
@@ -221,11 +218,12 @@ Sprite* Chess::createChess(Vec2 chessPosition)
 	double nowWidth = chessImage->getContentSize().width;
 	double nowHeight = chessImage->getContentSize().height;
 	
-
+	// 设置三个精灵的位置
 	chessImage->setPosition(chessPosition);
 	hpBarProgress->setPosition(chessPosition.x - 0.5 * nowWidth, chessPosition.y + 0.60 * nowHeight);
 	mpBarProgress->setPosition(chessPosition.x - 0.5 * nowWidth, chessPosition.y + 0.80 * nowHeight);
 
+	// 把血条和技能条添加到棋子上方
 	chessImage->addChild(hpBarProgress);
 	chessImage->addChild(mpBarProgress);
 
@@ -237,12 +235,10 @@ Sprite* Chess::getChessSprite()
 {
 	return chessImage;
 }
-
 Sprite* Chess::getAttackSprite()
 {
 	return attackImage;
 }
-
 Sprite* Chess::getSkillSprite()
 {
 	return skillImage;
@@ -332,17 +328,13 @@ mage::mage(int name)
 	chessName = name;
 	career = "mage";
 	chessImagePath = chessImagePaths[name];
-
-
 	initCondition();
 }
 
 // 对目标使用技能
 void mage::skill(Chess& OPP)
 {
-	// 技能可视化
-
-	OPP.beenAttack(skillScale * myAttack());
+	OPP.beenAttack(1.2*skillScale * myAttack());
 }
 
 // 羁绊效果增益
@@ -352,11 +344,13 @@ void mage::careerBuff()
 	skillScale = 3;
 }
 
+// 去除法师羁绊效果
 void mage::removeCareerBuff()
 {
 	skillScale = 2;
 }
 
+// 创建普攻贴图
 Sprite* mage::createAttack()
 {
 	auto texture = Director::getInstance()->getTextureCache();
@@ -367,36 +361,29 @@ Sprite* mage::createAttack()
 	else
 		attackImage = Sprite::create("/res/Effect/DIAOCHAN1.png");
 
-	// 后续再调整
 	// 可以根据需要设置攻击精灵的位置和缩放
-	// 这里假设我们将攻击放置在棋子的旁边
-	Vec2 attackPosition = chessImage->getPosition() ; // 举例，右侧100像素
+	Vec2 attackPosition = chessImage->getPosition() ;
 	attackImage->setPosition(attackPosition);
 
-	// 可以设置其他属性，比如缩放、旋转等
-	attackImage->setScale(0.1); // 示例缩放
 	return attackImage;
 }
 
+// 创建技能贴图
 Sprite* mage::createSkill()
 {
 	auto texture = Director::getInstance()->getTextureCache();
 
-	// 取路径中的图片代表普通攻击，这里也写死了
+	// 取路径中的图片代表技能，这里也写死了
 	if (chessName == DAJI)
 		skillImage = Sprite::create("/res/Effect/DAJI.png");
 	else
 		skillImage = Sprite::create("/res/Effect/DIAOCHAN.png");
 
-	// 后续再调整
 	// 可以根据需要设置攻击精灵的位置和缩放
-	// 这里假设我们将攻击放置在棋子的旁边
-	Vec2 attackPosition = chessImage->getPosition(); // 举例，右侧100像素
+	Vec2 attackPosition = chessImage->getPosition(); 
 
 	skillImage->setPosition(attackPosition);
 
-	// 可以设置其他属性，比如缩放、旋转等
-	skillImage->setScale(0.1); // 示例缩放
 	return skillImage;
 }
 
@@ -414,23 +401,23 @@ shooter::shooter(int name)
 // 对目标使用技能
 void shooter::skill(Chess& OPP)
 {
-	// 技能可视化
-
 	OPP.beenAttack(skillScale * myAttack());
 }
 
 // 羁绊效果增益
 void shooter::careerBuff()
 {
-	// 现有攻击上升
-	chessCondition.improvedAttack *= 1.2;
+	// 现有攻击提升
+	chessCondition.improvedAttack *= 1.3;
 }
 
+// 去除射手羁绊效果
 void shooter::removeCareerBuff()
 {
-	chessCondition.improvedAttack /= 1.2;
+	chessCondition.improvedAttack /= 1.3;
 }
 
+// 创建普攻贴图
 Sprite* shooter::createAttack()
 {
 	auto texture = Director::getInstance()->getTextureCache();
@@ -441,17 +428,14 @@ Sprite* shooter::createAttack()
 	else
 		attackImage = Sprite::create("/res/Effect/DIRENJIE1.png");
 
-	// 后续再调整
 	// 可以根据需要设置攻击精灵的位置和缩放
-	// 这里假设我们将攻击放置在棋子的旁边
-	Vec2 attackPosition = chessImage->getPosition(); // 举例，右侧100像素
-	attackImage->setPosition(attackPosition);
-
-	// 可以设置其他属性，比如缩放、旋转等
-	attackImage->setScale(0.05); // 示例缩放
+	Vec2 attackPosition = chessImage->getPosition(); 
+	attackImage->setPosition(attackPosition);  
+	
 	return attackImage;
 }
 
+// 设置技能贴图
 Sprite* shooter::createSkill()
 {
 	auto texture = Director::getInstance()->getTextureCache();
@@ -462,14 +446,11 @@ Sprite* shooter::createSkill()
 	else
 		skillImage = Sprite::create("/res/Effect/DIRENJIE.png");
 
-	// 后续再调整
+
 	// 可以根据需要设置攻击精灵的位置和缩放
-	// 这里假设我们将攻击放置在棋子的旁边
-	Vec2 attackPosition = chessImage->getPosition() ; // 举例，右侧100像素
+	Vec2 attackPosition = chessImage->getPosition() ;
 	skillImage->setPosition(attackPosition);
 
-	// 可以设置其他属性，比如缩放、旋转等
-	skillImage->setScale(0.1); // 示例缩放
 	return skillImage;
 }
 
@@ -485,8 +466,6 @@ tank::tank(int name)
 // 对目标使用技能
 void tank::skill(Chess& OPP)
 {
-	// 技能可视化
-
 	OPP.beenAttack(skillScale * myAttack());
 }
 
@@ -494,14 +473,16 @@ void tank::skill(Chess& OPP)
 void tank::careerBuff()
 {
 	// 现有防御值上升
-	chessCondition.improvedDefence *= 1.2;
+	chessCondition.improvedDefence *= 1.5;
 }
 
+// 去除坦克羁绊效果
 void tank::removeCareerBuff()
 {
-	chessCondition.improvedDefence /= 1.2;
+	chessCondition.improvedDefence /= 1.5;
 }
 
+// 创建普攻贴图
 Sprite* tank::createAttack()
 {
 	auto texture = Director::getInstance()->getTextureCache();
@@ -512,17 +493,14 @@ Sprite* tank::createAttack()
 	else
 		attackImage = Sprite::create("/res/Attack/tank/normal/ZHNAGFEI");
 
-	// 后续再调整
 	// 可以根据需要设置攻击精灵的位置和缩放
-	// 这里假设我们将攻击放置在棋子的旁边
-	Vec2 attackPosition = chessImage->getPosition(); // 举例，右侧100像素
+	Vec2 attackPosition = chessImage->getPosition(); 
 	attackImage->setPosition(attackPosition);
 
-	// 可以设置其他属性，比如缩放、旋转等
-	attackImage->setScale(1.0); // 示例缩放
 	return attackImage;
 }
 
+// 创建技能贴图
 Sprite* tank::createSkill()
 {
 	auto texture = Director::getInstance()->getTextureCache();
@@ -533,14 +511,10 @@ Sprite* tank::createSkill()
 	else
 		skillImage = Sprite::create("/res/Effect/ZHANGFEI.png");
 
-	// 后续再调整
 	// 可以根据需要设置攻击精灵的位置和缩放
-	// 这里假设我们将攻击放置在棋子的旁边
-	Vec2 attackPosition = chessImage->getPosition();// 举例，右侧100像素
+	Vec2 attackPosition = chessImage->getPosition();
 	skillImage->setPosition(attackPosition);
 
-	// 可以设置其他属性，比如缩放、旋转等
-	skillImage->setScale(1.0); // 示例缩放
 	return skillImage;
 }	
 

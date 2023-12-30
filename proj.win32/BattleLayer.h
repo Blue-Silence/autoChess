@@ -1,7 +1,8 @@
-/********************************************
- * 功能：棋子互相战斗
- * 作者：郑伟丞
- ********************************************/
+/******************************************************/
+/*                  文件名：BattleLayer.h             */
+/*                  功能：战斗逻辑头文件              */
+/*                  作者：郑伟丞                      */
+/******************************************************/
 
 #pragma once
 #include <atomic>
@@ -13,76 +14,100 @@ class BattleLayer :public Layer
 {
 public:
 
+	// 初始化函数
 	bool init();
 
+	// 更新函数，用于每帧更新战斗状态
 	void update(float delta);
 
-	//CREATE_FUNC(BattleLayer);
+	// 静态创建函数，用于创建BattleLayer实例
+	static BattleLayer* create(PlayerInfo* playerME, PlayerInfo* playerOPP, bool* isInBattle, bool* canBuyChess);
 
-	// 自定义的静态创建函数
-	static BattleLayer* create(PlayerInfo* playerME, PlayerInfo* playerOPP,bool* isInBattle,bool* canBuyChess) 
-	{
-		;
-		BattleLayer* layer = new (std::nothrow) BattleLayer(playerME, playerOPP,isInBattle,canBuyChess);
-		if (layer && layer->init()) 
-		{
-			layer->autorelease();
-			return layer;
-		}
-		CC_SAFE_DELETE(layer);
-		return nullptr;
-	}
+	// 战斗前棋子初始化
+	void chessInitBeforeBattle(shared_ptr<Chess> chess, const bool &isME);
 
-	void chessInitBeforeBattle(shared_ptr<Chess> chess,bool isME);
+	// 计算棋子间的曼哈顿距离
+	double getDistance(const ChessCoordinate* start, const ChessCoordinate* end);
 
-	//计算两个棋子之间的曼哈顿距离，输入参数为两个棋子的棋格坐标
-	double getDistance(ChessCoordinate* start, ChessCoordinate* end);
-
-	//void pieceBattle(Chess &damageMaker, Chess &victim);
-
+	// 寻找敌人
 	shared_ptr<Chess> findEnemy(shared_ptr<Chess> damageMaker, PlayerInfo* enemy);
 
-	//这是一个普通的寻路函数,每次只走一步
-	void findPathToEnemy(shared_ptr<Chess> damageMaker, shared_ptr<Chess> targetEnemy);
+	// 寻路至敌人位置
+	bool findPathToEnemy(shared_ptr<Chess> damageMaker, shared_ptr<Chess> targetEnemy);
 
 	// 移动棋子
-	void moveChess(shared_ptr<Chess> movingChess, Vec2 targetPoistion);
+	void moveChess(shared_ptr<Chess> movingChess, const Vec2 &targetPosition);
 
-	// 攻击——动画+数据
+	// 执行攻击动作
 	void doAttack(shared_ptr<Chess> damageMaker, shared_ptr<Chess> targetEnemy);
 
-	// 判断该位置能否通行
-	inline bool isAvailable(int row, int col);
+	// 检查指定位置是否可通行
+	inline bool isAvailable(const int &row,const int &col);
 
-	// 封装英雄进行战斗的全流程——寻找、寻路、攻击
-	void playGame(shared_ptr<Chess> chess,PlayerInfo* opp);
+	// 执行战斗全流程
+	void playGame(shared_ptr<Chess> chess, PlayerInfo* opp);
 
-	// 判断谁赢谁负
+	// 判断胜负
 	void detectWinner();
 
-	// 战斗测试
+	// 显示结束游戏的动画（胜利、失败或平局）
+	void BattleLayer::showEndGameAnimation(const string& gameResult);
+
+	// 共用的战后处理逻辑
+	void BattleLayer::processAttackResult(shared_ptr<Chess> damageMaker, shared_ptr<Chess> targetEnemy,
+								const int &targetRow, const int &targetCol, Sprite* targetChessImage,const bool &useSkill);
+
+	// 播放相应的音效
+	void BattleLayer::playSkillSound(shared_ptr<Chess> damageMaker);
+
+	// 技能共用动画逻辑
+	void remoteAttackAnimation(shared_ptr<Chess> damageMaker, shared_ptr<Chess> targetEnemy,const bool &useSkill);
+
+	// AI 测试函数
 	void AItest();
-
-
 
 private:
 
 	// 私有构造函数
-	BattleLayer(PlayerInfo* playerOfMe, PlayerInfo* playerOfOpp,bool* inBattle,bool* BuyChess)
-	{
-		playerME = playerOfMe; playerOPP = playerOfOpp; isInBattle = inBattle; canBuyChess = BuyChess;
-	}
-
+	BattleLayer(PlayerInfo* playerOfMe, PlayerInfo* playerOfOpp, bool* inBattle, bool* BuyChess);
+	
+	// 游戏结束标志
 	bool gameOver = false;
 
+	// 游戏中的棋盘状态
 	std::atomic<int> boardInGame[BOARDMAXR][BOARDMAXC] = { 0 };
 
+	// 玩家信息
 	PlayerInfo* playerME;
 
+	// 对手信息
 	PlayerInfo* playerOPP;
 
+	// 是否处于战斗状态
 	bool* isInBattle;
+
+	// 是否可以购买棋子
 	bool* canBuyChess;
 
 	
+};
+
+// A*寻路算法中使用的路径节点类
+class pathNode
+{
+public:
+	// 构造函数
+	pathNode(int x, int y, pathNode* parent = nullptr);
+
+	// 计算F值
+	void calculateFCost();
+
+	// 节点位置
+	int x, y;
+
+	// G值，H值和F值
+	int gCost, hCost, fCost;
+
+	// 父节点
+	pathNode* parent;
 };

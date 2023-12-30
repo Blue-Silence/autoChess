@@ -26,26 +26,39 @@ using namespace ui;
 class PreparationSeat :public Ref
 {
 private:
-	//屏幕相关
+	// 屏幕相关
 	Size pageSize;
 	Vec2 pageCoord;
-	//备战席button集合
+
+	// 备战席button集合
 	std::vector<Menu*> preAreaChessMenu = vector<Menu*>(9, nullptr);
-	//对象指针
+
+	// 对象指针
 	PlayerInfo* player;
 	ChessBoard* cBoard;
 	EventListenerMouse* listenerMouse;
 	Label* playerCoin;
+
 	//记录当前场上棋子数
 	int numOfBoard = 0;
+
 	//场上棋子位置记录
 	shared_ptr<Chess> onBoardChess[RSIZE][CSIZE];
 	Sprite* onBoardSprite[RSIZE][CSIZE];
+
 	//是否在战斗中
 	bool* canBuyChess;
+
 	//当前选中备战席
 	pair < Menu*, int >curHero = { nullptr, -1 };
+
+	//羁绊图标
+	Sprite* PreviousBuffmage;
+	Sprite* PreviousBuffshooter;
+	Sprite* PreviousBufftank;
+
 public:
+
 	// 玩家信息初始化函数
 	virtual bool init(PlayerInfo* pr, ChessBoard* board, EventListenerMouse* listener, Layer* preArea, bool* buyChess,Label* player_coin);
 
@@ -58,15 +71,15 @@ public:
 			delete pRet; pRet = nullptr; return nullptr;
 		}
 	};
+
 	void CallBack(Ref* sender, int index);
+
 	//备战席层
 	Layer* PreAreaLayer;
-	//羁绊图标
-	Sprite* PreviousBuffmage;
-	Sprite* PreviousBuffshooter;
-	Sprite* PreviousBufftank;
+
 	//羁绊图片改变
 	void PreparationSeat::ChangeBuffImage();
+
 	//生成备战席精灵
 	void CreatePreAreaButton(shared_ptr<Chess> curHero, int index);
 

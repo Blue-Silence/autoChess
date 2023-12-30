@@ -5,28 +5,47 @@
 
 #include"ChatGLM3.h"
 
+//-----------------------------------------------------//
+// 函数参数：无                                        //
+// 函数功能：构造函数，初始化CurlWrapper对象           //
+// 函数返回值：无（构造函数）                          //
+//-----------------------------------------------------//
 CurlWrapper::CurlWrapper()
 {
-	curl_global_init(CURL_GLOBAL_DEFAULT);
-	curl = curl_easy_init();
-
+    // 初始化cURL库
+    curl_global_init(CURL_GLOBAL_DEFAULT);
+    // 初始化cURL easy handle
+    curl = curl_easy_init();
 }
 
+//-----------------------------------------------------//
+// 函数参数：无                                        //
+// 函数功能：析构函数，清理CurlWrapper对象             //
+// 函数返回值：无（析构函数）                          //
+//-----------------------------------------------------//
 CurlWrapper::~CurlWrapper()
 {
-	if (curl) 
-	{
-		curl_easy_cleanup(curl);
-	}
-	curl_global_cleanup();
+    // 清理cURL easy handle
+    if (curl)
+    {
+        curl_easy_cleanup(curl);
+    }
+    // 清理cURL库
+    curl_global_cleanup();
 }
 
+//-----------------------------------------------------//
+// 函数参数：url（请求URL），userMessage（用户消息）   //
+// 函数功能：执行HTTP请求                              //
+// 函数返回值：std::string（请求响应）                 //
+//-----------------------------------------------------//
 std::string  CurlWrapper::performRequest(const std::string& url, const std::string& userMessage)
 {
     if (curl) 
     {
         std::string readBuffer;
 
+        // 告知AI游戏基本玩法
         std::string prompt =
             "Now that you are a master of AutoChess games, I will give you structured information"
             "about the current situation and ask you to provide valuable suggestions to players "
@@ -80,16 +99,22 @@ std::string  CurlWrapper::performRequest(const std::string& url, const std::stri
     return "";
 }
 
-
+//-----------------------------------------------------//
+// 函数参数：response（响应字符串）                    //
+// 函数功能：从响应中提取有效内容                      //
+// 函数返回值：std::string（提取的内容）               //
+//-----------------------------------------------------//
 std::string CurlWrapper::extractContent(const std::string& response)
 {
-    try 
+    try
     {
+        // 解析JSON响应并提取内容
         auto j = json::parse(response);
         return j["choices"][0]["message"]["content"];
     }
     catch (json::parse_error& e)
     {
+        // 输出解析错误信息
         std::cerr << "JSON parse error: " << e.what() << std::endl;
         return "";
     }

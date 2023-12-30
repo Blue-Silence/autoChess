@@ -138,6 +138,7 @@ void PlayScene::update(float delta)
 
 		if (!isInBattle && AI != nullptr)
 		{
+			
 			player_lifevalue->setString(to_string(playerME->GetLifeValue()));
 			isInBattle = true;
 			AI->eachTurnOver();
