@@ -135,10 +135,11 @@ bool PlayScene::init()
 	this->addChild(clock, 5);
 
 	//添加设置按钮
-	auto settingButton = StartAndLoginScene::createGameButton("/res/UI/setting.png", "/res/UI/setting.png", CC_CALLBACK_1(PlayScene::menuSettingsCallBack, this));
+	auto settingButton = StartAndLoginScene::createGameButton("/res/UI/setting.png", "/res/UI/setting.png", 
+													CC_CALLBACK_1(PlayScene::menuNetworkSettingsCallBack, this));
 	originSize = settingButton->getContentSize();
 	settingButton->setScale(10 * ConfigController::getInstance()->getPx()->x / originSize.x);
-	settingButton->setPosition(Vec2(50 * ConfigController::getInstance()->getPx()->y, -35 * ConfigController::getInstance()->getPx()->y));
+	settingButton->setPosition(Vec2(60 * ConfigController::getInstance()->getPx()->y, -20 * ConfigController::getInstance()->getPx()->y));
 	// 将按钮添加到当前场景
 	//this->addChild(settingButton);
 
@@ -389,7 +390,19 @@ void PlayScene::menuSettingsCallBack(cocos2d::Ref* pSender)
 {
 	// 替换当前场景为 ConfigScene
 	auto configScene = ConfigScene::createScene();
-	Director::getInstance()->replaceScene(configScene);
+	configScene->setConfigPortal(&AINum);
+	CC_SAFE_RETAIN(configScene);
+	Director::getInstance()->pushScene(configScene);
+}
+
+// 设置按钮的回调函数
+void PlayScene::menuNetworkSettingsCallBack(cocos2d::Ref* pSender)
+{
+	// 替换当前场景为 ConfigScene
+	auto configScene = NetworkConfigSetting::createScene();
+	//configScene->setConfigPortal(&AINum);
+	CC_SAFE_RETAIN(configScene);
+	Director::getInstance()->pushScene(configScene);
 }
 
 

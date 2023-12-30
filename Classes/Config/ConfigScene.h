@@ -28,17 +28,16 @@
 
 class ConfigScene : public cocos2d::Scene
 {
-    int* musicPercent;
     int* playerNum;
 
-    int musicPercentTMP = 1;
     int playerNumTMP = 1;
+    int musicPercentTMP = 100;
 
 public:
-    static cocos2d::Scene* createScene();
+    static ConfigScene* createScene();
 
 
-    void setConfigPortal(int* musicPercent, int* playerNum);
+    void setConfigPortal(int* playerNum);
     virtual bool init();
     // a selector callback
     void menuCloseCallback(cocos2d::Ref* pSender);
