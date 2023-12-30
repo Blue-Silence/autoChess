@@ -1,6 +1,8 @@
+#pragma once
 #include "cocos2d.h"
 #include "ui/CocosGUI.h"
 #include<Network/Connect.h>
+#include<Scene/PlayScene.h>
 
 USING_NS_CC;
 

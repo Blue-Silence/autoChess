@@ -21,6 +21,7 @@ bool NetworkConfigSetting::init()
 
     // 初始化主机选择器
     createHostSelector(Vec2(480, 160)); // 根据需要调整位置
+    
 
     //// 初始化确定连接按钮
     confirmButton = cocos2d::ui::Button::create("res/UI/confirm.png", "res/UI/confirm.png");
@@ -63,7 +64,7 @@ void NetworkConfigSetting::confirmButtonEvent(Ref* sender, cocos2d::ui::Widget::
         else
         {
             //跳转界面
-            Director::getInstance()->replaceScene(PlayScene::createScene("联机对战"));
+            Director::getInstance()->replaceScene(PlayScene::createScene(conPort, "联机对战"));
         }
 
     }
@@ -127,7 +128,7 @@ void NetworkConfigSetting::checkBoxEvent(cocos2d::Ref * sender, cocos2d::ui::Che
         {
             hostCheckBox->setSelected(true);
             // 设置为主机
-        }   
+        }
     }
 }
 

@@ -23,6 +23,8 @@ using namespace CocosDenshion;
 using namespace ui;
 
 #include "PlayScene.h"
+#include "Network/NetworkConfigSetting.h"
+#include "Network/network.h"
 
 class StartAndLoginScene :public Scene
 {

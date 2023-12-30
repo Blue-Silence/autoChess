@@ -3,13 +3,20 @@
 #include "Hero.h"
 
 
-Scene* PlayScene::createScene(const string& gameMode)
+Scene* PlayScene::createScene(ConPort* cone, const string& gameMode)
 {
 	auto p=PlayScene::create();
+	p->connection = cone;    
 	p->changeMode(gameMode);
+	
 	return p;
 }
 
+Scene* PlayScene::createScene()
+{
+	auto p = PlayScene::create();
+	return p;
+}
 
 bool PlayScene::init()
 {
@@ -18,7 +25,6 @@ bool PlayScene::init()
 
 	//播放背景音乐
 	playSceneBGM = SimpleAudioEngine::getInstance();
-	
 	
 	//playSceneBGM->playBackgroundMusic("res/Music/playScene_bgm.wav", true);
 	// 设置背景音乐的音量为 50%
@@ -136,7 +142,7 @@ bool PlayScene::init()
 
 	//添加设置按钮
 	auto settingButton = StartAndLoginScene::createGameButton("/res/UI/setting.png", "/res/UI/setting.png", 
-													CC_CALLBACK_1(PlayScene::menuNetworkSettingsCallBack, this));
+													CC_CALLBACK_1(PlayScene::menuSettingsCallBack, this));
 	originSize = settingButton->getContentSize();
 	settingButton->setScale(10 * ConfigController::getInstance()->getPx()->x / originSize.x);
 	settingButton->setPosition(Vec2(60 * ConfigController::getInstance()->getPx()->y, -20 * ConfigController::getInstance()->getPx()->y));
@@ -309,7 +315,7 @@ void PlayScene::update(float delta)
 				if (packRecv)
 				{
 					this->oppInfo = *packRecv;
-					delete packRecv;
+					delete[] (char *)packRecv;
 					break;
 				}
 				Sleep(200); //等待200ms再试
@@ -335,6 +341,16 @@ void PlayScene::update(float delta)
 			auto battleLayer = BattleLayer::create(playerME, playerOPP, &isInBattle, &canBuyChess);
 			battleLayer->setTag(BATTLE_LAYER_TAG); // 设置标签以便识别
 			this->addChild(battleLayer, 6);
+
+			// 向AI发送API请求
+			string message = "The number of my tank heroes is " + to_string(playerME->getTankNum())
+				+ ", the number of mage heroes is " + to_string(playerME->getMagesNum()) + ",the number of shooter is " + to_string(playerME->getShooterNum())
+				+ ", my level is " + to_string(playerME->getLevel()) + ",my lifevalue is " + to_string(playerME->GetLifeValue());
+
+			////string message = "tank,mages,shooters,which one should I buy firstly,please speak in short english";
+			string response = chatAI.performRequest(url, message);
+			string content = chatAI.extractContent(response);
+			AILabel->setString(content);
 		}
 	}
 }
@@ -342,6 +358,7 @@ void PlayScene::update(float delta)
 // 联网下：打包我方场上棋子信息
 void PlayScene::packageInfo()
 {
+	myInfo.totalChessNum = 0;
 	for (auto chess : *playerME->getBattleAreaChesses())
 	{
 		string career = chess->getCareer();
@@ -357,14 +374,16 @@ void PlayScene::packageInfo()
 // 联网下：提取对方场上棋子信息
 void PlayScene::extractInfo()
 {
+	playerOPP->getBattleAreaChesses()->clear();
 	shared_ptr<Chess> chess = nullptr;
 	for (int i = 0; i < oppInfo.totalChessNum; ++i)
 	{
 		string career = oppInfo.chesses[i].chessCareer;
 		int name = oppInfo.chesses[i].chessName;
 		int level = oppInfo.chesses[i].chessLevel;
-		int posX = oppInfo.chesses[i].chessBoardPosX;
-		int posY = oppInfo.chesses[i].chessBoardPosY;
+		int posX = COL_BOARD-1-oppInfo.chesses[i].chessBoardPosX;
+		int posY = ROW_BOARD -1-oppInfo.chesses[i].chessBoardPosY;
+
 
 		if (career == "shooter")
 			playerOPP->putChessInBattleArea(make_shared<shooter>(name));

@@ -66,6 +66,7 @@ private:
 
 
 public:
+
 	// 玩家信息初始化函数
 	virtual bool init();
 

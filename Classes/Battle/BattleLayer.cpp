@@ -142,6 +142,8 @@ bool BattleLayer::init()
 		chessInitBeforeBattle(chess, true);
 	}
 
+
+	playerOPP->buffJudgment();
 	// 初始化对手棋子
 	for (shared_ptr<Chess> chess : *playerOPP->getBattleAreaChesses())
 	{
@@ -163,6 +165,7 @@ bool BattleLayer::init()
 //-----------------------------------------------------//
 void BattleLayer::update(float delta)
 {
+	
 	// 处理我方的每个棋子
 	for (auto chess : *playerME->getBattleAreaChesses())
 	{
@@ -184,6 +187,10 @@ void BattleLayer::update(float delta)
 		// 播放棋子的行动
 		playGame(chess, playerME);
 	}
+	
+	
+	
+	
 
 	// 如果游戏结束
 	if (gameOver)

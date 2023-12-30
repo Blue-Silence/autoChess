@@ -40,7 +40,8 @@ using std::vector;
 class PlayScene : public Scene
 {
 public:
-	static Scene* createScene(const string& gameMode="人机对战");
+	static Scene* createScene(ConPort* cone, const string& gameMode = "人机对战");
+	static Scene* createScene();
 
 	Market* shopModel;
 
@@ -94,7 +95,7 @@ private:
 	int port;
 
 	// 主/副
-	bool isServer;
+	bool isServer=true;
 	
 	//网络连接
 	ConPort* connection;

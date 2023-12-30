@@ -229,9 +229,13 @@ void StartAndLoginScene::AIModeToPlayScene(Ref* pSender)
 void StartAndLoginScene::onlineModeToPlayScene(Ref* pSender)
 {
 	//停止播放音乐
-	startSceneBGM->stopBackgroundMusic("联机对战");
+	startSceneBGM->stopBackgroundMusic();
 	//跳转界面
-	Director::getInstance()->replaceScene(PlayScene::createScene());
+	// 替换当前场景为 ConfigScene
+	auto configScene = NetworkConfigSetting::createScene();
+	//configScene->setConfigPortal(&AINum);
+	CC_SAFE_RETAIN(configScene);
+	Director::getInstance()->pushScene(configScene);
 }
 
 
