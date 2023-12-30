@@ -1,12 +1,12 @@
 #include "PlayScene.h"
 #include "StartAndLoginScene.h"
-
 #include "Hero.h"
 
-Scene* PlayScene::createScene(string gamemode)
+
+Scene* PlayScene::createScene(const string& gameMode)
 {
 	auto p=PlayScene::create();
-	p->changeMode(gamemode);
+	p->changeMode(gameMode);
 	return p;
 }
 
@@ -134,18 +134,29 @@ bool PlayScene::init()
 	clock->setScale(scaleX,scaleY);
 	this->addChild(clock, 5);
 
+	//添加设置按钮
+	auto settingButton = StartAndLoginScene::createGameButton("/res/UI/setting.png", "/res/UI/setting.png", CC_CALLBACK_1(PlayScene::menuSettingsCallBack, this));
+	originSize = settingButton->getContentSize();
+	settingButton->setScale(10 * ConfigController::getInstance()->getPx()->x / originSize.x);
+	settingButton->setPosition(Vec2(50 * ConfigController::getInstance()->getPx()->y, -35 * ConfigController::getInstance()->getPx()->y));
+	// 将按钮添加到当前场景
+	//this->addChild(settingButton);
 
 	// 添加退出按钮
-	auto exitButton = StartAndLoginScene::createGameButton("/res/UI/ExitNormal.png", "/res/UI/ExitSelected.png", CC_CALLBACK_1(PlayScene::menuExitCallBack, this));
-
+	auto exitButton = StartAndLoginScene::createGameButton("/res/UI/ExitNormal.png", "/res/UI/ExitSelected.png",
+																CC_CALLBACK_1(PlayScene::menuExitCallBack, this));
 	exitButton->setAnchorPoint(Vec2::ANCHOR_MIDDLE);
 	originSize = exitButton->getContentSize();
 	exitButton->setScale(10 * ConfigController::getInstance()->getPx()->x / originSize.x);
 	exitButton->setPosition(Vec2(50 * ConfigController::getInstance()->getPx()->y, -35 * ConfigController::getInstance()->getPx()->y));
+	//this->addChild(exitButton);
+	
+	
 
+    
 
-	auto menu = Menu::create(exitButton, nullptr);
-	playLayer->addChild(menu, 5);
+    auto menu = Menu::create(exitButton, settingButton, nullptr);
+    playLayer->addChild(menu, 5);
 
 
 	// 调度启动update()函数，开始战斗
@@ -373,6 +384,13 @@ void PlayScene::extractInfo()
 
 
 
+// 设置按钮的回调函数
+void PlayScene::menuSettingsCallBack(cocos2d::Ref* pSender) 
+{
+	// 替换当前场景为 ConfigScene
+	auto configScene = ConfigScene::createScene();
+	Director::getInstance()->replaceScene(configScene);
+}
 
 
 void PlayScene::onBattleButtonClicked(Ref* sender) 
