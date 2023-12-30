@@ -32,7 +32,7 @@ class ConfigScene : public cocos2d::Scene
     int* playerNum;
 
     int musicPercentTMP = 1;
-    int payerNumTMP = 1;
+    int playerNumTMP = 1;
 
 public:
     static cocos2d::Scene* createScene();

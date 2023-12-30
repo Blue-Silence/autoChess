@@ -256,8 +256,8 @@ void ConfigScene::menuCloseCallback(Ref* pSender)
     Director::getInstance()->popScene();
     if(this->musicPercent!=nullptr)
           *this->musicPercent = this->musicPercentTMP;
-    if(this->payerNum!=nullptr)
-          *this->payerNum = this->payerNumTMP;
+    if(this->playerNum!=nullptr)
+          *this->playerNum = this->playerNumTMP;
  
 }
 
