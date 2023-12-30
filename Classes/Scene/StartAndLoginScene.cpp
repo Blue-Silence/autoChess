@@ -52,8 +52,8 @@ bool StartAndLoginScene::init()
 	else
 	{
 		auto imageSize = gameLogo->getContentSize();
-		gameLogo->setPosition(Vec2(pageSize.width / 2 + pageCoord.x, 2 * pageSize.height / 3 + pageCoord.y));
-		gameLogo->setScale((pageSize.width / 2) / imageSize.width);
+		gameLogo->setPosition(Vec2(pageSize.width / 2 + pageCoord.x, 3 * pageSize.height / 4 + pageCoord.y));
+		gameLogo->setScale((pageSize.width / 1.5) / imageSize.width);
 		this->addChild(gameLogo);
 	}
 
@@ -180,11 +180,17 @@ void StartAndLoginScene::LoadingCallBack(Ref* pSender)
 	//加载完成
 	if (curFileNums == totalFileNums)
 	{
-		//开始按键初始化
-		start = createGameButton("res/UI/PlayNormal.png", "res/UI/PlaySelected.png", CC_CALLBACK_1(StartAndLoginScene::MenuToPlayScene, this));
-		Size imageSize = start->getContentSize();
-		start->setPosition(Vec2(pageSize.width / 2 + pageCoord.x, 1 * pageSize.height / 4 + pageCoord.y));
-		start->setScale((pageSize.width / 4) / imageSize.width);
+		//人机模式按键初始化
+		AIMode = createGameButton("res/UI/AIModeNormal.png", "res/UI/AIModeSelected.png", CC_CALLBACK_1(StartAndLoginScene::AIModeToPlayScene, this));
+		Size imageSize = AIMode->getContentSize();
+		AIMode->setPosition(Vec2(pageSize.width / 3 + pageCoord.x, 1 * pageSize.height / 4 + pageCoord.y));
+		AIMode->setScale((pageSize.width / 4) / imageSize.width);
+
+		//联机模式按键初始化
+		onlineMode = createGameButton("res/UI/onlineModeNormal.png", "res/UI/onlineModeSelected.png", CC_CALLBACK_1(StartAndLoginScene::onlineModeToPlayScene, this));
+		imageSize = AIMode->getContentSize();
+		onlineMode->setPosition(Vec2(pageSize.width * 2 / 3 + pageCoord.x, 1 * pageSize.height / 4 + pageCoord.y));
+		onlineMode->setScale((pageSize.width / 4) / imageSize.width);
 
 		//退出按键初始化
 		exit = createGameButton("res/UI/ExitNormal.png", "res/UI/ExitSelected.png", CC_CALLBACK_1(StartAndLoginScene::MenuToExit, this));
@@ -194,7 +200,7 @@ void StartAndLoginScene::LoadingCallBack(Ref* pSender)
 		exit->setPosition(Vec2(pageSize.width + pageCoord.x, 1 * pageSize.height / 9 + pageCoord.y));
 
 		//菜单化按键
-		Menu* menus = Menu::create(start, exit, NULL);
+		Menu* menus = Menu::create(AIMode, onlineMode, exit, NULL);
 		menus->setPosition(pageCoord);
 		this->addChild(menus);
 	}
@@ -206,10 +212,24 @@ void StartAndLoginScene::LoadingCallBack(Ref* pSender)
 * 函数返回值：
 * 函数注意事项：点击后跳转至游戏界面
 */
-void StartAndLoginScene::MenuToPlayScene(Ref* pSender)
+void StartAndLoginScene::AIModeToPlayScene(Ref* pSender)
 {
 	//停止播放音乐
 	startSceneBGM->stopBackgroundMusic();
+	//跳转界面
+	Director::getInstance()->replaceScene(PlayScene::createScene());
+}
+
+/*
+* 函数参数：Ref* pSender
+* 函数功能：开始按键的回调函数
+* 函数返回值：
+* 函数注意事项：点击后跳转至游戏界面
+*/
+void StartAndLoginScene::onlineModeToPlayScene(Ref* pSender)
+{
+	//停止播放音乐
+	startSceneBGM->stopBackgroundMusic("联机对战");
 	//跳转界面
 	Director::getInstance()->replaceScene(PlayScene::createScene());
 }

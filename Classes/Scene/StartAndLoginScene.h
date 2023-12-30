@@ -52,8 +52,9 @@ private:
 	// 加载进度显示
 	Label* loadLabel;
 
-	// 开始和结束按键
-	MenuItemSprite* start;
+	// 模式选择按键和结束按键
+	MenuItemSprite* AIMode;
+	MenuItemSprite* onlineMode;
 	MenuItemSprite* exit;
 
 	// 背景音乐
@@ -73,7 +74,8 @@ private:
 	void LoadingCallBack(Ref* pSender);
 
 	// 开始游戏按键回调函数
-	void MenuToPlayScene(Ref* pSender);
+	void AIModeToPlayScene(Ref* pSender);
+	void onlineModeToPlayScene(Ref* pSender);
 
 	// 退出按键回调函数
 	void MenuToExit(Ref* pSender);

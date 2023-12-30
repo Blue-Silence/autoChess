@@ -82,7 +82,7 @@ void BattleLayer::chessInitBeforeBattle(shared_ptr<Chess> chess, const bool &isM
 
 		// 创建敌方标志
 		auto config = ConfigController::getInstance();
-		auto enemy = Sprite::create("/res/enemy.png");
+		auto enemy = Sprite::create("/res/UI/enemy.png");
 		Vec2 originSize = enemy->getContentSize();
 		float scaleX = 20 * config->getPx()->x / originSize.x;
 		float scaleY = 20 * config->getPx()->y / originSize.y;
@@ -123,11 +123,10 @@ inline bool BattleLayer::isAvailable(const int &row,const int &col)
 bool BattleLayer::init()
 {
 	// 预加载音效资源
-	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("/res/Music/张飞大招.wav");
-	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("/res/Music/弓箭.wav");
+	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("/res/Music/zhangfei.wav");
+	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("/res/Music/houyi.wav");
 	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("/res/Music/daji.wav");
-	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("/res/Music/onlinedo-output(1).wav");
-	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("/res/Music/onlinedo-output(2).wav");
+	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("/res/Music/skillSound.wav");
 	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("/res/Music/victory.wav");
 	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("/res/Music/defeat.wav");
 
@@ -207,11 +206,10 @@ void BattleLayer::update(float delta)
 
 				// 清理音效资源
 				auto audio = CocosDenshion::SimpleAudioEngine::getInstance();
-				audio->unloadEffect("/res/Music/张飞大招.wav");
-				audio->unloadEffect("/res/Music/弓箭.wav");
+				audio->unloadEffect("/res/Music/zhangfei.wav");
+				audio->unloadEffect("/res/Music/houyi.wav");
 				audio->unloadEffect("/res/Music/daji.wav");
-				audio->unloadEffect("/res/Music/onlinedo-output(1).wav");
-				audio->unloadEffect("/res/Music/onlinedo-output(2).wav");
+				audio->unloadEffect("/res/Music/skillSound.wav");
 				audio->unloadEffect("/res/Music/victory.wav");
 				audio->unloadEffect("/res/Music/defeat.wav");
 			});
@@ -291,17 +289,17 @@ void BattleLayer::showEndGameAnimation(const string& gameResult)
 	string soundEffectPath = "";
 	if (gameResult == "Win")
 	{
-		imagePath = "/res/Victory.png";
+		imagePath = "/res/UI/Victory.png";
 		soundEffectPath = "/res/Music/victory.wav";
 	}
 	else if (gameResult == "Lost")
 	{
-		imagePath = "/res/Defeat.png";
+		imagePath = "/res/UI/Defeat.png";
 		soundEffectPath = "/res/Music/defeat.wav";
 	}
 	else if (gameResult == "Draw")
 	{
-		imagePath = "/res/Draw.png";
+		imagePath = "/res/UI/Draw.png";
 		soundEffectPath = "/res/Music/draw.wav";
 	}
 
@@ -700,13 +698,13 @@ void BattleLayer::playSkillSound(shared_ptr<Chess> damageMaker)
 {
 	int chessName = damageMaker->getChessName();
 	if (chessName == ZHANGFEI)
-		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("/res/Music/张飞大招.wav");
+		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("/res/Music/zhangfei.wav");
 	else if (chessName == DAJI)
 		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("/res/Music/daji.wav");
 	else if (chessName == HOUYI)
-		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("/res/Music/弓箭.wav");
+		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("/res/Music/houyi.wav");
 	else
-		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("/res/Music/onlinedo-output (2).wav");
+		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("/res/Music/skillSound.wav");
 }
 
 //----------------------------------------------------------------------//
@@ -837,9 +835,9 @@ void BattleLayer::doAttack(shared_ptr<Chess> damageMaker, shared_ptr<Chess> targ
 			// 执行技能动画和逻辑计算
 			damageMakerAttackImage->runAction(sequence);
 			if (damageMaker->getChessName() == HOUYI)
-				CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("/res/Music/弓箭.wav");
+				CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("/res/Music/houyi.wav");
 			else
-				CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("/res/Music/onlinedo-output (2).wav");
+				CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("/res/Music/skillSound.wav");
 			
 		}
 		else
@@ -860,7 +858,7 @@ void BattleLayer::doAttack(shared_ptr<Chess> damageMaker, shared_ptr<Chess> targ
 			
 			// 执行技能动画和逻辑计算
 			damageMakerImage->runAction(sequence);
-			CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("/res/Music/onlinedo-output (2).wav");
+			CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("/res/Music/skillSound.wav");
 		}
 	}
 }
