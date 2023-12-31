@@ -1,8 +1,8 @@
-/********************************************
- * 功能：棋子模型头文件
- * 作者：郑伟丞
- * 最新修改日期：12.09
- ********************************************/
+/******************************************************/
+/*                  文件名：Chess.h                   */
+/*                  功能：棋子模型声明                */
+/*                  作者：郑伟丞                      */
+/******************************************************/
 #pragma once
 
 #ifndef _CHESSPIECE_H_
@@ -14,9 +14,8 @@
 #include "ConfigController.h"
 #include "Condition.h"
 
+// 星级提升强度
 #define promoteScale 1.2
-#define maxX 7
-#define maxY 4
 
 // 暂时用粗糙的方式存储英雄基本属性
 #define DAJI 0
@@ -27,77 +26,76 @@
 #define ZHANGFEI 5
 
 // 生命值
-int const hpData[6] = { 3229,3019,3182,3242,3500,3450 };
+double const hpData[6] = { 3229,3019,3182,3242,3500,3450 };
 // 攻击值
-int const attackData[6] = { 170,168,180,169,157,153 };
+double const attackData[6] = { 170,168,180,169,157,153 };
 // 防御值
-int const defenceData[6] = { 86,89,86,95,103,125 };
+double const defenceData[6] = { 86,89,86,95,103,125 };
 // 攻击距离，指与对手在棋盘上的曼哈顿距离
-int const attackDistanceData[6] = { 3,3,2,2,1,1 };
+double const attackDistanceData[6] = { 3,3,2,2,1,1 };
 // 触发技能的攻击次数
-int const skillCooldowns[6] = { 3 ,3,3,3,4,4 };
-// 英雄贴图地址  待添加
-string const chessImagePaths[6] = { };
-// 英雄技能贴图地址
-//.....
+const int skillCooldowns[6] = {4,4,3,3,4,4 };
+// 英雄贴图地址 
+string const chessImagePaths[6] = { "/res/Hero/DaJi.png","/res/Hero/DiaoChan.png","/res/Hero/HouYi.png",
+									"/res/Hero/DiRenJie.png","/res/Hero/XiangYu.png","/res/Hero/ZhangFei.png" };
 
 using std::string;
 using std::vector;
 
 USING_NS_CC;
 
+// 坐标类型  屏幕上的坐标(可视化用)和棋盘上的坐标(游戏逻辑用)
+enum class CoordinateType { screenCoordinates, chessBoardCoordinates};
+
  // 棋子属性数据类
 class ChessInfo 
 {
 public:
-	double HP; // 实时生命
-	double maxHP;//最大生命值
+	// 实时生命和最大生命
+	double HP; 
+	double maxHP;
 
-	double basicAttack; // 基础攻击力
-	double improvedAttack;//加成后的攻击
+	// 基础攻击和加成后的攻击
+	double basicAttack; 
+	double improvedAttack;
 
-	double basicDefence; // 实时防御力
-	double improvedDefence;//加成后的防御力
+	// 基础防御和加成后的防御力
+	double basicDefence; 
+	double improvedDefence;
 
-	double basicAttackDistance; // 基础攻击距离
-	double improvedAttackDistance; // 加成后的攻击距离
+	// 基础攻击距离和加成后的攻击距离
+	double basicAttackDistance; 
+	double improvedAttackDistance; 
 
 	// 技能冷却时间
 	int skillCooldown;
-
-
-
-	//Condition myCondition;//当前状态
 };
 
-
-// 坐标类型  屏幕上的坐标(可视化用)和棋盘上的坐标(游戏逻辑用)
-enum class CoordinateType { screenCoordinates, chessBoardCoordinates};
-
-
-// 棋子坐标
+// 棋子坐标类
 class ChessCoordinate 
 {
 public:
+
+	ChessCoordinate() :x(0), y(0) {}
+
 	// 获取棋子横坐标
-	int getX() const;
+	int getX() const ;
 
 	// 获取棋子纵坐标
 	int getY() const;
 
 	// 设置棋子横坐标
-	void setX(const int X);
+	void setX(const int& X);
 
 	// 设置棋子纵坐标
-	void setY(const int Y);
+	void setY(const int& Y);
+
 
 private:
 	// 横坐标
 	int x; 
 	// 纵坐标
 	int y; 
-
-	//CoordinateType type; // 坐标类型
 };
 
 
@@ -107,16 +105,16 @@ class Chess : public Ref
 {
 protected:
 	// 棋子名称
-	int chessName; // 名称
+	int chessName; 
 
 	// 英雄职业
-	string career; 
+	string career;
 
 	// 模型图片相对路径
 	string chessImagePath; 
 
 	// 星级，最高为三
-	int chessLevel; 
+	int chessLevel=1; 
 
 	// 棋子的花费
 	int chessPrice; 
@@ -134,49 +132,75 @@ protected:
 	ChessCoordinate screenCoordinate; 
 
 	//棋子可视化指针
-	Sprite* chessImage;
+	Sprite* chessImage=nullptr;
 
 	//普通攻击可视化
-	Sprite* attackImage;
+	Sprite* attackImage=nullptr;
 
 	// 技能攻击可视化指针
-	Sprite* skillImage;
+	Sprite* skillImage=nullptr;
 
 	// 生命条
-	ProgressTimer* hpBarProgress;
+	ProgressTimer* hpBarProgress=nullptr;
 
 	// 技能条
-	ProgressTimer* mpBarProgress;
-
+	ProgressTimer* mpBarProgress=nullptr;
 
 
 public:
+	
+	// 游戏中棋子的棋盘位置，会变化
+	ChessCoordinate inGameChessBoardCoordinate;
 
+	// 游戏中棋子的屏幕位置，会变化
+	ChessCoordinate inGameScreenCoordinate;
+
+	// 棋子的各自状态
+	enum class State
+	{
+		Idle,
+		Finding,
+		Moving,
+		Attacking,
+		Dead
+	};
+
+	// 棋子的当前状态
+	State state = State::Idle;
+
+	// 攻击目标
+	shared_ptr<Chess> targetChess;
+
+	// 攻击目标的像素位置
+	Vec2 targetPos;
+
+	// 是否正在移动和正在攻击（处于移动状态下可能正在移动也可能移动停止）
+	bool isMoving=false;
+	bool isAttacking=true;
+
+	// 普攻计数器
+	double attackNum = 0;
 
 	// 初始化棋子状态
 	void initCondition();
-	//void initPieceIfo();
 
 	// 获取英雄职业
-	string GetCareer();
-
-	// 更新棋子状态
-	//bool updatePieceInfo(const double damage, ChessCoordinate* newScreenCoordinate);
+	const string getCareer() const;
 
 	// 获取棋子贴图
-	const string getChessImagePath();
+	const string getChessImagePath() const;
 
 	// 获取棋子名称
-	const int getChessName();
+	const int getChessName() const;
 
 	// 获取当前棋子数值
-	const ChessInfo* getChessCondition();
+	ChessInfo* getChessCondition();
 
 	// 获取当前棋子星级
-	const int getChessLevel();
+	const int getChessLevel() const;
 
 	// 根据需要类型获取当前棋子屏幕位置或棋盘
-	ChessCoordinate* getChessCoordinateByType(CoordinateType type);
+	ChessCoordinate* getChessCoordinateByType(CoordinateType type) ;
 
 	//根据需要类型设定棋子的屏幕坐标或棋盘坐标
 	void setChessCoordinateByType(Vec2 position,CoordinateType type);
@@ -184,7 +208,8 @@ public:
 	// 设置当前棋子星级
 	void setChessLevel(const int newLevel);
 
-	//CREATE_FUNC(ChessPiece);   这里ChessPiece是抽象类不能create
+	//提升棋子星级
+	void promoteRank(int dstRank);
 
 	//技能函数，继承
 	virtual void skill(Chess& OPP) = 0;
@@ -192,19 +217,11 @@ public:
 	//羁绊效果, 继承
 	virtual void careerBuff() = 0;
 
-	//提升棋子星级
-	void promoteRank();
+	// remove 羁绊效果
+	virtual void removeCareerBuff() = 0;
 
-	//佩戴装备
-	void wearEquip(int equipNum, int equipType);
-	
-
-	//计算buff并修改自身属性
-	//virtual void readCondition();
-	//virtual void setCondition(double s, int Condition);
-
-	//攻击函数，返回攻击值,作为攻击目标的被攻击函数的输入
-	int myAttack();
+	//攻击函数，返回自身的攻击值,作为攻击目标的被攻击函数的输入
+	const int myAttack() const;
 
 	//被攻击函数,自身的当前生命值扣除对手伤害量和自身的防御值的差值
 	void beenAttack(int oppAttack);
@@ -213,10 +230,8 @@ public:
 	void attackOne(Chess& OPP);
 
 	//判断棋子是否死亡
-	bool isDead();
+	const bool isDead() const ;
 
-	// 这是啥
-	int storageNum = 0;//上方棋子为负数，下方棋子为正数
 
 	//棋子的可视化
 	Sprite* createChess(Vec2 chessPosition);
@@ -234,23 +249,18 @@ public:
 	void updateHpBar();
 
 	// 更新技能值
-	void updateMpBar(int attackNum);
+	void updateMpBar();
 
+	// 重载赋值运算符
 	Chess& operator=(const Chess& other);
-
 };
 
 
-
-
-
 // 以上是棋子的基类，以下是具体为不同职业的棋子类：法师、射手和坦克
+
 // 法师职业类
 class mage : public Chess
 {
-private:
-	string career = "mage";
-
 public:
 
 	// 初始化棋子属性
@@ -261,6 +271,9 @@ public:
 
 	// 羁绊效果增益
 	virtual void careerBuff() override;
+
+	// 去除羁绊效果
+	virtual void removeCareerBuff() override;
 
 	// 普通攻击可视化指针
 	virtual Sprite* createAttack() override;
@@ -273,22 +286,22 @@ public:
 // 射手职业类
 class shooter : public Chess
 {
-private:
-	string career = "shooter";
-
 public:
 
 	// 初始化棋子属性
 	shooter(int name);
 
-	// 销毁棋子
-	//~shooter();
+	// 销毁棋子,cocos2d-X中不需要自己提供虚析构函数的实现
+	//virtual ~shooter();
 
 	//技能函数
 	virtual void skill(Chess& OPP) override;
 
 	// 羁绊效果增益
 	virtual void careerBuff() override;
+
+	// 去除羁绊效果
+	virtual void removeCareerBuff() override;
 
 	// 普通攻击可视化指针
 	virtual Sprite* createAttack() override;
@@ -300,14 +313,11 @@ public:
 // 坦克职业类
 class tank : public Chess
 {
-private:
-	string career = "tank";
-
 public:
 	// 初始化棋子属性
 	tank(int name);
 
-	// 销毁棋子
+	// 销毁棋子,cocos2d-X中不需要自己提供虚析构函数的实现
 	//~tank();
 
 	//技能函数
@@ -315,6 +325,9 @@ public:
 
 	// 羁绊效果增益
 	virtual void careerBuff() override;
+
+	// 去除羁绊效果
+	virtual void removeCareerBuff() override;
 
 	// 普通攻击可视化指针
 	virtual Sprite* createAttack() override;

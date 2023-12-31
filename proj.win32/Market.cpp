@@ -12,8 +12,8 @@
 //-----------------------------------------------------//
 bool Market::init()
 {
-	RefreshMarket();
-	return true;
+    RefreshMarket();
+    return true;
 }
 
 //-----------------------------------------------------//
@@ -24,55 +24,40 @@ bool Market::init()
 //-----------------------------------------------------//
 bool Market::RefreshMarket()
 {
-	srand(time(NULL));
-	// 如果原来已有棋子，清空
-	if (!chessList.empty())
-	{
-		for (int i = 0; i < 5; i++)
-		{
-			delete chessList[i];
-		}
-		chessList.clear();
-	}
+    srand(static_cast<unsigned int>(time(NULL)));
 
-	// 增加棋子
-	for (int i = 0; i < 5; i++) 
-	{
-		int flag = rand() % HEROCATAGORY;
-		if (flag == 0)
-		{
-			chessList.push_back(new tank(ZHANGFEI));
-			continue;
-		}
-		if (flag == 1)
-		{
-			chessList.push_back(new shooter(HOUYI));
-			continue;
-		}
-		if (flag == 2)
-		{
-			chessList.push_back(new mage(DAJI));
-			continue;
-		}
-		if (flag == 3)
-		{
-			chessList.push_back(new tank(XIANGYU));
-			continue;
-		}
-		if (flag == 4)
-		{
-			chessList.push_back(new shooter(DIRENJIE));
-			continue;
-		}
-		if (flag == 5)
-		{
-			chessList.push_back(new mage(DIAOCHAN));
-			continue;
-		}
-	}
+    // 如果原来已有棋子，清空
+    chessList.clear();
 
-	equippment = rand() % 3;
-	return true;
+    // 增加棋子
+    for (int i = 0; i < 5; i++)
+    {
+        int flag = rand() % HEROCATAGORY;
+        switch (flag)
+        {
+            case 0:
+                chessList.push_back(std::make_shared<tank>(ZHANGFEI));
+                break;
+            case 1:
+                chessList.push_back(std::make_shared<shooter>(HOUYI));
+                break;
+            case 2:
+                chessList.push_back(std::make_shared<mage>(DAJI));
+                break;
+            case 3:
+                chessList.push_back(std::make_shared<tank>(XIANGYU));
+                break;
+            case 4:
+                chessList.push_back(std::make_shared<shooter>(DIRENJIE));
+                break;
+            case 5:
+                chessList.push_back(std::make_shared<mage>(DIAOCHAN));
+                break;
+        }
+    }
+
+    equippment = rand() % 3;
+    return true;
 }
 
 //-----------------------------------------------------//
@@ -85,14 +70,14 @@ bool Market::RefreshMarket()
 template<class ClassName, typename price>
 bool Market::BoughtPermission(int money, int maxChessNum, int nowChessNum, ClassName* A, typename price)
 {
-	if (money >= price && nowChessNum < maxChessNum)
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
+    if (money >= price && nowChessNum < maxChessNum)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 //-----------------------------------------------------//
@@ -106,8 +91,8 @@ bool Market::BoughtPermission(int money, int maxChessNum, int nowChessNum, Class
 template<class ClassName>
 ClassName Market::BuyChess(ClassName* A)
 {
-	ClassName candidate = *A;
-	return candidate;
+    ClassName candidate = *A;
+    return candidate;
 }
 
 //-----------------------------------------------------//
@@ -118,7 +103,7 @@ ClassName Market::BuyChess(ClassName* A)
 //-----------------------------------------------------//
 int Market::BuyEquippment() const
 {
-	return equippment;
+    return equippment;
 }
 
 //-----------------------------------------------------//
@@ -130,9 +115,9 @@ int Market::BuyEquippment() const
 template<class ClassName>
 int Market::SellOut(ClassName chess)
 {
-	int price = 0;//棋子的价格
-	price = static_cast<int>(chess.getPieceLevel());
-	return price;
+    int price = 0;//棋子的价格
+    price = static_cast<int>(chess.getPieceLevel());
+    return price;
 }
 
 //-----------------------------------------------------//
@@ -143,11 +128,10 @@ int Market::SellOut(ClassName chess)
 //-----------------------------------------------------//
 Chess* Market::GetChessByIndex(int index)
 {
-	if (chessList[index] != nullptr) 
-	{
-		Chess* sell = chessList[index];
-		chessList[index] = nullptr;
-		return sell;
-	}
-	return nullptr;
+    if (index >= 0 && index < chessList.size() && chessList[index] != nullptr)
+    {
+        // 由于使用了智能指针，需要获取原始指针
+        return chessList[index].get();
+    }
+    return nullptr;
 }

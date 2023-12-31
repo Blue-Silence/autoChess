@@ -1,14 +1,21 @@
 #include "PlayScene.h"
 #include "StartAndLoginScene.h"
+
+#include "Hero.h"
+
 Scene* PlayScene::createScene()
 {
 	return PlayScene::create();
 }
 
+
 bool PlayScene::init()
 {
 	if (!Scene::init()) // 对父类init方法的判断
 		return false;
+	//播放背景音乐
+	playSceneBGM = SimpleAudioEngine::getInstance();
+	playSceneBGM->playBackgroundMusic("res/Music/playScene_bgm.wav", true);
 
 	// 需要用到的单例工具
 	auto texture = Director::getInstance()->getTextureCache();
@@ -19,17 +26,9 @@ bool PlayScene::init()
 	auto origin = Director::getInstance()->getVisibleOrigin();
 	auto buttonPositiony = visibleSize.height / 3;	//	The y position of two buttons
 
-	// 创建单点事件监听器
-	auto clickListener = EventListenerTouchOneByOne::create();
-	clickListener->setSwallowTouches(true);
-	clickListener->onTouchBegan = CC_CALLBACK_2(PlayScene::onTouchBegan, this);
-	clickListener->onTouchEnded = CC_CALLBACK_2(PlayScene::onTouchEnded, this);
-	_eventDispatcher->addEventListenerWithSceneGraphPriority(clickListener, this);
-
-	// 创建移动事件监听器
-	auto moveListener = EventListenerMouse::create();
-	moveListener->onMouseMove = CC_CALLBACK_1(PlayScene::onMouseMove, this);
-	_eventDispatcher->addEventListenerWithSceneGraphPriority(moveListener, this);
+	// 创建鼠标事件监听器
+	mouseListener = EventListenerMouse::create();
+	_eventDispatcher->addEventListenerWithSceneGraphPriority(mouseListener, this);
 
 	// 添加背景层
 	playLayer = Layer::create();
@@ -43,23 +42,71 @@ bool PlayScene::init()
 	Vec2 originSize = backGround->getContentSize();
 	backGround->setScale(visibleSize.height / originSize.y);
 	playLayer->addChild(backGround, 1);
-
+	//auto magebuff = cocos2d::Sprite::create("/res/Bond/mage.png");
+	//magebuff->setPosition(100, 100);
+	//playLayer->addChild(magebuff, 1);
 	// 创建棋盘
 	chessBoardModel = ChessBoard::create();
 	createBoard(Vec2(config->getPx()->x * 38, config->getPx()->y * 30));
-
+	CC_SAFE_RETAIN(chessBoardModel);
 	// 创建玩家
-	playerA = PlayerInfo::create();
-	CC_SAFE_RETAIN(playerA);
+	playerME = PlayerInfo::create();
+	playerOPP = PlayerInfo::create();
+	CC_SAFE_RETAIN(playerME);
+	CC_SAFE_RETAIN(playerOPP);
+
+	//创建金币显示
+	player_coin = Label::createWithTTF(std::to_string(playerME->getcoin()), "fonts/Marker Felt.ttf", 30);
+	player_coin->setPosition(Vec2(760, 140));
+	playLayer->addChild(player_coin, 5);
+	Sprite* coinImage = Sprite::create("/res/UI/coin.png");
+	coinImage->setPosition(Vec2(800, 140));
+	coinImage->setScale(0.07);
+	playLayer->addChild(coinImage, 5);
 
 	//初始化备战席
-	preArea = PreparationSeat::create();
-	playLayer->addChild(preArea->PreAreaLayer);
+	preArea = PreparationSeat::create(playerME, chessBoardModel, mouseListener, playLayer, &canBuyChess,player_coin);
 	CC_SAFE_RETAIN(preArea);
 
+
+	//创建等级显示
+	player_level = Label::createWithTTF(std::to_string(playerME->getLevel()), "fonts/Marker Felt.ttf", 30);
+	player_level->setPosition(Vec2(760, 90));
+	playLayer->addChild(player_level, 5);
+	Sprite* levelImage = Sprite::create("res/UI/Level.png");
+	levelImage->setPosition(Vec2(800, 90));
+	levelImage->setScale(0.07);
+	playLayer->addChild(levelImage, 5);
+
+	// 创建血量显示
+	player_lifevalue = Label::createWithTTF(std::to_string(playerME->GetLifeValue()), "fonts/Marker Felt.ttf", 30);
+	player_lifevalue->setPosition(Vec2(760, 40));
+	playLayer->addChild(player_lifevalue, 5);
+	Sprite* lifeValue = Sprite::create("res/UI/lifeValue.png");
+	lifeValue->setPosition(Vec2(800, 40));
+	lifeValue->setScale(0.07);
+	playLayer->addChild(lifeValue, 5);
+
 	// 创建商店
+	createShop(Vec2(-45 * config->getPx()->x, -45 * config->getPx()->y));
+	{
+		auto littleHero = new Hero("/res/UI/LittleHero.png");
+		if (littleHero == nullptr)
+			throw "";
+		auto pos = Vec2(visibleSize.width / 2, visibleSize.height / 2);
+		littleHero->init(pos);
+		littleHero->setPosition(pos);
+		littleHero->startListen();
+		this->addChild(littleHero, 6);
+	}
+
 	
-	createShop(Vec2(-45 * config->getPx()->x, -45 * config->getPx()->y));	
+	// 添加AI建议框
+	AILabel->setPosition(Vec2(240, 160)); // 根据需要调整位置
+	AILabel->setColor(Color3B::WHITE); // 设置颜色
+	// 将标签添加到场景或层中
+	this->addChild(AILabel);
+
 
 	// 添加退出按钮
 	auto exitButton = StartAndLoginScene::createGameButton("/res/UI/ExitNormal.png", "/res/UI/ExitSelected.png", CC_CALLBACK_1(PlayScene::menuExitCallBack, this));
@@ -73,8 +120,195 @@ bool PlayScene::init()
 	auto menu = Menu::create(exitButton, nullptr);
 	playLayer->addChild(menu, 5);
 
+
+	// 调度启动update()函数，开始战斗
+	this->scheduleUpdate();
+	
+
 	
 	return true;
+}
+
+void PlayScene::update(float delta)
+{
+	if (gameMode == "人机对战")
+	{
+		if (AI == nullptr && AINum != 0)
+			AI = new AIMode(AINum);
+
+		if (!isInBattle && AI != nullptr)
+		{
+			
+			player_lifevalue->setString(to_string(playerME->GetLifeValue()));
+			isInBattle = true;
+			AI->eachTurnOver();
+			if (!AI->existLiveAI())
+			{
+				// 战斗结束,玩家获胜
+				// 
+				// 取消对update函数的调度
+				this->unscheduleUpdate();
+			}
+			else if (!playerME->isAlive())
+			{
+				// AI获胜
+				// 
+				// 取消对update函数的调度
+				this->unscheduleUpdate();
+			}
+
+			//AI++;
+			TargetAI = (TargetAI) % (AINum)+1;
+			while (!(*AI->getPlayersVectorInfo())[TargetAI].isAlive())
+			{
+				TargetAI = (TargetAI) % (AINum)+1;
+			}
+			// 选定好本轮对战的AI选手
+			playerOPP = &(*AI->getPlayersVectorInfo())[TargetAI];
+			// 其余的AI随机扣血
+			AI->randomBloodLose(TargetAI);
+
+			// 玩家和AI开始对战！
+			// 计时器,计时结束后开始对战
+			auto clockLayer = Clock::create(playerME, playerOPP, &isInBattle,&canBuyChess,&isTransmittingInfo,gameMode);
+			this->addChild(clockLayer, 6);
+
+			// 向AI发送API请求
+			//string message = "The number of my tank heroes is " + to_string(playerME->getTankNum())
+			//	+ ", the number of mage heroes is " + to_string(playerME->getMagesNum()) + ",the number of shooter is " + to_string(playerME->getShooterNum())
+			//	+ ", my level is" + to_string(playerME->getLevel());
+
+			////string message = "tank,mages,shooters,which one should I buy firstly,please speak in short english";
+			//string response = chatAI.performRequest(url, message);
+			//string content = chatAI.extractContent(response);
+			AILabel->setString("未启用");
+		}
+	}
+	else if (gameMode == "联机对战")
+	{
+		if(!isInBattle)
+		{
+			isInBattle = true;
+			// 计时器,计时结束后打包传送信息
+			auto clockLayer = Clock::create(playerME, playerOPP, &isInBattle, &canBuyChess,&isTransmittingInfo,gameMode);
+			this->addChild(clockLayer, 6);
+			
+		}
+		else if (isTransmittingInfo)
+		{
+			isTransmittingInfo = false;
+			canBuyChess = false;
+			// 1-打包信息
+			packageInfo();
+			// 2-发送信息
+			/////////////
+			if(!this->connection)
+				throw "Connection lost";
+			if(!this->connection->checkValid())
+				throw "Connection lost";
+			this->connection->sendPack((const char*)&(this->myInfo), sizeof(this->myInfo));
+			// 
+			// 3-接收信息
+			// 把接收到的信息赋值给成员变量oppInfo
+			// 
+			for (;;)
+			{
+				if (!this->connection->checkValid())
+					throw "Connection lost";
+				Packet* packRecv = (Packet*)this->connection->getPack(sizeof(this->oppInfo));
+				if (packRecv)
+				{
+					this->oppInfo = *packRecv;
+					delete packRecv;
+					break;
+				}
+				Sleep(200); //等待200ms再试
+
+			}
+			// 
+			// 4-提取信息
+			extractInfo();
+			// 接收成功后,才执行下面这一句
+			beginFighting = true;
+
+		}
+		else if (beginFighting)
+		{
+			beginFighting = false;
+			// 检查并移除现有的 BattleLayer
+			auto existingLayer = this->getChildByTag(BATTLE_LAYER_TAG);
+			if (existingLayer) {
+				this->removeChild(existingLayer, true);
+			}
+
+			// 创建并添加新的 BattleLayer,开始战斗
+			auto battleLayer = BattleLayer::create(playerME, playerOPP, &isInBattle, &canBuyChess);
+			battleLayer->setTag(BATTLE_LAYER_TAG); // 设置标签以便识别
+			this->addChild(battleLayer, 6);
+		}
+	}
+}
+
+// 联网下：打包我方场上棋子信息
+void PlayScene::packageInfo()
+{
+	for (auto chess : *playerME->getBattleAreaChesses())
+	{
+		string career = chess->getCareer();
+		int name = chess->getChessName();
+		int level = chess->getChessLevel();
+		int posX = chess->getChessCoordinateByType(CoordinateType::chessBoardCoordinates)->getX();
+		int posY = chess->getChessCoordinateByType(CoordinateType::chessBoardCoordinates)->getY();
+
+		myInfo.chesses[myInfo.totalChessNum++] = { career, name, level, posX, posY };
+	}
+}
+
+// 联网下：提取对方场上棋子信息
+void PlayScene::extractInfo()
+{
+	shared_ptr<Chess> chess = nullptr;
+	for (int i = 0; i < oppInfo.totalChessNum; ++i)
+	{
+		string career = oppInfo.chesses[i].chessCareer;
+		int name = oppInfo.chesses[i].chessName;
+		int level = oppInfo.chesses[i].chessLevel;
+		int posX = oppInfo.chesses[i].chessBoardPosX;
+		int posY = oppInfo.chesses[i].chessBoardPosY;
+
+		if (career == "shooter")
+			playerOPP->putChessInBattleArea(make_shared<shooter>(name));
+		else if (career == "mage")
+			playerOPP->putChessInBattleArea(make_shared<mage>(name));
+		else
+			playerOPP->putChessInBattleArea(make_shared<tank>(name));
+
+		chess = playerOPP->getBattleAreaChesses()->back();
+		chess->setChessLevel(level);
+		chess->setChessCoordinateByType(Vec2(posX, posY), CoordinateType::chessBoardCoordinates);
+		ChessCoordinate* newPos = new ChessCoordinate;
+		CoordinateConvert(CoordinateType::screenCoordinates, Vec2(posX, posY), newPos);
+		chess->setChessCoordinateByType(Vec2(newPos->getX(), newPos->getY()), CoordinateType::screenCoordinates);
+		delete newPos;
+	}
+}
+
+
+
+
+
+void PlayScene::onBattleButtonClicked(Ref* sender) 
+{
+	// 检查并移除现有的 BattleLayer
+	auto existingLayer = this->getChildByTag(BATTLE_LAYER_TAG);
+	if (existingLayer) {
+		this->removeChild(existingLayer, true);
+	}
+
+	// 创建并添加新的 BattleLayer
+	auto battleLayer = BattleLayer::create(playerME, playerOPP, &isInBattle,&canBuyChess);
+	battleLayer->setTag(BATTLE_LAYER_TAG); // 设置标签以便识别
+	this->addChild(battleLayer, 6);
 }
 
 void PlayScene::createBoard(Vec2 position)
@@ -251,125 +485,137 @@ void PlayScene::menuPieceCardCallBack(Ref* sender)
 void PlayScene::menuFreshShopCallBack(Ref* sender)
 {
 	auto config = ConfigController::getInstance();
-	shopModel = Market::create();
-	shopModel->RefreshMarket();
-	if(previousMenu){
-		previousMenu->removeFromParent();
+	if(playerME->getcoin()>=2)
+	{
+		playerME->PayForRefresh();
+		player_coin->setString(std::to_string(playerME->getcoin()));
+		shopModel = Market::create();
+		shopModel->RefreshMarket();
+		if (previousMenu) {
+			previousMenu->removeFromParent();
+		}
+
+
+		auto chess1 = StartAndLoginScene::createGameButton(shopModel->chessList[0]->getChessImagePath(), shopModel->chessList[0]->getChessImagePath(), CC_CALLBACK_1(PlayScene::BuyChess, this, 0));
+		auto chess2 = StartAndLoginScene::createGameButton(shopModel->chessList[1]->getChessImagePath(), shopModel->chessList[1]->getChessImagePath(), CC_CALLBACK_1(PlayScene::BuyChess, this, 1));
+		auto chess3 = StartAndLoginScene::createGameButton(shopModel->chessList[2]->getChessImagePath(), shopModel->chessList[2]->getChessImagePath(), CC_CALLBACK_1(PlayScene::BuyChess, this, 2));
+		auto chess4 = StartAndLoginScene::createGameButton(shopModel->chessList[3]->getChessImagePath(), shopModel->chessList[3]->getChessImagePath(), CC_CALLBACK_1(PlayScene::BuyChess, this, 3));
+		auto chess5 = StartAndLoginScene::createGameButton(shopModel->chessList[4]->getChessImagePath(), shopModel->chessList[4]->getChessImagePath(), CC_CALLBACK_1(PlayScene::BuyChess, this, 4));
+		chess1->setName("chess1");
+		chess2->setName("chess2");
+		chess3->setName("chess3");
+		chess4->setName("chess4");
+		chess5->setName("chess5");
+
+		Vec2 originSize1 = chess1->getContentSize();
+		float scale1 = 13.5 * 16.9 / 15 * config->getPx()->x / originSize1.x;
+		Vec2 originSize2 = chess2->getContentSize();
+		float scale2 = 13.5 * 16.9 / 15 * config->getPx()->x / originSize2.x;
+		Vec2 originSize3 = chess3->getContentSize();
+		float scale3 = 13.5 * 16.9 / 15 * config->getPx()->x / originSize3.x;
+		Vec2 originSize4 = chess4->getContentSize();
+		float scale4 = 13.5 * 16.9 / 15 * config->getPx()->x / originSize4.x;
+		Vec2 originSize5 = chess5->getContentSize();
+		float scale5 = 13.5 * 16.9 / 15 * config->getPx()->x / originSize5.x;
+		chess1->setScale(scale1);
+		chess2->setScale(scale2);
+		chess3->setScale(scale3);
+		chess4->setScale(scale4);
+		chess5->setScale(scale5);
+		chess1->setPosition(280, 80);
+		chess2->setPosition(280 + 100, 80);
+		chess3->setPosition(280 + 200, 80);
+		chess4->setPosition(280 + 300, 80);
+		chess5->setPosition(280 + 400, 80);
+		auto menu = Menu::create(chess1, chess2, chess3, chess4, chess5, NULL);
+		menu->setPosition(Vec2::ZERO);
+		menu->setName("ChessMenu");
+		playLayer->addChild(menu, 7);
+		previousMenu = menu;
+
+		//增加引用计数
+		CC_SAFE_RETAIN(shopModel);
 	}
-	
-	
-	auto chess1 = StartAndLoginScene::createGameButton(shopModel->chessList[0]->getChessImagePath(), shopModel->chessList[0]->getChessImagePath(), CC_CALLBACK_1(PlayScene::BuyChess, this,0));
-	auto chess2 = StartAndLoginScene::createGameButton(shopModel->chessList[1]->getChessImagePath(), shopModel->chessList[1]->getChessImagePath(), CC_CALLBACK_1(PlayScene::BuyChess, this,1));
-	auto chess3 = StartAndLoginScene::createGameButton(shopModel->chessList[2]->getChessImagePath(), shopModel->chessList[2]->getChessImagePath(), CC_CALLBACK_1(PlayScene::BuyChess, this,2));
-	auto chess4 = StartAndLoginScene::createGameButton(shopModel->chessList[3]->getChessImagePath(), shopModel->chessList[3]->getChessImagePath(), CC_CALLBACK_1(PlayScene::BuyChess, this,3));
-	auto chess5 = StartAndLoginScene::createGameButton(shopModel->chessList[4]->getChessImagePath(), shopModel->chessList[4]->getChessImagePath(), CC_CALLBACK_1(PlayScene::BuyChess, this,4));
-	chess1->setName("chess1");
-	chess2->setName("chess2");
-	chess3->setName("chess3");
-	chess4->setName("chess4");
-	chess5->setName("chess5");
+	else {
+		// 创建一个 Label，当没钱时显示
+		cocos2d::Label* label = cocos2d::Label::createWithTTF("No money!!!", "fonts/Marker Felt.ttf", 24);
+		label->setPosition(cocos2d::Vec2(500, 200));
+		this->addChild(label);
+		auto delayAction = cocos2d::DelayTime::create(1.0f);
+		auto removeLabel = cocos2d::CallFunc::create([label]() {
+			label->removeFromParent();
+			});
 
-	Vec2 originSize1 = chess1->getContentSize();
-	float scale1 = 13.5 * 16.9 / 15 * config->getPx()->x / originSize1.x;
-	Vec2 originSize2 = chess2->getContentSize();
-	float scale2 = 13.5 * 16.9 / 15 * config->getPx()->x / originSize2.x;
-	Vec2 originSize3 = chess3->getContentSize();
-	float scale3 = 13.5 * 16.9 / 15 * config->getPx()->x / originSize3.x;
-	Vec2 originSize4 = chess4->getContentSize();
-	float scale4 = 13.5 * 16.9 / 15 * config->getPx()->x / originSize4.x;
-	Vec2 originSize5 = chess5->getContentSize();
-	float scale5 = 13.5 * 16.9 / 15 * config->getPx()->x / originSize5.x;
-	chess1->setScale(scale1);
-	chess2->setScale(scale2);
-	chess3->setScale(scale3);
-	chess4->setScale(scale4);
-	chess5->setScale(scale5);
-	chess1->setPosition(280, 80);
-	chess2->setPosition(280+100, 80);
-	chess3->setPosition(280 + 200, 80);
-	chess4->setPosition(280 + 300, 80);
-	chess5->setPosition(280 + 400, 80);
-	auto menu = Menu::create(chess1,chess2,chess3,chess4,chess5, NULL);
-	menu->setPosition(Vec2::ZERO);
-	menu->setName("ChessMenu");
-	playLayer->addChild(menu, 7);
-	previousMenu = menu;
+		// 创建一个顺序动作，先延时，然后移除 Label
+		auto sequence = cocos2d::Sequence::create(delayAction, removeLabel, nullptr);
 
-	//增加引用计数
-	CC_SAFE_RETAIN(shopModel);
+		// 在 Label 上运行这个顺序动作
+		label->runAction(sequence);
+	}
 }
 
 //购买棋子的回调函数！！！
 void PlayScene::BuyChess(Ref* sender, int index)
 {
-	int location = playerA->GetMinIndex();
-	if (sender && location != -1) {
-		MenuItemImage* myButton = static_cast<MenuItemImage*>(sender);
-		myButton->removeFromParent();
-		//备战席加入新棋子
-		Chess* purchasedChess = shopModel->chessList[index];
-		playerA->chessInPreArea[location] = (purchasedChess);
-		preArea->CreatePreAreaButton(purchasedChess, location);
-		//更新备战席层
-		preArea->PreAreaLayer->removeFromParent();
-		playLayer->addChild(preArea->PreAreaLayer, 8);
-	}
-}
-void PlayScene::menuBuyExpCallBack(Ref* sender)
-{
-	
-}
+	if (playerME->getcoin() >= 3)
+	{
+		int location = playerME->GetMinIndex();
+		int delLoc_1 = -1;
+		int delLoc_2 = -1;
+		int& ref_delLoc_1 = delLoc_1;
+		int& ref_delLoc_2 = delLoc_2;
+		if (sender && location != -1) {
+			MenuItemImage* myButton = static_cast<MenuItemImage*>(sender);
+			myButton->removeFromParent();
+			playerME->payForHero();
+			player_coin->setString(std::to_string(playerME->getcoin()));
+			//备战席加入新棋子
+			shared_ptr<Chess> purchasedChess = shopModel->chessList[index];
+			playerME->chessInPreArea[location] = (purchasedChess);
+			preArea->PromoteChessLevel(location);
 
-int PlayScene::onTouchBegan(Touch* touch, Event* event)
-{
-	Vec2 position = touch->getLocation();
-	if (position.x > chessBoard[1][1]->getPositionX() && position.x < chessBoard[1][9]->getPositionX() && 
-		position.y > chessBoard[1][1]->getPositionY() && position.y < chessBoard[5][1]->getPositionY()) // 鼠标在棋盘战斗区
-	{
-		CCLOG("WAR");
-		return IN_WAR_ZONE;
-	}
-	else if (position.x > chessBoard[0][1]->getPosition().x && position.x < chessBoard[0][9]->getPosition().x &&
-			 position.y > chessBoard[0][1]->getPosition().y && position.y < chessBoard[1][1]->getPosition().y)
-	{
-		CCLOG("READY");
-		return IN_READY_ZONE;
+		}
 	}
 	else
 	{
-		return NOT_IN_BOARD;
+		cocos2d::Label* label = cocos2d::Label::createWithTTF("No money!!!", "fonts/Marker Felt.ttf", 24);
+		label->setPosition(cocos2d::Vec2(500, 200));
+		this->addChild(label);
+		auto delayAction = cocos2d::DelayTime::create(1.0f);
+		auto removeLabel = cocos2d::CallFunc::create([label]() {
+			label->removeFromParent();
+			});
+
+		// 创建一个顺序动作，先延时，然后移除 Label
+		auto sequence = cocos2d::Sequence::create(delayAction, removeLabel, nullptr);
+
+		// 在 Label 上运行这个顺序动作
+		label->runAction(sequence);
 	}
+	
 }
 
-void PlayScene::onTouchEnded(Touch* touch, Event* event)
+//升级回调函数
+void PlayScene::menuBuyExpCallBack(Ref* sender)
 {
-	Vec2 position = touch->getLocation();
-	ChessCoordinate* logPosition = coordingrevert(position);
+	if (playerME->getcoin() >= 4) {
+		playerME->ChangeLevel();
+		player_level->setString(std::to_string(playerME->getLevel()));
+		player_coin->setString(std::to_string(playerME->getcoin()));
+	}
+	else {
+		cocos2d::Label* label = cocos2d::Label::createWithTTF("No money!!!", "fonts/Marker Felt.ttf", 24);
+		label->setPosition(cocos2d::Vec2(500, 200));
+		this->addChild(label);
+		auto delayAction = cocos2d::DelayTime::create(1.0f);
+		auto removeLabel = cocos2d::CallFunc::create([label]() {
+			label->removeFromParent();
+			});
 
-	// int clickType = PlayScene::onTouchBegan(touch, event);
-	/*switch (clickType)
-	{
-		case IN_WAR_ZONE:
-			if (board->getPlayerInfoA_WarZone_Pieces()[logPosition->getX()][logPosition->getY()] != nullptr)
-			{
-				chessBoard[logPosition->getY() + 1][logPosition->getX()]->setOpacity(50);
-			}
-			break;
+		// 创建一个顺序动作，先延时，然后移除 Label
+		auto sequence = cocos2d::Sequence::create(delayAction, removeLabel, nullptr);
 
-		case IN_READY_ZONE:
-			if (board->getPlayerInfoA_PreZone_Pieces()->at(logPosition->getX()) != nullptr)
-			{
-				chessBoard[0][logPosition->getX()]->setOpacity(50);
-			}
-			break;
-
-		default:
-			break;
-	}*/
-
-}
-
-void PlayScene::onMouseMove(Event* event)
-{
-	EventMouse* e = (EventMouse*)event;
+		// 在 Label 上运行这个顺序动作
+		label->runAction(sequence);
+	}
 }

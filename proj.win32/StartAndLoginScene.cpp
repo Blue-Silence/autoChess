@@ -1,3 +1,8 @@
+/******************************************************/
+/*              文件名：StartAndLoginScene.cpp        */
+/*              功能：欢迎界面，预加载资源            */
+/******************************************************/
+
 #include "StartAndLoginScene.h"
 USING_NS_CC;
 
@@ -5,6 +10,7 @@ Scene* StartAndLoginScene::CreateScene()
 {
 	return StartAndLoginScene::create();
 }
+
 /*
 * 函数参数：
 * 函数功能：覆盖父类init函数
@@ -24,7 +30,7 @@ bool StartAndLoginScene::init()
 
 	//贴背景图
 	auto background = Sprite::create("res/Background/InitalBackground.png");
-	if (background == nullptr) 
+	if (background == nullptr)
 	{
 		return false;
 	}
@@ -50,6 +56,12 @@ bool StartAndLoginScene::init()
 		gameLogo->setScale((pageSize.width / 2) / imageSize.width);
 		this->addChild(gameLogo);
 	}
+
+	//播放背景音乐
+	startSceneBGM = SimpleAudioEngine::getInstance();
+	startSceneBGM->playBackgroundMusic("res/Music/startScene_bgm.wav",true);
+
+	
 	//加载资源
 	curFileNums = 0;
 	loadLabel = Label::createWithTTF("0%", "fonts/Marker Felt.ttf", 50);
@@ -66,12 +78,12 @@ bool StartAndLoginScene::init()
 * 函数注意事项：
 */
 void StartAndLoginScene::LoadResource()
-{   
+{
 	GetAllMusic("res/MUSIC");
 	GetAllpng("res/Background");
-	GetAllpng("res/Books");
+	GetAllpng("res/Bond");
+	GetAllpng("res/Hero");
 	GetAllpng("res/Effect");
-	GetAllpng("res/Icons");
 	GetAllpng("res/UI");
 }
 
@@ -121,20 +133,37 @@ bool StartAndLoginScene::GetAllMusic(const std::string& path)
 		std::string contName = path;
 		contName += '/';
 		filename = contName + filename;
-		filename += ".mp3";
+		filename += ".wav";
 		//加载为bgm
-		if (filename.find("bgm") != -1) 
+		if (filename.find("bgm") != -1)
 		{
 			audio->preloadBackgroundMusic(filename.c_str());
 		}
 		//加载为effect
-		else if (filename.find("effect") != -1) 
+		else if (filename.find("effect") != -1)
 		{
 			audio->preloadBackgroundMusic(filename.c_str());
 		}
 		curFileNums++;
 	}
 	return 1;
+}
+
+/*
+* 函数参数：std::string normalPicPath, std::string pressedPicPath, const ccMenuCallback& callback
+* 函数功能：以参数图片路径和回调函数创建MenuItemSprite
+* 函数返回值：返回MenuItemSprite对象
+* 函数注意事项：
+*/
+MenuItemSprite* StartAndLoginScene::createGameButton(std::string normalPicPath, std::string pressedPicPath, const ccMenuCallback& callback)
+{
+	//得到图片
+	auto normalImage = Sprite::create(normalPicPath);
+	auto pressedImage = Sprite::create(pressedPicPath);
+	//创建菜单项
+	auto item = MenuItemSprite::create(normalImage, pressedImage, callback);
+
+	return item;
 }
 
 /*
@@ -147,21 +176,23 @@ void StartAndLoginScene::LoadingCallBack(Ref* pSender)
 {
 	curFileNums++;
 	float percentage = static_cast<float>(curFileNums) / static_cast<float>(totalFileNums);
-	loadLabel->setString(StringUtils::format("%.2f %%", percentage*100));
+	loadLabel->setString(StringUtils::format("%.2f %%", percentage * 100));
 	//加载完成
-	if (curFileNums == totalFileNums) 
+	if (curFileNums == totalFileNums)
 	{
 		//开始按键初始化
-		start = MenuItemImage::create("res/UI/PlayNormal.png", "res/UI/PlaySelected.png", CC_CALLBACK_1(StartAndLoginScene::MenuToPlayScene, this));
-		Size imageSize = start->getContentSize();		
-		start->setPosition(Vec2(pageSize.width/2 + pageCoord.x, 1 * pageSize.height / 6 + pageCoord.y));
-		start->setScale((pageSize.width / 10) / imageSize.width);
+		start = createGameButton("res/UI/PlayNormal.png", "res/UI/PlaySelected.png", CC_CALLBACK_1(StartAndLoginScene::MenuToPlayScene, this));
+		Size imageSize = start->getContentSize();
+		start->setPosition(Vec2(pageSize.width / 2 + pageCoord.x, 1 * pageSize.height / 4 + pageCoord.y));
+		start->setScale((pageSize.width / 4) / imageSize.width);
+
 		//退出按键初始化
-		exit = MenuItemImage::create("res/UI/ExitNormal.png", "res/UI/ExitSelected.png", CC_CALLBACK_1(StartAndLoginScene::MenuToExit, this));
-		imageSize = exit->getContentSize();	
-		exit->setScale((pageSize.width / 10) / imageSize.width);
+		exit = createGameButton("res/UI/ExitNormal.png", "res/UI/ExitSelected.png", CC_CALLBACK_1(StartAndLoginScene::MenuToExit, this));
+		imageSize = exit->getContentSize();
+		exit->setScale((pageSize.width / 4) / imageSize.width);
 		exit->setAnchorPoint(Vec2(1, 0));
-		exit->setPosition(Vec2(pageSize.width + pageCoord.x, 1 * pageSize.height / 6 + pageCoord.y));
+		exit->setPosition(Vec2(pageSize.width + pageCoord.x, 1 * pageSize.height / 9 + pageCoord.y));
+
 		//菜单化按键
 		Menu* menus = Menu::create(start, exit, NULL);
 		menus->setPosition(pageCoord);
@@ -177,8 +208,10 @@ void StartAndLoginScene::LoadingCallBack(Ref* pSender)
 */
 void StartAndLoginScene::MenuToPlayScene(Ref* pSender)
 {
-	Director::getInstance()->end();
-	//Director::getInstance()->replaceScene(PlayScene::create());
+	//停止播放音乐
+	startSceneBGM->stopBackgroundMusic();
+	//跳转界面
+	Director::getInstance()->replaceScene(PlayScene::createScene());
 }
 
 /*
