@@ -9,24 +9,26 @@ bool NetworkConfigSetting::init()
         return false;
     }
 
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+
     // 初始化IP输入框
-    ipInput = createInputField("Please input IP:", Vec2(480, 320)); // 根据需要调整位置
+    ipInput = createInputField("Please input IP:", Vec2(visibleSize.width * 0.5, visibleSize.height * 0.7)); // 根据需要调整位置
     this->addChild(ipInput);
 
 
     // 初始化端口输入框
-    portInput = createInputField("Please input port:", Vec2(480, 240)); // 根据需要调整位置
+    portInput = createInputField("Please input port:", Vec2(visibleSize.width * 0.5, visibleSize.height * 0.5)); // 根据需要调整位置
     portInput->setTextColor(Color4B::WHITE); // 设置文字颜色为白色
     this->addChild(portInput);
 
     // 初始化主机选择器
-    createHostSelector(Vec2(480, 160)); // 根据需要调整位置
+    createHostSelector(Vec2(visibleSize.width * 0.5, visibleSize.height * 0.3)); // 根据需要调整位置
     
 
     //// 初始化确定连接按钮
     confirmButton = cocos2d::ui::Button::create("res/UI/confirm.png", "res/UI/confirm.png");
-    confirmButton->setScale(0.1);
-    confirmButton->setPosition(Vec2(480, 80)); // 根据需要调整位置
+    confirmButton->setScale(0.1f);
+    confirmButton->setPosition(Vec2(visibleSize.width * 0.5, visibleSize.height * 0.1)); // 根据需要调整位置
     confirmButton->addTouchEventListener(CC_CALLBACK_2(NetworkConfigSetting::confirmButtonEvent, this));
     this->addChild(confirmButton);
 
@@ -64,7 +66,7 @@ void NetworkConfigSetting::confirmButtonEvent(Ref* sender, cocos2d::ui::Widget::
         else
         {
             //跳转界面
-            Director::getInstance()->replaceScene(PlayScene::createScene(conPort, "联机对战"));
+            Director::getInstance()->replaceScene(PlayScene::createScene(isServer,conPort, "联机对战"));
         }
 
     }
@@ -88,8 +90,9 @@ void NetworkConfigSetting::createHostSelector(const cocos2d::Vec2& position)
 {
     // 主机复选框
     hostCheckBox = cocos2d::ui::CheckBox::create("res/UI/noSelected.png", "res/UI/selected.png");
-    hostCheckBox->setScale(0.1);
-    hostCheckBox->setPosition(position + Vec2(-50, 0)); // 根据需要调整位置
+    hostCheckBox->setSelected(false);
+    hostCheckBox->setScale(0.1f);
+    hostCheckBox->setPosition(position); // 根据需要调整位置
     hostCheckBox->addEventListener(CC_CALLBACK_2(NetworkConfigSetting::checkBoxEvent, this));
     this->addChild(hostCheckBox);
 }

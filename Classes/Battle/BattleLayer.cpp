@@ -135,20 +135,22 @@ bool BattleLayer::init()
 
 	// 初始化棋盘状态
 	memset(boardInGame, 0, sizeof boardInGame);
+	
+    // 初始化玩家棋子
+    for (shared_ptr<Chess> chess : *playerME->getBattleAreaChesses())
+    {
+        chessInitBeforeBattle(chess, true);
+    }
 
-	// 初始化玩家棋子
-	for (shared_ptr<Chess> chess : *playerME->getBattleAreaChesses())
-	{
-		chessInitBeforeBattle(chess, true);
-	}
 
-
-	playerOPP->buffJudgment();
-	// 初始化对手棋子
-	for (shared_ptr<Chess> chess : *playerOPP->getBattleAreaChesses())
-	{
-		chessInitBeforeBattle(chess, false);
-	}
+    playerOPP->buffJudgment();
+    // 初始化对手棋子
+    for (shared_ptr<Chess> chess : *playerOPP->getBattleAreaChesses())
+    {
+        chessInitBeforeBattle(chess, false);
+    }
+	
+	
 
 	// 调度启动update()函数，开始战斗
 	this->scheduleUpdate();
@@ -166,27 +168,29 @@ bool BattleLayer::init()
 void BattleLayer::update(float delta)
 {
 	
-	// 处理我方的每个棋子
-	for (auto chess : *playerME->getBattleAreaChesses())
-	{
-		// 如果棋子已死亡，则跳过
-		if (chess->isDead())
-			continue;
+	
+    // 处理我方的每个棋子
+    for (auto chess : *playerME->getBattleAreaChesses())
+    {
+        // 如果棋子已死亡，则跳过
+        if (chess->isDead())
+            continue;
 
-		// 播放棋子的行动
-		playGame(chess, playerOPP);
-	}
+        // 播放棋子的行动
+        playGame(chess, playerOPP);
+    }
 
-	// 处理对方的每个棋子
-	for (auto chess : *playerOPP->getBattleAreaChesses())
-	{
-		// 如果棋子已死亡，则跳过
-		if (chess->isDead())
-			continue;
+    // 处理对方的每个棋子
+    for (auto chess : *playerOPP->getBattleAreaChesses())
+    {
+        // 如果棋子已死亡，则跳过
+        if (chess->isDead())
+            continue;
 
-		// 播放棋子的行动
-		playGame(chess, playerME);
-	}
+        // 播放棋子的行动
+        playGame(chess, playerME);
+    }
+	
 	
 	
 	

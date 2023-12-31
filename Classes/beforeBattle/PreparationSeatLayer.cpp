@@ -23,7 +23,7 @@ bool PreparationSeat::init(PlayerInfo* pr, ChessBoard* board, EventListenerMouse
 	//设置出售席
 	auto sellOutArea = StartAndLoginScene::createGameButton("/res/UI/sellOut.png", "/res/UI/sellOut.png", CC_CALLBACK_1(PreparationSeat::SellOut, this));
 	sellOutArea->setPosition(Vec2(900, 200));
-	sellOutArea->setScale(0.16);
+	sellOutArea->setScale(0.16f);
 	auto sellMenu = Menu::create(sellOutArea, NULL);
 	sellMenu->setPosition(Vec2::ZERO);
 	sellMenu->setName("PreAreaMenu");

@@ -147,7 +147,7 @@ void PlayerInfo::putChessInBattleArea(shared_ptr<Chess> chess)
 		return;
 	}
 	//非空数组遍历空位加
-	for (int i = 0; i < chessInBattleArea.size(); i++)
+	for (unsigned int i = 0; i < chessInBattleArea.size(); i++)
 	{
 		if (chessInBattleArea[i] == nullptr)
 		{
@@ -157,6 +157,15 @@ void PlayerInfo::putChessInBattleArea(shared_ptr<Chess> chess)
 	}
 	//无空位直接加
 	chessInBattleArea.push_back(chess);
+}
+
+// 清空战场上的数组
+void PlayerInfo::clearVector()
+{
+	for (unsigned int  i = 0; i < chessInBattleArea.size(); i++)
+	{
+		chessInBattleArea[i] = nullptr;	
+	}
 }
 
 // 获取玩家对战区棋子集合
@@ -208,7 +217,7 @@ int* PlayerInfo::buffJudgment()
 	mageNumInBattleArea = 0;
 	shooterNumInBattleArea = 0;
 	tankNumInBattleArea = 0;
-	for (int i = 0; i < chessInBattleArea.size(); ++i)
+	for (unsigned int  i = 0; i < chessInBattleArea.size(); ++i)
 	{
 		switch (chessInBattleArea[i]->getChessName())
 		{
@@ -228,7 +237,7 @@ int* PlayerInfo::buffJudgment()
 	}
 	if (mageNumInBattleArea >= 2)
 	{
-		for (int i = 0; i < chessInBattleArea.size(); ++i)
+		for (unsigned int  i = 0; i <chessInBattleArea.size(); ++i)
 		{
 			if (chessInBattleArea[i]->getCareer() == "mage")
 			{
@@ -239,7 +248,7 @@ int* PlayerInfo::buffJudgment()
 	}
 	if (shooterNumInBattleArea >= 2)
 	{
-		for (int i = 0; i < chessInBattleArea.size(); ++i)
+		for (unsigned int  i = 0; i < chessInBattleArea.size(); ++i)
 		{
 			if (chessInBattleArea[i]->getCareer() == "shooter")
 			{
@@ -250,7 +259,7 @@ int* PlayerInfo::buffJudgment()
 	}
 	if (tankNumInBattleArea >= 2)
 	{
-		for (int i = 0; i < chessInBattleArea.size(); ++i)
+		for (unsigned int  i = 0; i < chessInBattleArea.size(); ++i)
 		{
 			if (chessInBattleArea[i]->getCareer() == "tank")
 			{
@@ -280,7 +289,7 @@ bool PlayerInfo::starRaiseLevel(int location, int& delLoc_1, int& delLoc_2)
 	bool isRaising = 0;
 	arrZero(heroOneStarNumArr);
 	arrZero(heroTwoStarNumArr);
-	for (int i = 0; i < chessInBattleArea.size(); ++i)
+	for (unsigned int  i = 0; i < chessInBattleArea.size(); ++i)
 	{
 		if (chessInBattleArea[i] != nullptr) 
 		{
@@ -295,7 +304,7 @@ bool PlayerInfo::starRaiseLevel(int location, int& delLoc_1, int& delLoc_2)
 			}
 		}
 	}
-	for (int i = 0; i < chessInPreArea.size(); ++i)
+	for (unsigned int  i = 0; i < chessInPreArea.size(); ++i)
 	{
 		if (chessInPreArea[i] != nullptr)
 		{
@@ -339,7 +348,7 @@ void PlayerInfo::deleteLowLevelChess(int heroFlag, int level, int location, int&
 {
 	int count = 0;
 	// 优先从备战区删除
-	for (int i = 0; i < chessInPreArea.size(); ++i)
+	for (unsigned int  i = 0; i < chessInPreArea.size(); ++i)
 	{
 		if (chessInPreArea[i] != nullptr && chessInPreArea[i]->getChessName() == heroFlag && chessInPreArea[i]->getChessLevel() == level)
 		{
@@ -362,7 +371,7 @@ void PlayerInfo::deleteLowLevelChess(int heroFlag, int level, int location, int&
 	}
 
 	// 然后从战斗区删除
-	for (int i = 0; i < chessInBattleArea.size(); ++i)
+	for (unsigned int  i = 0; i < chessInBattleArea.size(); ++i)
 	{
 		if (chessInBattleArea[i] != nullptr&& chessInBattleArea[i]->getChessName() == heroFlag && chessInBattleArea[i]->getChessLevel() == level)
 		{
@@ -418,7 +427,7 @@ int PlayerInfo::GetMinIndex()
 //更新场上棋子
 void PlayerInfo::ReBattleChess(shared_ptr<Chess> curChess, shared_ptr<Chess>newChess)
 {
-	for (int i = 0; i < chessInBattleArea.size(); i++)
+	for (unsigned int  i = 0; i < chessInBattleArea.size(); i++)
 	{
 		if (chessInBattleArea[i] != nullptr && chessInBattleArea[i] == curChess)
 		{

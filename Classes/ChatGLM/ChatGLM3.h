@@ -35,6 +35,7 @@ public:
         }
         catch (std::bad_alloc& e) 
         {
+            e;
             return 0;
         }
     }

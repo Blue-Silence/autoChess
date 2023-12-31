@@ -124,6 +124,12 @@ public:
 	// 获取当前能上场英雄最大值
 	int getMaxBattleChessNum() const;
 
+	// 清空战场上的数组
+	void clearVector();
+
+	// 是否为主机
+	bool isServer = true;
+
 	// 对vector的修改函数接口
 	//-------------------//
 	// 作者：胡峻玮      //

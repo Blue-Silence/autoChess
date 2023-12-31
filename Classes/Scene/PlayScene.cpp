@@ -3,9 +3,10 @@
 #include "Hero.h"
 
 
-Scene* PlayScene::createScene(ConPort* cone, const string& gameMode)
+Scene* PlayScene::createScene(bool isServer,ConPort* cone, const string& gameMode)
 {
 	auto p=PlayScene::create();
+	p->server = isServer;
 	p->connection = cone;    
 	p->changeMode(gameMode);
 	
@@ -29,6 +30,8 @@ bool PlayScene::init()
 	//playSceneBGM->playBackgroundMusic("res/Music/playScene_bgm.wav", true);
 	// 设置背景音乐的音量为 50%
 	//playSceneBGM->setBackgroundMusicVolume(0.0f);
+
+	
 
 	// 需要用到的单例工具
 	auto texture = Director::getInstance()->getTextureCache();
@@ -68,13 +71,15 @@ bool PlayScene::init()
 	CC_SAFE_RETAIN(playerME);
 	CC_SAFE_RETAIN(playerOPP);
 
+	playerME->isServer = server;
+
 	//创建金币显示
 	player_coin = Label::createWithTTF(std::to_string(playerME->getcoin()), "fonts/Marker Felt.ttf", 30);
 	player_coin->setPosition(Vec2(760, 140));
 	playLayer->addChild(player_coin, 5);
 	Sprite* coinImage = Sprite::create("/res/UI/coin.png");
 	coinImage->setPosition(Vec2(800, 140));
-	coinImage->setScale(0.07);
+	coinImage->setScale(0.07f);
 	playLayer->addChild(coinImage, 5);
 
 	//初始化备战席
@@ -88,7 +93,7 @@ bool PlayScene::init()
 	playLayer->addChild(player_level, 5);
 	Sprite* levelImage = Sprite::create("res/UI/Level.png");
 	levelImage->setPosition(Vec2(800, 90));
-	levelImage->setScale(0.07);
+	levelImage->setScale(0.07f);
 	playLayer->addChild(levelImage, 5);
 
 	// 创建血量显示
@@ -97,7 +102,7 @@ bool PlayScene::init()
 	playLayer->addChild(player_lifevalue, 5);
 	Sprite* lifeValue = Sprite::create("res/UI/lifeValue.png");
 	lifeValue->setPosition(Vec2(800, 40));
-	lifeValue->setScale(0.07);
+	lifeValue->setScale(0.07f);
 	playLayer->addChild(lifeValue, 5);
 
 	// 创建小小英雄
@@ -285,6 +290,17 @@ void PlayScene::update(float delta)
 		if(!isInBattle)
 		{
 			isInBattle = true;
+			player_coin->setString(std::to_string(playerME->getcoin()));
+			player_lifevalue->setString(to_string(playerME->GetLifeValue()));
+			// 向AI发送API请求
+			string message = "The number of my tank heroes is " + to_string(playerME->getTankNum())
+				+ ", the number of mage heroes is " + to_string(playerME->getMagesNum()) + ",the number of shooter is " + to_string(playerME->getShooterNum())
+				+ ", my level is " + to_string(playerME->getLevel()) + ",my lifevalue is " + to_string(playerME->GetLifeValue());
+
+			////string message = "tank,mages,shooters,which one should I buy firstly,please speak in short english";
+			string response = chatAI.performRequest(url, message);
+			string content = chatAI.extractContent(response);
+			AILabel->setString(content);
 			// 计时器,计时结束后打包传送信息
 			auto clockLayer = Clock::create(playerME, playerOPP, &isInBattle, &canBuyChess,&isTransmittingInfo,gameMode);
 			this->addChild(clockLayer, 6);
@@ -342,15 +358,7 @@ void PlayScene::update(float delta)
 			battleLayer->setTag(BATTLE_LAYER_TAG); // 设置标签以便识别
 			this->addChild(battleLayer, 6);
 
-			// 向AI发送API请求
-			string message = "The number of my tank heroes is " + to_string(playerME->getTankNum())
-				+ ", the number of mage heroes is " + to_string(playerME->getMagesNum()) + ",the number of shooter is " + to_string(playerME->getShooterNum())
-				+ ", my level is " + to_string(playerME->getLevel()) + ",my lifevalue is " + to_string(playerME->GetLifeValue());
-
-			////string message = "tank,mages,shooters,which one should I buy firstly,please speak in short english";
-			string response = chatAI.performRequest(url, message);
-			string content = chatAI.extractContent(response);
-			AILabel->setString(content);
+			
 		}
 	}
 }
@@ -361,6 +369,8 @@ void PlayScene::packageInfo()
 	myInfo.totalChessNum = 0;
 	for (auto chess : *playerME->getBattleAreaChesses())
 	{
+		if (chess == nullptr)
+			continue;
 		string career = chess->getCareer();
 		int name = chess->getChessName();
 		int level = chess->getChessLevel();
@@ -374,7 +384,7 @@ void PlayScene::packageInfo()
 // 联网下：提取对方场上棋子信息
 void PlayScene::extractInfo()
 {
-	playerOPP->getBattleAreaChesses()->clear();
+	playerOPP->clearVector();
 	shared_ptr<Chess> chess = nullptr;
 	for (int i = 0; i < oppInfo.totalChessNum; ++i)
 	{
@@ -483,7 +493,7 @@ void PlayScene::createShop(Vec2 position)
 	// 背景
 	auto shopMore = Sprite::create("/res/Background/shop.png");
 	Vec2 originSize = shopMore->getContentSize();
-	shopMore->setScale(0.36);
+	shopMore->setScale(0.36f);
 	auto shopSize = shopMore->getContentSize();
 	auto pageSize = Director::getInstance()->getVisibleSize();
 	Vec2 originPosition;
@@ -509,7 +519,7 @@ void PlayScene::createShop(Vec2 position)
 	playLayer->addChild(menu, 6);
 }
 
-ChessCoordinate* PlayScene::coordingrevert(Vec2 realPosition)
+ChessCoordinate PlayScene::coordingrevert(Vec2 realPosition)
 {
 	auto config = ConfigController::getInstance();
 	realPosition.x -= config->getPx()->x * 47.5;
@@ -520,7 +530,7 @@ ChessCoordinate* PlayScene::coordingrevert(Vec2 realPosition)
 	logPosition.setX(static_cast<int>(realPosition.x) % static_cast<int>(perLength));
 	logPosition.setY(static_cast<int>(realPosition.y) % static_cast<int>(perLength));
 
-	return &logPosition;
+	return logPosition;
 }
 
 void PlayScene::menuExitCallBack(Ref* sender)

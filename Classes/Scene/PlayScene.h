@@ -40,7 +40,7 @@ using std::vector;
 class PlayScene : public Scene
 {
 public:
-	static Scene* createScene(ConPort* cone, const string& gameMode = "人机对战");
+	static Scene* createScene(bool isServer,ConPort* cone, const string& gameMode = "人机对战");
 	static Scene* createScene();
 
 	Market* shopModel;
@@ -70,7 +70,7 @@ public:
 	void extractInfo();
 
 	// 坐标转换函数
-	static ChessCoordinate* coordingrevert(Vec2 realPosition);
+	static ChessCoordinate coordingrevert(Vec2 realPosition);
 
 	// 结算动画
 	void PlayScene::showEndGameAnimation(const string& gameResult);
@@ -95,7 +95,7 @@ private:
 	int port;
 
 	// 主/副
-	bool isServer=true;
+	bool server=true;
 	
 	//网络连接
 	ConPort* connection;
@@ -106,7 +106,7 @@ private:
 	// 接收的敌方棋子信息包
 	Packet oppInfo;
 
-	string url = "https://u207393-9f64-1bb9f03b.westc.gpuhub.com:8443/v1/chat/completions";
+	string url = "https://u207393-a5b8-10e2f069.westb.seetacloud.com:8443/v1/chat/completions";
 
 	CurlWrapper chatAI;
 
@@ -185,20 +185,5 @@ private:
 };
 
 #endif
-
-
-
-
-
-
-
-
-// 点击商店触发事件，刷新
-// 购买棋子,要出现在备战席
-// 放到战场上
-// 右键移动小小英雄
-// 战斗逻辑
-// 收集素材
-
 
 

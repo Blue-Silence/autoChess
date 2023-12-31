@@ -128,7 +128,7 @@ int Market::SellOut(ClassName chess)
 //-----------------------------------------------------//
 Chess* Market::GetChessByIndex(int index)
 {
-    if (index >= 0 && index < chessList.size() && chessList[index] != nullptr)
+    if (index >= 0 && unsigned int(index) < chessList.size() && chessList[index] != nullptr)
     {
         // 由于使用了智能指针，需要获取原始指针
         return chessList[index].get();

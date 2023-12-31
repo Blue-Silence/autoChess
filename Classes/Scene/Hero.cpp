@@ -24,7 +24,7 @@ bool Hero::init(Vec2 location)
 
 
 	hero->setPosition(Vec2(visibleSize.width / 9, visibleSize.height * 0.38));
-	hero->setScale(0.2);
+	hero->setScale(0.2f);
 	this->addChild(hero);
 
 	this->location = location;
