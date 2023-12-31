@@ -44,7 +44,7 @@ public:
 private:
 
 	// 预加载资源相关
-	const int totalFileNums = 71;
+	const int totalFileNums = 91;
 	int curFileNums;
 
 	// 页面相关

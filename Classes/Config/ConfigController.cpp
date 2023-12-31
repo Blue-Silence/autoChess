@@ -37,25 +37,6 @@ void ConfigController::setScaleAndPosition(Sprite* sprite, int scale, float pos_
 	sprite->setPosition(getPx()->x * pos_x, getPx()->y * pos_y);
 }
 
-/*Sprite* ConfigController::pickChessPiece(EventListenerTouchOneByOne* listener)
-{
-	listener->setSwallowTouches(true);
-	listener->onTouchBegan = CC_CALLBACK_2(ConfigController::onTouchBegan, this);
-	listener->onTouchEnded = CC_CALLBACK_2(ConfigController::onTouchEnded, this);
-}*/
-
-/*bool  ConfigController::onTouchBegan(Touch* touch, Event* event)
-{
-	Vec2 posi = touch->getLocation();
-	//判断点击是否在合法范围内
-	if (ChessBoard::isInBoard(posi)) {
-		return true;
-	}
-	else {
-		return false;
-	}
-}*/
-
 Sprite* ConfigController::onTouchEnded(Touch* touch, Event* event)
 {
 	Vec2 posi = touch->getLocation();

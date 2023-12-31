@@ -139,7 +139,10 @@ bool BattleLayer::init()
     // 初始化玩家棋子
     for (shared_ptr<Chess> chess : *playerME->getBattleAreaChesses())
     {
-        chessInitBeforeBattle(chess, true);
+		if (chess != nullptr) 
+		{
+			chessInitBeforeBattle(chess, true);
+		}
     }
 
 
@@ -147,7 +150,10 @@ bool BattleLayer::init()
     // 初始化对手棋子
     for (shared_ptr<Chess> chess : *playerOPP->getBattleAreaChesses())
     {
-        chessInitBeforeBattle(chess, false);
+		if (chess != nullptr)
+		{
+			chessInitBeforeBattle(chess, false);
+		}
     }
 	
 	
@@ -172,23 +178,28 @@ void BattleLayer::update(float delta)
     // 处理我方的每个棋子
     for (auto chess : *playerME->getBattleAreaChesses())
     {
-        // 如果棋子已死亡，则跳过
-        if (chess->isDead())
-            continue;
+		if (chess != nullptr) {
+			// 如果棋子已死亡，则跳过
+			if (chess->isDead())
+				continue;
 
-        // 播放棋子的行动
-        playGame(chess, playerOPP);
+			// 播放棋子的行动
+			playGame(chess, playerOPP);
+		}
     }
 
     // 处理对方的每个棋子
     for (auto chess : *playerOPP->getBattleAreaChesses())
     {
-        // 如果棋子已死亡，则跳过
-        if (chess->isDead())
-            continue;
+		if (chess != nullptr)
+		{
+			// 如果棋子已死亡，则跳过
+			if (chess->isDead())
+				continue;
 
-        // 播放棋子的行动
-        playGame(chess, playerME);
+			// 播放棋子的行动
+			playGame(chess, playerME);
+		}
     }
 	
 	
@@ -231,15 +242,18 @@ void BattleLayer::update(float delta)
 				// 重置我方所有棋子状态，便于战后重新显示
 				for (auto chess : *playerME->getBattleAreaChesses())
 				{
-					int posX = chess->getChessCoordinateByType(CoordinateType::screenCoordinates)->getX();
-					int posY = chess->getChessCoordinateByType(CoordinateType::screenCoordinates)->getY();
-					Sprite* chessImage = chess->getChessSprite();
-					chessImage->setPosition(posX, posY);
-					chessImage->setVisible(true);
-					chess->getChessCondition()->HP = chess->getChessCondition()->maxHP;
-					chess->attackNum = 0;
-					chess->updateHpBar();
-					chess->updateMpBar();
+					if (chess != nullptr)
+					{
+						int posX = chess->getChessCoordinateByType(CoordinateType::screenCoordinates)->getX();
+						int posY = chess->getChessCoordinateByType(CoordinateType::screenCoordinates)->getY();
+						Sprite* chessImage = chess->getChessSprite();
+						chessImage->setPosition(posX, posY);
+						chessImage->setVisible(true);
+						chess->getChessCondition()->HP = chess->getChessCondition()->maxHP;
+						chess->attackNum = 0;
+						chess->updateHpBar();
+						chess->updateMpBar();
+					}
 				}
 
 				// 更新战斗状态标志
@@ -362,7 +376,7 @@ void BattleLayer::detectWinner()
 	// 计算玩家存活的棋子数量
 	for (auto chess : *playerME->getBattleAreaChesses())
 	{
-		if (!chess->isDead())
+		if (chess != nullptr && !chess->isDead())
 		{
 			surviveNumMe++;
 		}
@@ -371,10 +385,13 @@ void BattleLayer::detectWinner()
 	// 计算对手存活的棋子数量，并移除其棋子的显示
 	for (auto chess : *playerOPP->getBattleAreaChesses())
 	{
-		chess->getChessSprite()->removeFromParent();
-		if (!chess->isDead())
+		if (chess != nullptr)
 		{
-			surviveNumOPP++;
+			chess->getChessSprite()->removeFromParent();
+			if (!chess->isDead())
+			{
+				surviveNumOPP++;
+			}
 		}
 	}
 
@@ -487,18 +504,21 @@ shared_ptr<Chess> BattleLayer::findEnemy(shared_ptr<Chess> damageMaker, PlayerIn
 	// 遍历敌方所有棋子
 	for (auto chess : *enemy->getBattleAreaChesses())
 	{
-		// 跳过已死的棋子
-		if (chess->isDead())
-			continue;
-
-		// 计算当前棋子与攻击者的距离
-		double currentDistance = getDistance(&damageMaker->inGameChessBoardCoordinate, &chess->inGameChessBoardCoordinate);
-
-		// 如果当前棋子更近，则更新目标棋子
-		if (currentDistance <= minDistance)
+		if (chess != nullptr)
 		{
-			targetChess = chess;
-			minDistance = currentDistance;
+			// 跳过已死的棋子
+			if (chess->isDead())
+				continue;
+
+			// 计算当前棋子与攻击者的距离
+			double currentDistance = getDistance(&damageMaker->inGameChessBoardCoordinate, &chess->inGameChessBoardCoordinate);
+
+			// 如果当前棋子更近，则更新目标棋子
+			if (currentDistance <= minDistance)
+			{
+				targetChess = chess;
+				minDistance = currentDistance;
+			}
 		}
 	}
 

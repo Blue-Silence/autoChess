@@ -1,3 +1,7 @@
+/******************************************************/
+/*               文件名：PlayScene.cpp                */
+/*               功能：游戏场景                       */
+/******************************************************/
 #include "PlayScene.h"
 #include "StartAndLoginScene.h"
 #include "Hero.h"
@@ -25,13 +29,8 @@ bool PlayScene::init()
 		return false;
 
 	//播放背景音乐
-	playSceneBGM = SimpleAudioEngine::getInstance();
-	
-	//playSceneBGM->playBackgroundMusic("res/Music/playScene_bgm.wav", true);
-	// 设置背景音乐的音量为 50%
-	//playSceneBGM->setBackgroundMusicVolume(0.0f);
-
-	
+	playSceneBGM = SimpleAudioEngine::getInstance();	
+	playSceneBGM->playBackgroundMusic("res/Music/playScene_bgm.wav", true);
 
 	// 需要用到的单例工具
 	auto texture = Director::getInstance()->getTextureCache();
@@ -52,19 +51,19 @@ bool PlayScene::init()
 	playLayer->setContentSize(visibleSize);
 	this->addChild(playLayer);
 	CC_SAFE_RETAIN(playLayer);
+
 	// 添加背景图片
 	auto backGround = Sprite::create("/res/Background/background2.png");
 	backGround->setPosition(visibleSize / 2);
 	Vec2 originSize = backGround->getContentSize();
 	backGround->setScale(visibleSize.height / originSize.y);
 	playLayer->addChild(backGround, 1);
-	//auto magebuff = cocos2d::Sprite::create("/res/Bond/mage.png");
-	//magebuff->setPosition(100, 100);
-	//playLayer->addChild(magebuff, 1);
+
 	// 创建棋盘
 	chessBoardModel = ChessBoard::create();
 	createBoard(Vec2(config->getPx()->x * 38, config->getPx()->y * 30));
 	CC_SAFE_RETAIN(chessBoardModel);
+
 	// 创建玩家
 	playerME = PlayerInfo::create();
 	playerOPP = PlayerInfo::create();
@@ -146,35 +145,27 @@ bool PlayScene::init()
 	this->addChild(clock, 5);
 
 	//添加设置按钮
-	auto settingButton = StartAndLoginScene::createGameButton("/res/UI/setting.png", "/res/UI/setting.png", 
-													CC_CALLBACK_1(PlayScene::menuSettingsCallBack, this));
+	auto settingButton = StartAndLoginScene::createGameButton("/res/UI/setting.png", "/res/UI/setting.png",
+		CC_CALLBACK_1(PlayScene::menuSettingsCallBack, this));
 	originSize = settingButton->getContentSize();
 	settingButton->setScale(10 * ConfigController::getInstance()->getPx()->x / originSize.x);
-	settingButton->setPosition(Vec2(60 * ConfigController::getInstance()->getPx()->y, -20 * ConfigController::getInstance()->getPx()->y));
-	// 将按钮添加到当前场景
-	//this->addChild(settingButton);
+	settingButton->setPosition(Vec2(visibleSize.width * 8 / 9, visibleSize.height * 9 / 10));
 
 	// 添加退出按钮
 	auto exitButton = StartAndLoginScene::createGameButton("/res/UI/ExitNormal.png", "/res/UI/ExitSelected.png",
-																CC_CALLBACK_1(PlayScene::menuExitCallBack, this));
-	exitButton->setAnchorPoint(Vec2::ANCHOR_MIDDLE);
+		CC_CALLBACK_1(PlayScene::menuExitCallBack, this));
+	exitButton->setAnchorPoint(Vec2::ANCHOR_BOTTOM_RIGHT);
 	originSize = exitButton->getContentSize();
-	exitButton->setScale(10 * ConfigController::getInstance()->getPx()->x / originSize.x);
-	exitButton->setPosition(Vec2(50 * ConfigController::getInstance()->getPx()->y, -35 * ConfigController::getInstance()->getPx()->y));
-	//this->addChild(exitButton);
-	
-	
-
-    
+	exitButton->setScale(30 * ConfigController::getInstance()->getPx()->x / originSize.x);
+	exitButton->setPosition(Vec2(visibleSize.width, visibleSize.height / 10));
 
     auto menu = Menu::create(exitButton, settingButton, nullptr);
+	menu->setPosition(Vec2(0, 0));
     playLayer->addChild(menu, 5);
 
 
 	// 调度启动update()函数，开始战斗
 	this->scheduleUpdate();
-	
-
 	
 	return true;
 }

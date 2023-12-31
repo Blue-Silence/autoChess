@@ -219,8 +219,9 @@ int* PlayerInfo::buffJudgment()
 	tankNumInBattleArea = 0;
 	for (unsigned int  i = 0; i < chessInBattleArea.size(); ++i)
 	{
-		switch (chessInBattleArea[i]->getChessName())
-		{
+		if (chessInBattleArea[i] != nullptr) {
+			switch (chessInBattleArea[i]->getChessName())
+			{
 			case 0:
 			case 1:
 				mageNumInBattleArea++;
@@ -233,13 +234,14 @@ int* PlayerInfo::buffJudgment()
 			case 5:
 				tankNumInBattleArea++;
 				break;
+			}
 		}
 	}
 	if (mageNumInBattleArea >= 2)
 	{
-		for (unsigned int  i = 0; i <chessInBattleArea.size(); ++i)
+		for (unsigned int i = 0; i < chessInBattleArea.size(); ++i)
 		{
-			if (chessInBattleArea[i]->getCareer() == "mage")
+			if (chessInBattleArea[i] != nullptr && chessInBattleArea[i]->getCareer() == "mage")
 			{
 				chessInBattleArea[i]->careerBuff();
 			}
@@ -248,9 +250,9 @@ int* PlayerInfo::buffJudgment()
 	}
 	if (shooterNumInBattleArea >= 2)
 	{
-		for (unsigned int  i = 0; i < chessInBattleArea.size(); ++i)
+		for (unsigned int i = 0; i < chessInBattleArea.size(); ++i)
 		{
-			if (chessInBattleArea[i]->getCareer() == "shooter")
+			if (chessInBattleArea[i] != nullptr && chessInBattleArea[i]->getCareer() == "shooter")
 			{
 				chessInBattleArea[i]->careerBuff();
 			}
@@ -259,9 +261,9 @@ int* PlayerInfo::buffJudgment()
 	}
 	if (tankNumInBattleArea >= 2)
 	{
-		for (unsigned int  i = 0; i < chessInBattleArea.size(); ++i)
+		for (unsigned int i = 0; i < chessInBattleArea.size(); ++i)
 		{
-			if (chessInBattleArea[i]->getCareer() == "tank")
+			if (chessInBattleArea[i] != nullptr && chessInBattleArea[i]->getCareer() == "tank")
 			{
 				chessInBattleArea[i]->careerBuff();
 			}
