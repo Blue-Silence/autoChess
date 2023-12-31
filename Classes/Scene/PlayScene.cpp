@@ -240,6 +240,7 @@ void PlayScene::update(float delta)
 
 				// 取消对update函数的调度
 				this->unscheduleUpdate();
+				return;
 			}
 			else if (!playerME->isAlive())
 			{
@@ -247,6 +248,7 @@ void PlayScene::update(float delta)
 				showEndGameAnimation("Lost");
 				// 取消对update函数的调度
 				this->unscheduleUpdate();
+				return;
 			}
 
 			//AI++;
