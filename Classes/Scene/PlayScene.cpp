@@ -360,15 +360,16 @@ void PlayScene::packageInfo()
 	myInfo.totalChessNum = 0;
 	for (auto chess : *playerME->getBattleAreaChesses())
 	{
-		if (chess == nullptr)
-			continue;
-		string career = chess->getCareer();
-		int name = chess->getChessName();
-		int level = chess->getChessLevel();
-		int posX = chess->getChessCoordinateByType(CoordinateType::chessBoardCoordinates)->getX();
-		int posY = chess->getChessCoordinateByType(CoordinateType::chessBoardCoordinates)->getY();
+		if (chess != nullptr)
+		{
+			string career = chess->getCareer();
+			int name = chess->getChessName();
+			int level = chess->getChessLevel();
+			int posX = chess->getChessCoordinateByType(CoordinateType::chessBoardCoordinates)->getX();
+			int posY = chess->getChessCoordinateByType(CoordinateType::chessBoardCoordinates)->getY();
 
-		myInfo.chesses[myInfo.totalChessNum++] = { career, name, level, posX, posY };
+			myInfo.chesses[myInfo.totalChessNum++] = { career, name, level, posX, posY };
+		}
 	}
 }
 
@@ -387,13 +388,20 @@ void PlayScene::extractInfo()
 
 
 		if (career == "shooter")
-			playerOPP->putChessInBattleArea(make_shared<shooter>(name));
+		{
+			chess = make_shared<shooter>(name);
+			playerOPP->putChessInBattleArea(chess);
+		}
 		else if (career == "mage")
-			playerOPP->putChessInBattleArea(make_shared<mage>(name));
+		{
+			chess = make_shared<mage>(name);
+			playerOPP->putChessInBattleArea(chess);
+		}
 		else
-			playerOPP->putChessInBattleArea(make_shared<tank>(name));
-
-		chess = playerOPP->getBattleAreaChesses()->back();
+		{
+			chess = make_shared<tank>(name);
+			playerOPP->putChessInBattleArea(chess);
+		}
 		chess->setChessLevel(level);
 		chess->setChessCoordinateByType(Vec2(posX, posY), CoordinateType::chessBoardCoordinates);
 		ChessCoordinate* newPos = new ChessCoordinate;
